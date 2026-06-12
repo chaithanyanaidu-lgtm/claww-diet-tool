@@ -166,14 +166,24 @@
       margin-top: 4px;
     }
 
-    /* Gender Toggle */
-    .gender-toggle {
+    /* Gender / Exp Toggle Grids */
+    .gender-toggle, .exp-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
     }
 
-    .gender-btn {
+    .exp-grid {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    @media (max-width: 600px) {
+      .exp-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .gender-btn, .exp-card {
       background: white;
       border: 2px solid var(--border-color);
       border-radius: 12px;
@@ -187,12 +197,36 @@
       justify-content: center;
       gap: 8px;
       transition: var(--transition);
+      text-align: center;
     }
 
-    .gender-btn.active {
+    .exp-card {
+      flex-direction: column;
+      padding: 18px 12px;
+    }
+
+    .gender-btn.active, .exp-card.active {
       border-color: var(--primary);
       background: var(--primary-light);
       color: var(--primary-dark);
+    }
+
+    .exp-card .exp-icon {
+      font-size: 1.8rem;
+    }
+
+    .exp-card .exp-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .exp-card .exp-desc {
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.3;
     }
 
     .gender-btn svg {
@@ -202,7 +236,7 @@
     }
 
     /* Input Fields */
-    input[type="number"], select, textarea {
+    input[type="number"], select, textarea, input[type="text"] {
       width: 100%;
       padding: 12px 16px;
       border: 2px solid var(--border-color);
@@ -214,7 +248,7 @@
       transition: var(--transition);
     }
 
-    input[type="number"]:focus, select:focus, textarea:focus {
+    input[type="number"]:focus, select:focus, textarea:focus, input[type="text"]:focus {
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.15);
     }
@@ -599,7 +633,59 @@
       word-break: break-all;
     }
 
-    /* Macro Ring / Summary in numbers card */
+    /* Calorie Progress Bar for Advanced / Manual updates */
+    .calorie-progress-container {
+      background: #F9F9F9;
+      padding: 20px 24px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .calorie-progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .calorie-progress-track {
+      height: 18px;
+      background: #ECEFF1;
+      border-radius: 9px;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .calorie-progress-bar {
+      height: 100%;
+      background: var(--accent);
+      transition: var(--transition);
+      border-radius: 9px 0 0 9px;
+    }
+
+    .calorie-overflow-bar {
+      height: 100%;
+      background: #F57C00;
+      transition: var(--transition);
+    }
+
+    .calorie-progress-track.over-target .calorie-overflow-bar {
+      background: var(--error-color) !important;
+    }
+
+    .calorie-overflow-alert {
+      color: var(--error-color);
+      font-weight: 700;
+      font-size: 0.82rem;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Macro Progress track styling */
     .macro-bar-container {
       grid-column: 1 / -1;
       background: #ECEFF1;
@@ -729,15 +815,52 @@
       align-items: center;
       padding: 10px 0;
       border-bottom: 1px dashed #ECEFF1;
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
     .food-item:last-child {
       border-bottom: none;
     }
 
+    .food-info-block {
+      flex: 1 1 250px;
+    }
+
     .food-name {
-      font-weight: 500;
+      font-weight: 600;
       font-size: 0.95rem;
+    }
+
+    .food-inline-macros {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-top: 2px;
+    }
+
+    .food-qty-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Advanced Manual inputs styling */
+    .portion-override-input {
+      width: 80px;
+      padding: 6px 8px;
+      border: 2px solid var(--border-color);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      text-align: center;
+      outline: none;
+    }
+
+    .portion-override-input:focus {
+      border-color: var(--primary);
     }
 
     .food-qty {
@@ -747,6 +870,28 @@
       border-radius: 10px;
       font-weight: 700;
       font-size: 0.82rem;
+    }
+
+    /* Prep notes styling */
+    .meal-prep-notes {
+      margin-top: 16px;
+      background: #FFFDE7;
+      border-left: 4px solid #FDD835;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: #5D4037;
+    }
+
+    .meal-prep-notes p {
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .meal-prep-notes li {
+      margin-left: 14px;
+      line-height: 1.4;
+      margin-bottom: 2px;
     }
 
     /* Collapsible Alternatives */
@@ -1016,6 +1161,27 @@
           <input type="number" id="bodyfat" min="3" max="60" placeholder="e.g. 18">
           <div class="helper-text">Used the Body Fat Calculator? Enter your result here for more accuracy.</div>
           <div class="error-message" id="bodyfatError">Body fat must be between 3 and 60.</div>
+        </div>
+
+        <div class="form-group">
+          <label>Fitness / Nutrition Experience Level</label>
+          <div class="exp-grid">
+            <button type="button" class="exp-card" id="expBeginner" onclick="selectExperience('Beginner')">
+              <span class="exp-icon">🌱</span>
+              <span class="exp-title">Beginner</span>
+              <span class="exp-desc">New to tracking food, need guidance on portions and prep</span>
+            </button>
+            <button type="button" class="exp-card active" id="expIntermediate" onclick="selectExperience('Intermediate')">
+              <span class="exp-icon">🚀</span>
+              <span class="exp-title">Intermediate</span>
+              <span class="exp-desc">Comfortable with macros, want flexibility in food choices</span>
+            </button>
+            <button type="button" class="exp-card" id="expAdvanced" onclick="selectExperience('Advanced')">
+              <span class="exp-icon">🏆</span>
+              <span class="exp-title">Advanced</span>
+              <span class="exp-desc">Track macros precisely, want maximum customization</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1296,6 +1462,21 @@
         <div class="numbers-grid" id="numbersGrid">
           <!-- Populated dynamically by JS -->
         </div>
+        
+        <!-- Interactive Calorie progress tracker -->
+        <div class="calorie-progress-container" id="calorieProgressContainer">
+          <div class="calorie-progress-header">
+            <span>Daily Intake Portions: <strong id="actualCalVal">0</strong> / <span id="targetCalVal">0</span> kcal</span>
+            <span id="caloriePercentVal" style="background: var(--primary-light); color: var(--primary-dark); padding: 2px 8px; border-radius: 8px;">0%</span>
+          </div>
+          <div class="calorie-progress-track" id="calorieProgressTrack">
+            <div class="calorie-progress-bar" id="calorieProgressBar" style="width: 0%;"></div>
+            <div class="calorie-overflow-bar" id="calorieOverflowBar" style="width: 0%;"></div>
+          </div>
+          <div class="calorie-overflow-alert" id="calorieOverflowAlert" style="display: none;">
+            ⚠️ Caloric Target Exceeded (>110% of Target). Consider trimming portions to stay on track.
+          </div>
+        </div>
       </div>
 
       <!-- Plan disclaimer if conditions selected -->
@@ -1373,6 +1554,7 @@
       height: null,
       weight: null,
       bodyfat: null,
+      experience: 'Intermediate',
       goal: '',
       activityLevel: '',
       trainingDays: 3,
@@ -1386,53 +1568,56 @@
       dislikedFoods: '',
       budget: 'Moderate',
       mealsCount: 4,
-      prepTime: 'Moderate'
+      prepTime: 'Moderate',
+      
+      // Cache values for calculations
+      generatedPlan: null
     };
 
     // Food Database Definitions
     const FOOD_DATABASE = [
       // PROTEINS
-      { name: "Dal / Lentils (Cooked)", type: "protein", category: "vegan", cal: 116, p: 9, c: 20, f: 0.4, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["high-fiber", "gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi"] },
-      { name: "Chickpeas (Boiled)", type: "protein", category: "vegan", cal: 164, p: 9, c: 27, f: 2.6, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["high-fiber", "gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi"] },
-      { name: "Rajma / Kidney Beans (Boiled)", type: "protein", category: "vegan", cal: 127, p: 8.7, c: 22.8, f: 0.5, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["high-fiber", "gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi"] },
-      { name: "Soy Chunks (Boiled)", type: "protein", category: "vegan", cal: 150, p: 25, c: 10, f: 0.5, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["soy", "gluten-free", "lactose-free", "nuts-free", "low-gi"] },
-      { name: "Organic Tofu", type: "protein", category: "vegan", cal: 76, p: 8, c: 1.9, f: 4.8, unit: "g", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["soy", "gluten-free", "lactose-free", "nuts-free", "low-gi"] },
-      { name: "Low Fat Paneer", type: "protein", category: "veg", cal: 180, p: 18, c: 2, f: 12, unit: "g", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["dairy", "paneer", "gluten-free", "soy-free", "nuts-free"] },
-      { name: "Unsweetened Greek Yogurt", type: "protein", category: "veg", cal: 97, p: 10, c: 3.6, f: 5, unit: "g", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["dairy", "gluten-free", "soy-free", "nuts-free"] },
-      { name: "Whole Eggs (Boiled)", type: "protein", category: "egg", cal: 155, p: 13, c: 1.1, f: 11, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["egg", "gluten-free", "lactose-free", "soy-free", "nuts-free"] },
-      { name: "Egg Whites", type: "protein", category: "egg", cal: 52, p: 11, c: 0.7, f: 0.2, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["egg", "gluten-free", "lactose-free", "soy-free", "nuts-free"] },
-      { name: "Chicken Breast (Grilled)", type: "protein", category: "non-veg", cal: 165, p: 31, c: 0, f: 3.6, unit: "g", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["chicken", "gluten-free", "lactose-free", "soy-free", "nuts-free", "low-sodium"] },
-      { name: "Rohu / Surmai Fish (Grilled)", type: "protein", category: "non-veg", cal: 140, p: 20, c: 0, f: 6, unit: "g", unitWeight: 1, budget: ["Flexible"], tags: ["seafood", "fish", "gluten-free", "lactose-free", "soy-free", "nuts-free", "low-sodium"] },
-      { name: "Lean Mutton (Cooked)", type: "protein", category: "non-veg", cal: 220, p: 26, c: 0, f: 12, unit: "g", unitWeight: 1, budget: ["Flexible"], tags: ["redmeat", "mutton", "gluten-free", "lactose-free", "soy-free", "nuts-free"] },
+      { name: "Dal / Lentils (Cooked)", type: "protein", category: "vegan", cal: 116, p: 9, c: 20, f: 0.4, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["high-fiber", "gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi"], isWholeUnit: false, prepNote: "Wash lentils and soak for 30 mins. Pressure cook with water, turmeric, and salt for 3 whistles." },
+      { name: "Chickpeas (Boiled)", type: "protein", category: "vegan", cal: 164, p: 9, c: 27, f: 2.6, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["high-fiber", "gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi"], isWholeUnit: false, prepNote: "Soak dry chickpeas overnight (8 hrs). Pressure cook with water and salt for 5 whistles until soft." },
+      { name: "Rajma / Kidney Beans (Boiled)", type: "protein", category: "vegan", cal: 127, p: 8.7, c: 22.8, f: 0.5, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["high-fiber", "gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi"], isWholeUnit: false, prepNote: "Soak kidney beans overnight (8 hrs). Pressure cook with salt and water for 5 whistles." },
+      { name: "Soy Chunks (Boiled)", type: "protein", category: "vegan", cal: 150, p: 25, c: 10, f: 0.5, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["soy", "gluten-free", "lactose-free", "nuts-free", "low-gi"], isWholeUnit: false, prepNote: "Boil soy chunks in water for 10 mins. Squeeze out water completely, rinse in cold water, and squeeze again." },
+      { name: "Organic Tofu", type: "protein", category: "vegan", cal: 76, p: 8, c: 1.9, f: 4.8, unit: "g", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["soy", "gluten-free", "lactose-free", "nuts-free", "low-gi"], isWholeUnit: false, prepNote: "Press the tofu block with a heavy plate for 15 mins to drain water. Slice and pan-sear with minimal oil." },
+      { name: "Low Fat Paneer", type: "protein", category: "veg", cal: 180, p: 18, c: 2, f: 12, unit: "g", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["dairy", "paneer", "gluten-free", "soy-free", "nuts-free"], isWholeUnit: false, prepNote: "Cut paneer into cubes. Soak in warm water for 10 mins before cooking to make it super soft." },
+      { name: "Unsweetened Greek Yogurt", type: "protein", category: "veg", cal: 97, p: 10, c: 3.6, f: 5, unit: "g", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["dairy", "gluten-free", "soy-free", "nuts-free"], isWholeUnit: false, prepNote: "Keep refrigerated. Enjoy cold as a side dish or mixed with fruit." },
+      { name: "Whole Eggs (Boiled)", type: "protein", category: "egg", cal: 155, p: 13, c: 1.1, f: 11, unit: "egg(s)", unitWeight: 50, budget: ["Budget", "Moderate", "Flexible"], tags: ["egg", "gluten-free", "lactose-free", "soy-free", "nuts-free"], isWholeUnit: true, unitName: "egg(s)", prepNote: "Boil eggs in water for 8-9 minutes. Cool in cold water immediately, then peel." },
+      { name: "Egg Whites", type: "protein", category: "egg", cal: 52, p: 11, c: 0.7, f: 0.2, unit: "white(s)", unitWeight: 33, budget: ["Budget", "Moderate", "Flexible"], tags: ["egg", "gluten-free", "lactose-free", "soy-free", "nuts-free"], isWholeUnit: true, unitName: "white(s)", prepNote: "Boil eggs for 8 mins, cool, peel, cut open and discard the yellow yolk, keeping only the whites." },
+      { name: "Chicken Breast (Grilled)", type: "protein", category: "non-veg", cal: 165, p: 31, c: 0, f: 3.6, unit: "g", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["chicken", "gluten-free", "lactose-free", "soy-free", "nuts-free", "low-sodium"], isWholeUnit: false, prepNote: "Marinate chicken breast with spices and lemon juice for 20 mins. Grill on medium heat for 6-8 mins per side." },
+      { name: "Rohu / Surmai Fish (Grilled)", type: "protein", category: "non-veg", cal: 140, p: 20, c: 0, f: 6, unit: "g", unitWeight: 1, budget: ["Flexible"], tags: ["seafood", "fish", "gluten-free", "lactose-free", "soy-free", "nuts-free", "low-sodium"], isWholeUnit: false, prepNote: "Marinate fish with turmeric and salt. Grill on a hot pan with a splash of oil for 3-4 mins per side." },
+      { name: "Lean Mutton (Cooked)", type: "protein", category: "non-veg", cal: 220, p: 26, c: 0, f: 12, unit: "g", unitWeight: 1, budget: ["Flexible"], tags: ["redmeat", "mutton", "gluten-free", "lactose-free", "soy-free", "nuts-free"], isWholeUnit: false, prepNote: "Cook mutton in a pressure cooker with spices and water for 6-8 whistles until tender." },
 
       // CARBS
-      { name: "Brown Rice (Cooked)", type: "carb", category: "vegan", cal: 111, p: 2.6, c: 23, f: 0.9, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "high-fiber"] },
-      { name: "White Rice (Cooked)", type: "carb", category: "vegan", cal: 130, p: 2.7, c: 28, f: 0.3, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free"] },
-      { name: "Whole Wheat Roti / Chapati", type: "carb", category: "vegan", cal: 267, p: 8, c: 53, f: 1.1, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten", "lactose-free", "soy-free", "nuts-free", "high-fiber"] },
-      { name: "Oats (Cooked in water)", type: "carb", category: "vegan", cal: 71, p: 2.5, c: 12, f: 1.4, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "high-fiber"] },
-      { name: "Quinoa (Cooked)", type: "carb", category: "vegan", cal: 120, p: 4.4, c: 21.3, f: 1.9, unit: "g", unitWeight: 1, budget: ["Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "high-fiber"] },
-      { name: "Sweet Potato (Boiled)", type: "carb", category: "vegan", cal: 86, p: 1.6, c: 20, f: 0.1, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "high-fiber"] },
-      { name: "Poha (Flattened Rice)", type: "carb", category: "vegan", cal: 110, p: 2.3, c: 25, f: 0.2, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free"] },
-      { name: "Idli", type: "carb", category: "vegan", cal: 111, p: 2.8, c: 23, f: 0.3, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free"] },
-      { name: "Dosa (Plain)", type: "carb", category: "vegan", cal: 220, p: 4.2, c: 43, f: 4.2, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free"] },
-      { name: "Ragi Millet Roti", type: "carb", category: "vegan", cal: 255, p: 5, c: 55, f: 1.3, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "high-fiber"] },
-      { name: "Banana", type: "carb", category: "vegan", cal: 89, p: 1.1, c: 23, f: 0.3, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free"] },
-      { name: "Apple", type: "carb", category: "vegan", cal: 52, p: 0.3, c: 14, f: 0.2, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "high-fiber"] },
+      { name: "Brown Rice (Cooked)", type: "carb", category: "vegan", cal: 111, p: 2.6, c: 23, f: 0.9, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "high-fiber"], isWholeUnit: false, prepNote: "Soak brown rice for 20 mins. Cook in a 1:2.5 rice-to-water ratio for 20-25 mins." },
+      { name: "White Rice (Cooked)", type: "carb", category: "vegan", cal: 130, p: 2.7, c: 28, f: 0.3, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free"], isWholeUnit: false, prepNote: "Wash rice twice. Cook with double the water volume for 12-15 mins." },
+      { name: "Whole Wheat Roti / Chapati", type: "carb", category: "vegan", cal: 267, p: 8, c: 53, f: 1.1, unit: "roti(s)", unitWeight: 45, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten", "lactose-free", "soy-free", "nuts-free", "high-fiber"], isWholeUnit: true, unitName: "roti(s)", prepNote: "Knead wheat flour with warm water. Roll into thin discs and cook on a hot tawa/pan until puffed." },
+      { name: "Oats (Cooked in water)", type: "carb", category: "vegan", cal: 71, p: 2.5, c: 12, f: 1.4, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "high-fiber"], isWholeUnit: false, prepNote: "Add oats to boiling water. Simmer on medium-low for 3-5 mins, stirring occasionally." },
+      { name: "Quinoa (Cooked)", type: "carb", category: "vegan", cal: 120, p: 4.4, c: 21.3, f: 1.9, unit: "g", unitWeight: 1, budget: ["Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "high-fiber"], isWholeUnit: false, prepNote: "Rinse quinoa. Boil with water (1:2 ratio) for 15 mins until the water is fully absorbed." },
+      { name: "Sweet Potato (Boiled)", type: "carb", category: "vegan", cal: 86, p: 1.6, c: 20, f: 0.1, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "high-fiber"], isWholeUnit: false, prepNote: "Wash sweet potato. Boil in water for 15-20 mins until soft, peel, and slice." },
+      { name: "Poha (Flattened Rice)", type: "carb", category: "vegan", cal: 110, p: 2.3, c: 25, f: 0.2, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free"], isWholeUnit: false, prepNote: "Rinse poha in a colander until soft. Sauté with mustard seeds, turmeric, and curry leaves." },
+      { name: "Idli", type: "carb", category: "vegan", cal: 111, p: 2.8, c: 23, f: 0.3, unit: "idli(s)", unitWeight: 35, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free"], isWholeUnit: true, unitName: "idli(s)", prepNote: "Steam idli batter in an idli cooker or stand for 10-12 minutes on medium heat." },
+      { name: "Dosa (Plain)", type: "carb", category: "vegan", cal: 220, p: 4.2, c: 43, f: 4.2, unit: "dosa(s)", unitWeight: 60, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free"], isWholeUnit: true, unitName: "dosa(s)", prepNote: "Spread dosa batter on a hot greased tawa in circular motions. Cook until crispy on medium heat." },
+      { name: "Ragi Millet Roti", type: "carb", category: "vegan", cal: 255, p: 5, c: 55, f: 1.3, unit: "roti(s)", unitWeight: 45, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "high-fiber"], isWholeUnit: true, unitName: "roti(s)", prepNote: "Mix ragi flour with hot water to form a soft dough. Pat on a tawa and cook both sides." },
+      { name: "Banana", type: "carb", category: "vegan", cal: 89, p: 1.1, c: 23, f: 0.3, unit: "banana(s)", unitWeight: 100, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free"], isWholeUnit: true, unitName: "banana(s)", prepNote: "Peel and eat raw as a pre/post-workout snack." },
+      { name: "Apple", type: "carb", category: "vegan", cal: 52, p: 0.3, c: 14, f: 0.2, unit: "apple(s)", unitWeight: 120, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "high-fiber"], isWholeUnit: true, unitName: "apple(s)", prepNote: "Wash thoroughly under clean running water, core, and slice." },
 
       // FATS
-      { name: "Mixed Nuts (Almonds / Walnuts)", type: "fat", category: "vegan", cal: 607, p: 20, c: 21, f: 54, unit: "g", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["nuts", "gluten-free", "lactose-free", "soy-free", "high-fiber"] },
-      { name: "Chia Seeds / Flaxseeds", type: "fat", category: "vegan", cal: 486, p: 17, c: 42, f: 31, unit: "g", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "high-fiber"] },
-      { name: "Olive Oil", type: "fat", category: "vegan", cal: 884, p: 0, c: 0, f: 100, unit: "ml", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free"] },
-      { name: "Peanut Butter", type: "fat", category: "vegan", cal: 588, p: 25, c: 20, f: 50, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["nuts", "gluten-free", "lactose-free", "soy-free"] },
-      { name: "Pure Ghee", type: "fat", category: "veg", cal: 900, p: 0, c: 0, f: 100, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["dairy", "gluten-free", "soy-free", "nuts-free"] },
-      { name: "Avocado", type: "fat", category: "vegan", cal: 160, p: 2, c: 8.5, f: 14.7, unit: "g", unitWeight: 1, budget: ["Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "high-fiber"] },
+      { name: "Mixed Nuts (Almonds / Walnuts)", type: "fat", category: "vegan", cal: 607, p: 20, c: 21, f: 54, unit: "g", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["nuts", "gluten-free", "lactose-free", "soy-free", "high-fiber"], isWholeUnit: false, prepNote: "Soak almonds overnight in water, peel the skin in the morning before eating." },
+      { name: "Chia Seeds / Flaxseeds", type: "fat", category: "vegan", cal: 486, p: 17, c: 42, f: 31, unit: "g", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "high-fiber"], isWholeUnit: false, prepNote: "Soak chia seeds in water for 15 mins. Grind flaxseeds before eating." },
+      { name: "Olive Oil", type: "fat", category: "vegan", cal: 884, p: 0, c: 0, f: 100, unit: "ml", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free"], isWholeUnit: false, prepNote: "Use as a raw dressing over salads or warm rice dishes." },
+      { name: "Peanut Butter", type: "fat", category: "vegan", cal: 588, p: 25, c: 20, f: 50, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["nuts", "gluten-free", "lactose-free", "soy-free"], isWholeUnit: false, prepNote: "Spread over apple slices or stir directly into warm oatmeal." },
+      { name: "Pure Ghee", type: "fat", category: "veg", cal: 900, p: 0, c: 0, f: 100, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["dairy", "gluten-free", "soy-free", "nuts-free"], isWholeUnit: false, prepNote: "Drizzle melted ghee over hot rice, roti, or khichdi." },
+      { name: "Avocado", type: "fat", category: "vegan", cal: 160, p: 2, c: 8.5, f: 14.7, unit: "g", unitWeight: 1, budget: ["Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "high-fiber"], isWholeUnit: false, prepNote: "Cut open, remove pit, scoop out pulp, and mash with a pinch of salt." },
 
       // VEGETABLES
-      { name: "Spinach (Boiled)", type: "vegetable", category: "vegan", cal: 23, p: 3, c: 3.6, f: 0.3, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "high-fiber", "low-gi"] },
-      { name: "Broccoli (Steamed)", type: "vegetable", category: "vegan", cal: 35, p: 2.8, c: 7, f: 0.4, unit: "g", unitWeight: 1, budget: ["Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "high-fiber", "low-gi"] },
-      { name: "Mixed Vegetable Sabzi", type: "vegetable", category: "vegan", cal: 65, p: 2, c: 10, f: 2, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "high-fiber"] },
-      { name: "Fresh Cucumber Salad", type: "vegetable", category: "vegan", cal: 15, p: 0.6, c: 3.6, f: 0.1, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "low-sodium"] },
-      { name: "Bottle Gourd (Lauki Sabzi)", type: "vegetable", category: "vegan", cal: 40, p: 1, c: 6, f: 1, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "low-sodium"] }
+      { name: "Spinach (Boiled)", type: "vegetable", category: "vegan", cal: 23, p: 3, c: 3.6, f: 0.3, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "high-fiber", "low-gi"], isWholeUnit: false, prepNote: "Wash leaves thoroughly. Boil or steam for 3-4 minutes, drain excess water." },
+      { name: "Broccoli (Steamed)", type: "vegetable", category: "vegan", cal: 35, p: 2.8, c: 7, f: 0.4, unit: "g", unitWeight: 1, budget: ["Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "high-fiber", "low-gi"], isWholeUnit: false, prepNote: "Cut into florets. Steam for 5-6 minutes until tender-crisp." },
+      { name: "Mixed Vegetable Sabzi", type: "vegetable", category: "vegan", cal: 65, p: 2, c: 10, f: 2, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "high-fiber"], isWholeUnit: false, prepNote: "Sauté chopped vegetables with cumin, turmeric, and light salt. Sauté on medium heat." },
+      { name: "Fresh Cucumber Salad", type: "vegetable", category: "vegan", cal: 15, p: 0.6, c: 3.6, f: 0.1, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "low-sodium"], isWholeUnit: false, prepNote: "Peel, slice, and dress with lemon juice and a pinch of black pepper." },
+      { name: "Bottle Gourd (Lauki Sabzi)", type: "vegetable", category: "vegan", cal: 40, p: 1, c: 6, f: 1, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "low-sodium"], isWholeUnit: false, prepNote: "Peel, chop, and cook in pressure cooker with cumin and ginger for 2 whistles." }
     ];
 
     // Page Load Setup
@@ -1471,6 +1656,13 @@
       state.gender = gender;
       document.getElementById("genderMale").classList.toggle("active", gender === 'Male');
       document.getElementById("genderFemale").classList.toggle("active", gender === 'Female');
+    }
+
+    function selectExperience(exp) {
+      state.experience = exp;
+      document.getElementById("expBeginner").classList.toggle("active", exp === 'Beginner');
+      document.getElementById("expIntermediate").classList.toggle("active", exp === 'Intermediate');
+      document.getElementById("expAdvanced").classList.toggle("active", exp === 'Advanced');
     }
 
     function selectGoal(goal) {
@@ -1694,6 +1886,10 @@
           <div class="review-value">${state.gender}</div>
         </div>
         <div class="review-item">
+          <div class="review-label">Experience Level</div>
+          <div class="review-value">${state.experience}</div>
+        </div>
+        <div class="review-item">
           <div class="review-label">Age / Height / Weight</div>
           <div class="review-value">${state.age} yrs / ${state.height} cm / ${state.weight} kg</div>
         </div>
@@ -1733,10 +1929,6 @@
           <div class="review-label">Meal Budget</div>
           <div class="review-value">${state.budget}</div>
         </div>
-        <div class="review-item">
-          <div class="review-label">Enjoyed Foods</div>
-          <div class="review-value" style="font-weight: 500; font-size: 0.85rem;">${state.likedFoods ? state.likedFoods : 'None listed'}</div>
-        </div>
       `;
     }
 
@@ -1747,10 +1939,10 @@
       let bmrFormula = '';
       if (state.gender === 'Male') {
         bmr = 10 * state.weight + 6.25 * state.height - 5 * state.age + 5;
-        bmrFormula = `BMR = 10 × ${state.weight} (wt) + 6.25 × ${state.height} (ht) - 5 × ${state.age} (age) + 5\n= ${Math.round(bmr)} kcal`;
+        bmrFormula = `BMR = 10 × ${state.weight} + 6.25 × ${state.height} - 5 × ${state.age} + 5 = ${Math.round(bmr)} kcal`;
       } else {
         bmr = 10 * state.weight + 6.25 * state.height - 5 * state.age - 161;
-        bmrFormula = `BMR = 10 × ${state.weight} (wt) + 6.25 × ${state.height} (ht) - 5 × ${state.age} (age) - 161\n= ${Math.round(bmr)} kcal`;
+        bmrFormula = `BMR = 10 × ${state.weight} + 6.25 × ${state.height} - 5 × ${state.age} - 161 = ${Math.round(bmr)} kcal`;
       }
 
       // 2. TDEE
@@ -1763,7 +1955,7 @@
       };
       const multiplier = activityMultipliers[state.activityLevel] || 1.2;
       const tdee = bmr * multiplier;
-      const tdeeFormula = `TDEE = BMR × ${multiplier} (activity multiplier)\n= ${Math.round(bmr)} × ${multiplier}\n= ${Math.round(tdee)} kcal`;
+      const tdeeFormula = `TDEE = BMR × ${multiplier} = ${Math.round(bmr)} × ${multiplier} = ${Math.round(tdee)} kcal`;
 
       // 3. Goal Adjustment
       let targetCalories = 0;
@@ -1771,19 +1963,18 @@
       if (state.goal === 'Fat loss') {
         const reduction = Math.min(500, tdee * 0.20);
         targetCalories = tdee - reduction;
-        goalFormula = `Fat Loss Target = TDEE - Min(500, TDEE × 20%)\n= ${Math.round(tdee)} - ${Math.round(reduction)}\n= ${Math.round(targetCalories)} kcal`;
+        goalFormula = `Fat Loss = TDEE - Min(500, TDEE × 20%) = ${Math.round(tdee)} - ${Math.round(reduction)} = ${Math.round(targetCalories)} kcal`;
       } else if (state.goal === 'Lean bulk') {
         targetCalories = tdee + 250;
-        goalFormula = `Lean Bulk Target = TDEE + 250 (surplus for hypertrophy)\n= ${Math.round(tdee)} + 250\n= ${Math.round(targetCalories)} kcal`;
+        goalFormula = `Lean Bulk = TDEE + 250 = ${Math.round(tdee)} + 250 = ${Math.round(targetCalories)} kcal`;
       } else if (state.goal === 'Recomposition') {
         targetCalories = tdee - 150;
-        goalFormula = `Recomposition Target = TDEE - 150 (slight deficit for fat loss with high protein)\n= ${Math.round(tdee)} - 150\n= ${Math.round(targetCalories)} kcal`;
+        goalFormula = `Recomposition = TDEE - 150 = ${Math.round(tdee)} - 150 = ${Math.round(targetCalories)} kcal`;
       } else {
         targetCalories = tdee;
-        goalFormula = `Maintenance Target = TDEE\n= ${Math.round(targetCalories)} kcal`;
+        goalFormula = `Maintenance = TDEE = ${Math.round(targetCalories)} kcal`;
       }
       
-      // Ensure targetCalories is sensible
       targetCalories = Math.max(1200, Math.round(targetCalories));
 
       // 4. BMI
@@ -1795,7 +1986,7 @@
       else if (bmi < 30) bmiCategory = 'Overweight';
       else bmiCategory = 'Obese';
       
-      const bmiFormula = `BMI = weight(kg) / height(m)²\n= ${state.weight} / (${heightInMeters.toFixed(2)})²\n= ${bmi.toFixed(1)} (${bmiCategory})`;
+      const bmiFormula = `BMI = weight / height² = ${state.weight} / (${heightInMeters.toFixed(2)})² = ${bmi.toFixed(1)} (${bmiCategory})`;
 
       // 5. Macro Splits
       let proteinPerKg = 1.8;
@@ -1823,23 +2014,8 @@
 
       let proteinG = state.weight * proteinPerKg;
       let fatG = state.weight * fatPerKg;
-      
-      // Calories from protein and fats
-      let proteinCal = proteinG * 4;
-      let fatCal = fatG * 9;
-      
-      // Remaining for carbs
-      let carbCal = targetCalories - (proteinCal + fatCal);
-      let carbG = Math.max(30, carbCal / 4); // clamp min carb to 30g
-      
-      // Re-calculate actual totals if carbs clamped
-      if (carbCal < 120) {
-        carbG = 30;
-        carbCal = 120;
-        // recalculate fat slightly to match total calories
-        fatCal = targetCalories - (proteinCal + carbCal);
-        fatG = Math.max(30, fatCal / 9);
-      }
+      let carbCal = targetCalories - ((proteinG * 4) + (fatG * 9));
+      let carbG = Math.max(30, carbCal / 4);
 
       proteinG = Math.round(proteinG);
       fatG = Math.round(fatG);
@@ -1847,26 +2023,20 @@
 
       const isProteinHighMultiplier = proteinPerKg >= 2.0;
 
-      const macroFormula = `Protein: ${proteinPerKg}g/kg × ${state.weight}kg = ${proteinG}g\n` +
-                           `Fat: ${fatPerKg}g/kg × ${state.weight}kg = ${fatG}g\n` +
-                           `Carbs: [${Math.round(targetCalories)}kcal - (${proteinG}g×4 + ${fatG}g×9)] / 4 = ${carbG}g`;
-
-      // 6. Macro Calories Calculation
-      const actualCal = (proteinG * 4) + (carbG * 4) + (fatG * 9);
-      const calCalculationFormula = `Total Target = (${proteinG}g × 4) + (${carbG}g × 4) + (${fatG}g × 9)\n= ${proteinG*4} + ${carbG*4} + ${fatG*9} = ${actualCal} kcal`;
+      const macroFormula = `Protein: ${proteinPerKg}g/kg × ${state.weight} = ${proteinG}g | Fat: ${fatPerKg}g/kg × ${state.weight} = ${fatG}g | Carbs: [${Math.round(targetCalories)} - (${proteinG}×4 + ${fatG}×9)] / 4 = ${carbG}g`;
 
       return {
         bmr: Math.round(bmr), bmrFormula,
         tdee: Math.round(tdee), tdeeFormula,
-        targetCalories: actualCal, goalFormula,
+        targetCalories, goalFormula,
         bmi: bmi.toFixed(1), bmiCategory, bmiFormula,
         proteinG, fatG, carbG, macroFormula,
-        calCalculationFormula, isProteinHighMultiplier, hasKidneyIssues
+        isProteinHighMultiplier, hasKidneyIssues
       };
     }
 
-    // DIET GENERATOR FILTERING ENGINE
-    function filterFoodDatabase(healthConditions, dietType, exclusions, excludeOtherText, budget) {
+    // DIET DATABASE FILTERING
+    function filterFoodDatabase(healthConditions, dietType, exclusions, excludeOtherText, budget, cuisine) {
       let filtered = [...FOOD_DATABASE];
 
       // 1. Filter by Diet Type
@@ -1876,12 +2046,11 @@
         filtered = filtered.filter(f => f.category === 'veg' || f.category === 'vegan' || f.category === 'egg');
       } else if (dietType === 'Vegan') {
         filtered = filtered.filter(f => f.category === 'vegan');
-      } // non-veg allows all
+      }
 
-      // 2. Filter by explicit checkboxes exclusions
+      // 2. Filter by explicit check exclusions
       exclusions.forEach(ex => {
         if (ex === 'dairy') {
-          // exclude dairy, paneer, and whey if any dairy tag is present
           filtered = filtered.filter(f => !f.tags.includes('dairy') && !f.tags.includes('paneer'));
         } else {
           filtered = filtered.filter(f => !f.tags.includes(ex));
@@ -1901,12 +2070,10 @@
 
       // 5. Filter by Health Condition specific adjustments
       if (healthConditions.includes("Diabetes") || healthConditions.includes("PCOS")) {
-        // Exclude white/refined grains with high GI
         filtered = filtered.filter(f => !f.name.includes("White Rice") && !f.name.includes("Poha") && !f.name.includes("Dosa (Plain)") && !f.name.includes("Idli"));
       }
 
       if (healthConditions.includes("Thyroid")) {
-        // Exclude Soy Products
         filtered = filtered.filter(f => !f.tags.includes('soy'));
       }
 
@@ -1919,120 +2086,28 @@
       }
 
       if (healthConditions.includes("Cholesterol")) {
-        // Limit ghee and whole eggs
         filtered = filtered.filter(f => !f.name.includes("Pure Ghee") && !f.name.includes("Whole Eggs") && !f.tags.includes('redmeat'));
+      }
+
+      // 6. Cuisine Filter
+      if (cuisine === 'South Indian') {
+        filtered = filtered.filter(f => !f.name.includes("Whole Wheat Roti"));
+      } else if (cuisine === 'North Indian') {
+        filtered = filtered.filter(f => !f.name.includes("Idli") && !f.name.includes("Dosa"));
       }
 
       return filtered;
     }
 
+    // MAIN MEAL PLAN GENERATOR (WITH CORE MATH FIXED)
     function generatePlan() {
-      // Run calculations first
       const calc = runCalculations();
+      const safeFoods = filterFoodDatabase(state.healthConditions, state.dietType, state.exclusions, state.excludeOther, state.budget, state.cuisine);
       
-      // Filter foods
-      const safeFoods = filterFoodDatabase(state.healthConditions, state.dietType, state.exclusions, state.excludeOther, state.budget);
-      
-      // Select UI elements and display container
       document.getElementById("wizard").style.display = "none";
       document.getElementById("results").style.display = "block";
-      
-      // Hide header wizard navigation steps
       document.getElementById("progressBar").parentElement.style.display = "none";
       document.getElementById("stepIndicator").style.display = "none";
-      
-      // Render "Your Numbers" Dashboard
-      const grid = document.getElementById("numbersGrid");
-      grid.innerHTML = `
-        <div class="number-block">
-          <div class="number-title">1. BMR (Mifflin-St Jeor)</div>
-          <div class="number-val">${calc.bmr} kcal</div>
-          <div class="number-formula">${calc.bmrFormula}</div>
-        </div>
-        <div class="number-block">
-          <div class="number-title">2. TDEE (Maintenance)</div>
-          <div class="number-val">${calc.tdee} kcal</div>
-          <div class="number-formula">${calc.tdeeFormula}</div>
-        </div>
-        <div class="number-block">
-          <div class="number-title">3. Goal Intake Target</div>
-          <div class="number-val">${calc.targetCalories} kcal</div>
-          <div class="number-formula">${calc.goalFormula}</div>
-        </div>
-        <div class="number-block">
-          <div class="number-title">4. Body Mass Index (BMI)</div>
-          <div class="number-val">${calc.bmi} <span style="font-size:0.9rem; font-weight:600;">(${calc.bmiCategory})</span></div>
-          <div class="number-formula">${calc.bmiFormula}</div>
-        </div>
-        <div class="number-block" style="grid-column: 1 / -1;">
-          <div class="number-title">5. Macronutrient Splits</div>
-          <div class="number-val">${calc.proteinG}g P | ${calc.carbG}g C | ${calc.fatG}g F</div>
-          <div class="number-formula">${calc.macroFormula}</div>
-        </div>
-        <div class="number-block" style="grid-column: 1 / -1;">
-          <div class="number-title">6. Macro Calories Verifications</div>
-          <div class="number-val">${calc.targetCalories} kcal</div>
-          <div class="number-formula">${calc.calCalculationFormula}</div>
-        </div>
-        <div class="macro-bar-container">
-          <div class="macro-label-row">
-            <span>Macro Ratios (Caloric Weight)</span>
-            <span>P: ${Math.round((calc.proteinG*4/calc.targetCalories)*100)}% | C: ${Math.round((calc.carbG*4/calc.targetCalories)*100)}% | F: ${Math.round((calc.fatG*9/calc.targetCalories)*100)}%</span>
-          </div>
-          <div class="macro-progress-track">
-            <div class="macro-segment macro-p" style="width: ${(calc.proteinG*4/calc.targetCalories)*100}%">Protein</div>
-            <div class="macro-segment macro-c" style="width: ${(calc.carbG*4/calc.targetCalories)*100}%">Carbs</div>
-            <div class="macro-segment macro-f" style="width: ${(calc.fatG*9/calc.targetCalories)*100}%">Fat</div>
-          </div>
-          <div class="macro-legend">
-            <div class="legend-item"><div class="legend-color macro-p"></div>Protein (${calc.proteinG}g)</div>
-            <div class="legend-item"><div class="legend-color macro-c"></div>Carbs (${calc.carbG}g)</div>
-            <div class="legend-item"><div class="legend-color macro-f"></div>Fats (${calc.fatG}g)</div>
-          </div>
-        </div>
-      `;
-
-      // Render health conditions alert warnings (if any)
-      const healthAlertCard = document.getElementById("healthResultAlert");
-      const healthList = document.getElementById("healthAlertList");
-      healthList.innerHTML = '';
-      
-      if (state.healthConditions.length > 0) {
-        healthAlertCard.style.display = 'block';
-        state.healthConditions.forEach(cond => {
-          let li = document.createElement("li");
-          if (cond === 'Diabetes') {
-            li.innerHTML = `<strong>Diabetes / Pre-diabetes</strong>: Pair carbohydrates with lean protein and plant fiber to slow glycemic index curves. Avoid refined sugar and fruit juices.`;
-          } else if (cond === 'Hypertension') {
-            li.innerHTML = `<strong>High Blood Pressure</strong>: Limit sodium-dense foods, pickles, papads, and processed snacks. Use rock salt sparingly.`;
-          } else if (cond === 'Thyroid') {
-            li.innerHTML = `<strong>Thyroid Issues</strong>: Minimize consumption of raw cruciferous greens (cabbage, cauliflower) and monitor iodine intakes. Limit soy timing.`;
-          } else if (cond === 'PCOS') {
-            li.innerHTML = `<strong>PCOS / PCOD</strong>: Focus on high-fiber whole food items, legumes, and lean protein, which help balance insulin. Limit sweet confectionery.`;
-          } else if (cond === 'Cholesterol') {
-            li.innerHTML = `<strong>High Cholesterol</strong>: Restrict butter, margarine, deep fry fats, and red meats. Maximize soluble fiber feeds (oats, apple pectin).`;
-          } else if (cond === 'Lactose') {
-            li.innerHTML = `<strong>Lactose Intolerance</strong>: Milk sugar filtered out. Substitute with plant milk, curd (usually safe), or lactose-free dairy.`;
-          } else if (cond === 'Gluten') {
-            li.innerHTML = `<strong>Gluten Sensitivity</strong>: Wheat products excluded. Utilize ragi, rice, millets, and potatoes as clean starches.`;
-          } else if (cond === 'Kidney') {
-            li.innerHTML = `<strong>Kidney Concerns</strong>: <span style="color:var(--error-color); font-weight:700;">WARNING: Cap protein at 1.2g/kg (applied in calculations). Consult a nephrologist before committing to high-protein schedules.</span>`;
-          }
-          healthList.appendChild(li);
-        });
-      } else {
-        healthAlertCard.style.display = 'none';
-      }
-
-      // Render dynamic meal blocks
-      const mealsList = document.getElementById("mealsList");
-      mealsList.innerHTML = '';
-      
-      const mealsNum = state.mealsCount;
-      const caloriePerMeal = calc.targetCalories / mealsNum;
-      const proteinPerMeal = calc.proteinG / mealsNum;
-      const carbPerMeal = calc.carbG / mealsNum;
-      const fatPerMeal = calc.fatG / mealsNum;
 
       // Group foods for generating meals
       const proteins = safeFoods.filter(f => f.type === 'protein');
@@ -2041,13 +2116,16 @@
       const veggies = safeFoods.filter(f => f.type === 'vegetable');
 
       // Fallback arrays if database is empty due to too many exclusions
-      const fallbackP = [{ name: "Tofu", cal: 76, p: 8, c: 1.9, f: 4.8, unit: "g" }];
-      const fallbackC = [{ name: "Brown Rice", cal: 111, p: 2.6, c: 23, f: 0.9, unit: "g" }];
-      const fallbackF = [{ name: "Peanut Butter", cal: 588, p: 25, c: 20, f: 50, unit: "g" }];
+      const fallbackP = [{ name: "Tofu", type: "protein", category: "vegan", cal: 76, p: 8, c: 1.9, f: 4.8, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["soy"], isWholeUnit: false }];
+      const fallbackC = [{ name: "Brown Rice", type: "carb", category: "vegan", cal: 111, p: 2.6, c: 23, f: 0.9, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free"], isWholeUnit: false }];
+      const fallbackF = [{ name: "Peanut Butter", type: "fat", category: "vegan", cal: 588, p: 25, c: 20, f: 50, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["nuts"], isWholeUnit: false }];
 
       const pSource = proteins.length > 0 ? proteins : fallbackP;
       const cSource = carbs.length > 0 ? carbs : fallbackC;
       const fSource = fats.length > 0 ? fats : fallbackF;
+
+      const mealsNum = state.mealsCount;
+      const mealPlanMeals = [];
 
       const mealTimes = {
         3: ["8:30 AM (Breakfast)", "1:30 PM (Lunch)", "8:00 PM (Dinner)"],
@@ -2063,213 +2141,574 @@
         6: ["Breakfast", "Mid-day Snack 1", "Lunch", "Evening Snack 2", "Late Snack 3", "Dinner"]
       };
 
-      let accumulatedFoodProtein = 0;
+      // Accumulative variables to track actual portions assigned
+      let accP = 0;
+      let accC = 0;
+      let accF = 0;
 
       for (let i = 0; i < mealsNum; i++) {
-        // Select ingredients based on index to ensure variety
+        // Calculate remaining balance to satisfy target precisely within ±3%
+        const mealsLeft = mealsNum - i;
+        const proteinTarget = (calc.proteinG - accP) / mealsLeft;
+        const carbTarget = (calc.carbG - accC) / mealsLeft;
+        const fatTarget = (calc.fatG - accF) / mealsLeft;
+
+        // Choose ingredients
         const pFood = pSource[i % pSource.length];
         const cFood = cSource[i % cSource.length];
-        
-        // Include fats in some meals, veggies in main meals (lunch/dinner)
         const hasFat = (i % 2 === 0);
         const fFood = hasFat ? fSource[i % fSource.length] : null;
         
         const isMainMeal = (mealNames[mealsNum][i].includes("Lunch") || mealNames[mealsNum][i].includes("Dinner"));
         const vegFood = isMainMeal && veggies.length > 0 ? veggies[i % veggies.length] : null;
 
-        // Base quantities
+        // 1. Calculate veg macros (constant 100g serving size)
+        let vegP = 0, vegC = 0, vegF = 0;
+        if (vegFood) {
+          vegP = vegFood.p;
+          vegC = vegFood.c;
+          vegF = vegFood.f;
+        }
+
+        // Adjust remaining targets for veg content
+        const pTargetAdjusted = Math.max(5, proteinTarget - vegP);
+        const cTargetAdjusted = Math.max(5, carbTarget - vegC);
+        const fatTargetAdjusted = Math.max(2, fatTarget - vegF);
+
+        // 2. Solve for portion sizes using 2x2 Cramer system solver
+        const p1 = pFood.p / 100;
+        const c1 = pFood.c / 100;
+        const p2 = cFood.p / 100;
+        const c2 = cFood.c / 100;
+
         let pQty = 100;
         let cQty = 100;
-        let fQty = 10;
-        let vQty = 100;
+        let fQty = 0;
 
-        // Scaling logic based on target meal macronutrients
-        // Protein source calculation
-        if (pFood.p > 0) {
-          pQty = (proteinPerMeal / pFood.p) * 100;
-        }
-        
-        // Carb source calculation (adjusting for protein source carbs)
-        const carbsInProtein = (pQty / 100) * pFood.c;
-        const netCarbGoal = Math.max(10, carbPerMeal - carbsInProtein);
-        if (cFood.c > 0) {
-          cQty = (netCarbGoal / cFood.c) * 100;
+        const det = p1 * c2 - c1 * p2;
+        if (Math.abs(det) < 0.0001) {
+          pQty = pTargetAdjusted / p1;
+          cQty = cTargetAdjusted / c2;
+        } else {
+          pQty = (pTargetAdjusted * c2 - cTargetAdjusted * p2) / det;
+          cQty = (cTargetAdjusted * p1 - pTargetAdjusted * c1) / det;
         }
 
-        // Fat source calculation (adjusting for protein/carb fats)
-        const fatsInProtein = (pQty / 100) * pFood.f;
-        const fatsInCarb = (cQty / 100) * cFood.f;
-        const netFatGoal = Math.max(2, fatPerMeal - (fatsInProtein + fatsInCarb));
+        // Fallback if solver yields negative portions
+        if (pQty < 0 || cQty < 0) {
+          pQty = pTargetAdjusted / p1;
+          const netCarbs = Math.max(5, cTargetAdjusted - (pQty * c1));
+          cQty = netCarbs / c2;
+        }
+
+        // Adjust fat target for protein and carb source fats
+        const pFats = (pQty / 100) * pFood.f;
+        const cFats = (cQty / 100) * cFood.f;
+        const fTargetNet = Math.max(0, fatTargetAdjusted - (pFats + cFats));
         if (fFood && fFood.f > 0) {
-          fQty = (netFatGoal / fFood.f) * 100;
+          fQty = (fTargetNet / fFood.f) * 100;
         }
 
-        // Enforce range clamping for logical serving sizes
-        if (pFood.name.includes("Eggs")) {
-          // Convert from grams to count
-          pQty = Math.max(1, Math.round((proteinPerMeal / 13) * 2)) / 2; // increments of 0.5 egg
+        // Apply rounding and whole-unit checks
+        let displayPQty = pQty;
+        let displayCQty = cQty;
+        let displayFQty = fQty;
+
+        // Round protein unit
+        if (pFood.isWholeUnit) {
+          const unitWeight = pFood.unitWeight;
+          // Calculate piece count and round to integer
+          const pieceCount = Math.max(1, Math.round(pQty / unitWeight));
+          displayPQty = pieceCount; // Store unit count
+          pQty = pieceCount * unitWeight; // Actual weight in grams
         } else {
-          pQty = Math.max(40, Math.min(300, Math.round(pQty / 5) * 5)); // round to nearest 5g
+          pQty = Math.max(40, Math.min(400, Math.round(pQty / 5) * 5));
+          displayPQty = pQty;
         }
 
-        if (cFood.name.includes("Roti") || cFood.name.includes("Idli") || cFood.name.includes("Dosa")) {
-          // Roti is ~120 cal, 24g carb, idli ~39cal, 8g carb.
-          // Let's divide required carb grams by carb content per piece
-          const carbPerPiece = cFood.name.includes("Roti") ? 24 : (cFood.name.includes("Idli") ? 8 : 26);
-          cQty = Math.max(1, Math.round(carbPerMeal / carbPerPiece));
+        // Round carb unit
+        if (cFood.isWholeUnit) {
+          const unitWeight = cFood.unitWeight;
+          const pieceCount = Math.max(1, Math.round(cQty / unitWeight));
+          displayCQty = pieceCount;
+          cQty = pieceCount * unitWeight;
         } else {
-          cQty = Math.max(30, Math.min(250, Math.round(cQty / 5) * 5));
+          cQty = Math.max(30, Math.min(450, Math.round(cQty / 5) * 5));
+          displayCQty = cQty;
         }
 
+        // Round fat unit
         if (fFood) {
-          if (fFood.name.includes("Nuts") || fFood.name.includes("Seeds") || fFood.name.includes("Avocado")) {
-            fQty = Math.max(10, Math.min(60, Math.round(fQty / 5) * 5));
+          if (fFood.isWholeUnit) {
+            const unitWeight = fFood.unitWeight;
+            const pieceCount = Math.max(1, Math.round(fQty / unitWeight));
+            displayFQty = pieceCount;
+            fQty = pieceCount * unitWeight;
           } else {
-            fQty = Math.max(5, Math.min(30, Math.round(fQty))); // oil / ghee in ml/grams
+            fQty = Math.max(5, Math.min(50, Math.round(fQty)));
+            displayFQty = fQty;
           }
         }
 
-        // Compile actual macro counts for this meal
+        // Calculate actual macros of final portions
+        const finalP = ((pQty / 100) * pFood.p) + ((cQty / 100) * cFood.p) + (fFood ? ((fQty / 100) * fFood.p) : 0) + vegP;
+        const finalC = ((pQty / 100) * pFood.c) + ((cQty / 100) * cFood.c) + (fFood ? ((fQty / 100) * fFood.c) : 0) + vegC;
+        const finalF = ((pQty / 100) * pFood.f) + ((cQty / 100) * cFood.f) + (fFood ? ((fQty / 100) * fFood.f) : 0) + vegF;
+        const finalCal = (finalP * 4) + (finalC * 4) + (finalF * 9);
+
+        // Save accumulated values
+        accP += finalP;
+        accC += finalC;
+        accF += finalF;
+
+        // Build meal object
+        const mealFoods = [
+          { food: pFood, qty: displayPQty, actualG: pQty },
+          { food: cFood, qty: displayCQty, actualG: cQty }
+        ];
+        if (fFood) {
+          mealFoods.push({ food: fFood, qty: displayFQty, actualG: fQty });
+        }
+        if (vegFood) {
+          mealFoods.push({ food: vegFood, qty: 100, actualG: 100 });
+        }
+
+        mealPlanMeals.push({
+          name: mealNames[mealsNum][i],
+          time: mealTimes[mealsNum][i],
+          foods: mealFoods,
+          p: finalP,
+          c: finalC,
+          f: finalF,
+          cal: finalCal
+        });
+      }
+
+      // Cache plan to state
+      state.generatedPlan = {
+        meals: mealPlanMeals,
+        targetCalories: calc.targetCalories,
+        targetProtein: calc.proteinG,
+        targetCarbs: calc.carbG,
+        targetFat: calc.fatG,
+        safeFoods: safeFoods
+      };
+
+      // Initial render of the numbers card & meal cards
+      recalculatePlanTotals();
+      renderAlerts(calc);
+    }
+
+    // INTERACTIVE RECALCULATION ENGINE (FOR MANUAL OVERRIDES)
+    function recalculatePlanTotals() {
+      const plan = state.generatedPlan;
+      if (!plan) return;
+
+      let totalP = 0;
+      let totalC = 0;
+      let totalF = 0;
+      let totalCal = 0;
+
+      // Recalculate each meal
+      plan.meals.forEach((meal, mealIdx) => {
         let mealP = 0;
         let mealC = 0;
         let mealF = 0;
-        let mealCal = 0;
 
-        // P item contribution
-        if (pFood.name.includes("Eggs")) {
-          // Egg counts: pQty is egg units, egg weight ~50g
-          const totalEggG = pQty * 50;
-          mealP += (totalEggG / 100) * pFood.p;
-          mealC += (totalEggG / 100) * pFood.c;
-          mealF += (totalEggG / 100) * pFood.f;
+        meal.foods.forEach((item) => {
+          const qty = item.qty;
+          const food = item.food;
+          let weightInG = qty;
+          
+          if (food.isWholeUnit) {
+            weightInG = qty * food.unitWeight;
+          }
+          item.actualG = weightInG;
+
+          mealP += (weightInG / 100) * food.p;
+          mealC += (weightInG / 100) * food.c;
+          mealF += (weightInG / 100) * food.f;
+        });
+
+        meal.p = mealP;
+        meal.c = mealC;
+        meal.f = mealF;
+        meal.cal = (mealP * 4) + (mealC * 4) + (mealF * 9);
+
+        totalP += mealP;
+        totalC += mealC;
+        totalF += mealF;
+        totalCal += meal.cal;
+      });
+
+      totalP = Math.round(totalP);
+      totalC = Math.round(totalC);
+      totalF = Math.round(totalF);
+      totalCal = Math.round(totalCal);
+
+      // Render Dashboard "Your Numbers" Card - UPDATE ALL HEADLINES
+      const calc = runCalculations();
+      
+      const grid = document.getElementById("numbersGrid");
+      grid.innerHTML = `
+        <div class="number-block">
+          <div class="number-title">1. BMR (Mifflin-St Jeor)</div>
+          <div class="number-val">${calc.bmr} kcal</div>
+          <div class="number-formula">BMR = Mifflin-St Jeor Formula\n= ${calc.bmr} kcal</div>
+        </div>
+        <div class="number-block">
+          <div class="number-title">2. TDEE (Maintenance)</div>
+          <div class="number-val">${calc.tdee} kcal</div>
+          <div class="number-formula">TDEE = BMR × Activity Multiplier\n= ${calc.tdee} kcal</div>
+        </div>
+        <div class="number-block" id="box3Target">
+          <div class="number-title">3. Goal Intake Target</div>
+          <div class="number-val">${totalCal} kcal</div>
+          <div class="number-formula">Calculated from dynamic portions:\n= ${totalCal} kcal</div>
+        </div>
+        <div class="number-block">
+          <div class="number-title">4. Body Mass Index (BMI)</div>
+          <div class="number-val">${calc.bmi} <span style="font-size:0.82rem; font-weight:700;">(${calc.bmiCategory})</span></div>
+          <div class="number-formula">BMI = weight / height²\n= ${calc.bmi}</div>
+        </div>
+        <div class="number-block" style="grid-column: 1 / -1;">
+          <div class="number-title">5. Actual Plan Daily Macros</div>
+          <div class="number-val">${totalP}g P | ${totalC}g C | ${totalF}g F</div>
+          <div class="number-formula">Current actual portions sum:\nProtein: ${totalP}g | Carbs: ${totalC}g | Fat: ${totalF}g</div>
+        </div>
+        <div class="number-block" style="grid-column: 1 / -1;">
+          <div class="number-title">6. Macro Calories Verification</div>
+          <div class="number-val">${totalCal} kcal</div>
+          <div class="number-formula">Verification = (${totalP}g × 4) + (${totalC}g × 4) + (${totalF}g × 9)\n= ${totalP*4} + ${totalC*4} + ${totalF*9} = ${totalCal} kcal</div>
+        </div>
+        <div class="macro-bar-container">
+          <div class="macro-label-row">
+            <span>Macro Ratios (Caloric Weight)</span>
+            <span>P: ${Math.round((totalP*4/totalCal)*100)}% | C: ${Math.round((totalC*4/totalCal)*100)}% | F: ${Math.round((totalF*9/totalCal)*100)}%</span>
+          </div>
+          <div class="macro-progress-track">
+            <div class="macro-segment macro-p" style="width: ${(totalP*4/totalCal)*100}%">Protein</div>
+            <div class="macro-segment macro-c" style="width: ${(totalC*4/totalCal)*100}%">Carbs</div>
+            <div class="macro-segment macro-f" style="width: ${(totalF*9/totalCal)*100}%">Fat</div>
+          </div>
+          <div class="macro-legend">
+            <div class="legend-item"><div class="legend-color macro-p"></div>Protein (${totalP}g)</div>
+            <div class="legend-item"><div class="legend-color macro-c"></div>Carbs (${totalC}g)</div>
+            <div class="legend-item"><div class="legend-color macro-f"></div>Fats (${totalF}g)</div>
+          </div>
+        </div>
+      `;
+
+      // Update Calorie Progress Bar (under Numbers card)
+      const targetCal = calc.targetCalories;
+      document.getElementById("targetCalVal").innerText = targetCal;
+      document.getElementById("actualCalVal").innerText = totalCal;
+      
+      const ratio = totalCal / targetCal;
+      const pct = Math.round(ratio * 100);
+      document.getElementById("caloriePercentVal").innerText = `${pct}%`;
+
+      const bar = document.getElementById("calorieProgressBar");
+      const overflow = document.getElementById("calorieOverflowBar");
+      const track = document.getElementById("calorieProgressTrack");
+      const overflowAlert = document.getElementById("calorieOverflowAlert");
+
+      if (ratio <= 1.0) {
+        bar.style.width = `${pct}%`;
+        overflow.style.width = '0%';
+        track.classList.remove("over-target");
+        overflowAlert.style.display = 'none';
+      } else {
+        bar.style.width = '100%';
+        const overflowPct = Math.min(100, (ratio - 1.0) * 100);
+        overflow.style.width = `${overflowPct}%`;
+        
+        if (ratio > 1.10) {
+          track.classList.add("over-target");
+          overflowAlert.style.display = 'block';
         } else {
-          mealP += (pQty / 100) * pFood.p;
-          mealC += (pQty / 100) * pFood.c;
-          mealF += (pQty / 100) * pFood.f;
+          track.classList.remove("over-target");
+          overflowAlert.style.display = 'none';
         }
+      }
 
-        // C item contribution
-        if (cFood.name.includes("Roti") || cFood.name.includes("Idli") || cFood.name.includes("Dosa")) {
-          const pieceWeight = cFood.name.includes("Roti") ? 45 : (cFood.name.includes("Idli") ? 35 : 60);
-          const totalG = cQty * pieceWeight;
-          mealP += (totalG / 100) * cFood.p;
-          mealC += (totalG / 100) * cFood.c;
-          mealF += (totalG / 100) * cFood.f;
-        } else {
-          mealP += (cQty / 100) * cFood.p;
-          mealC += (cQty / 100) * cFood.c;
-          mealF += (cQty / 100) * cFood.f;
-        }
+      // Render Meal List cards
+      renderMealList();
+    }
 
-        // F item contribution
-        if (fFood) {
-          mealP += (fQty / 100) * fFood.p;
-          mealC += (fQty / 100) * fFood.c;
-          mealF += (fQty / 100) * fFood.f;
-        }
+    function renderMealList() {
+      const plan = state.generatedPlan;
+      const mealsList = document.getElementById("mealsList");
+      mealsList.innerHTML = '';
 
-        // Veg item contribution
-        if (vegFood) {
-          mealP += (vQty / 100) * vegFood.p;
-          mealC += (vQty / 100) * vegFood.c;
-          mealF += (vQty / 100) * vegFood.f;
-        }
-
-        mealCal = (mealP * 4) + (mealC * 4) + (mealF * 9);
-        accumulatedFoodProtein += mealP;
-
-        // Generate Alternatives String
-        let altText = '';
-        if (pFood.name.includes("Chicken Breast")) {
-          altText += `<li><strong>${pQty}g Chicken Breast</strong> → Alternatives: Low Fat Paneer ${Math.round(pQty * 1.7)}g, Organic Tofu ${Math.round(pQty * 3.8)}g, or Egg Whites ${Math.round(pQty / 10)} whites</li>`;
-        } else if (pFood.name.includes("Paneer")) {
-          altText += `<li><strong>${pQty}g Paneer</strong> → Alternatives: Organic Tofu ${Math.round(pQty * 2.2)}g, Cooked Lentils ${Math.round(pQty * 2)}g, or Egg Whites ${Math.round(pQty / 6)} whites</li>`;
-        } else if (pFood.name.includes("Tofu")) {
-          altText += `<li><strong>${pQty}g Tofu</strong> → Alternatives: Low Fat Paneer ${Math.round(pQty * 0.45)}g, Cooked Lentils ${Math.round(pQty * 0.9)}g, or Soy Chunks ${Math.round(pQty * 0.3)}g</li>`;
-        } else if (pFood.name.includes("Dal") || pFood.name.includes("Chickpeas") || pFood.name.includes("Rajma")) {
-          altText += `<li><strong>${pQty}g ${pFood.name.split("/")[0].trim()}</strong> → Alternatives: Tofu ${Math.round(pQty * 1.1)}g, Paneer ${Math.round(pQty * 0.5)}g, or Soy Chunks ${Math.round(pQty * 0.35)}g</li>`;
-        } else if (pFood.name.includes("Eggs")) {
-          altText += `<li><strong>${pQty} boiled egg(s)</strong> → Alternatives: Low Fat Paneer ${Math.round(pQty * 36)}g, Greek Yogurt ${Math.round(pQty * 65)}g, or Egg Whites ${Math.round(pQty * 1.2)} whites</li>`;
-        }
-
-        if (cFood.name.includes("Rice")) {
-          altText += `<li><strong>${cQty}g ${cFood.name.split("(")[0].trim()}</strong> → Alternatives: Quinoa ${Math.round(cQty * 1.1)}g, Sweet Potato ${Math.round(cQty * 1.3)}g, or Oats ${Math.round(cQty * 1.8)}g cooked</li>`;
-        } else if (cFood.name.includes("Roti")) {
-          altText += `<li><strong>${cQty} wheat Roti</strong> → Alternatives: Ragi Roti ${Math.round(cQty)} piece(s), White Rice ${Math.round(cQty * 85)}g cooked, or Oats ${Math.round(cQty * 150)}g cooked</li>`;
-        } else if (cFood.name.includes("Oats")) {
-          altText += `<li><strong>${cQty}g Oats</strong> → Alternatives: Sweet Potato ${Math.round(cQty * 0.6)}g, White Rice ${Math.round(cQty * 0.4)}g cooked, or Roti ${Math.round(cQty / 150)} piece(s)</li>`;
-        }
-
-        // Build HTML
+      plan.meals.forEach((meal, mealIdx) => {
         const mealCard = document.createElement("div");
         mealCard.className = "meal-card";
-        
-        let foodItemsHtml = `
-          <div class="food-item">
-            <span class="food-name">${pFood.name.includes("Eggs") ? `${pQty} whole boiled egg(s)` : `${pQty}g of ${pFood.name}`}</span>
-            <span class="food-qty">${pFood.name.includes("Eggs") ? `${Math.round(pQty * 50)}g` : `Portion: ${pQty}g`}</span>
-          </div>
-          <div class="food-item">
-            <span class="food-name">${cFood.name.includes("Roti") || cFood.name.includes("Idli") || cFood.name.includes("Dosa") ? `${cQty} piece(s) of ${cFood.name}` : `${cQty}g of ${cFood.name}`}</span>
-            <span class="food-qty">${cFood.name.includes("Roti") || cFood.name.includes("Idli") || cFood.name.includes("Dosa") ? `${cQty} piece(s)` : `Portion: ${cQty}g`}</span>
-          </div>
-        `;
 
-        if (fFood) {
+        let foodItemsHtml = '';
+        const prepNotesList = [];
+
+        meal.foods.forEach((item, foodIdx) => {
+          const food = item.food;
+          const qty = item.qty;
+          const actualG = item.actualG;
+
+          // Beginner prep notes compilation
+          if (food.prepNote) {
+            prepNotesList.push(`<li><strong>${food.name.split("/")[0].trim()}</strong>: ${food.prepNote}</li>`);
+          }
+
+          // Format names based on experience
+          let displayName = food.name;
+          if (state.experience === 'Beginner') {
+            // Simplify names
+            if (food.name.includes("Brown Rice")) displayName = "Brown Rice";
+            else if (food.name.includes("White Rice")) displayName = "White Rice";
+            else if (food.name.includes("Whole Wheat Roti")) displayName = "Roti / Chapati";
+            else if (food.name.includes("Chicken Breast")) displayName = "Grilled Chicken";
+            else if (food.name.includes("Rohu / Surmai Fish")) displayName = "Grilled Fish";
+            else if (food.name.includes("Lean Mutton")) displayName = "Cooked Mutton";
+          }
+
+          let inlineMacrosHtml = '';
+          if (state.experience === 'Advanced') {
+            inlineMacrosHtml = `<div class="food-inline-macros">(Per 100g: ${food.cal} kcal | P: ${food.p}g | C: ${food.c}g | F: ${food.f}g)</div>`;
+          }
+
+          // Build portions display (input vs static badge)
+          let portionDisplayHtml = '';
+          if (state.experience === 'Advanced') {
+            const isWhole = food.isWholeUnit;
+            portionDisplayHtml = `
+              <div class="food-qty-section">
+                <input type="number" 
+                       class="portion-override-input" 
+                       value="${qty}" 
+                       step="${isWhole ? 1 : 5}"
+                       onchange="handleOverrideInput(${mealIdx}, ${foodIdx}, this.value, ${isWhole}, '${food.type}')">
+                <span style="font-size: 0.8rem; font-weight:700; color:var(--text-muted);">${isWhole ? food.unit : 'g'}</span>
+              </div>
+            `;
+          } else {
+            portionDisplayHtml = `<span class="food-qty">${qty} ${food.isWholeUnit ? food.unitName : food.unit}</span>`;
+          }
+
           foodItemsHtml += `
             <div class="food-item">
-              <span class="food-name">${fQty}g / ml of ${fFood.name}</span>
-              <span class="food-qty">Portion: ${fQty}g</span>
+              <div class="food-info-block">
+                <span class="food-name">${displayName}</span>
+                ${inlineMacrosHtml}
+              </div>
+              ${portionDisplayHtml}
+            </div>
+          `;
+        });
+
+        // Beginner prep notes block
+        let prepNotesHtml = '';
+        if (state.experience === 'Beginner' && prepNotesList.length > 0) {
+          prepNotesHtml = `
+            <div class="meal-prep-notes">
+              <p>🌱 Step-by-Step Prep Notes:</p>
+              <ul style="padding-left: 0; list-style-type: none;">
+                ${prepNotesList.join("")}
+              </ul>
             </div>
           `;
         }
 
-        if (vegFood) {
-          foodItemsHtml += `
-            <div class="food-item">
-              <span class="food-name">${vQty}g of ${vegFood.name}</span>
-              <span class="food-qty">Portion: ${vQty}g</span>
-            </div>
-          `;
+        // Swaps Suggestions Section
+        let swapsHtml = '';
+        if (state.experience === 'Beginner') {
+          // Dynamic category swap filtering (respecting health/allergen exclusions)
+          swapsHtml = compileBeginnerCategorySwaps(meal.foods);
+        } else {
+          // Standard detailed swaps (up to 3 for Intermediate, 5-6 for Advanced)
+          swapsHtml = compileStandardPortionSwaps(meal.foods, state.experience === 'Advanced' ? 6 : 3);
         }
 
         mealCard.innerHTML = `
           <div class="meal-header">
             <div class="meal-title-group">
-              <h4>Meal ${i+1}: ${mealNames[mealsNum][i]}</h4>
-              <span class="meal-time">🕒 Suggested Time: ${mealTimes[mealsNum][i]}</span>
+              <h4>Meal ${mealIdx+1}: ${meal.name}</h4>
+              <span class="meal-time">🕒 Suggested Time: ${meal.time}</span>
             </div>
             <div class="meal-macros">
-              <span class="macro-badge badge-cal">${Math.round(mealCal)} kcal</span>
-              <span class="macro-badge badge-p">P: ${Math.round(mealP)}g</span>
-              <span class="macro-badge badge-c">C: ${Math.round(mealC)}g</span>
-              <span class="macro-badge badge-f">F: ${Math.round(mealF)}g</span>
+              <span class="macro-badge badge-cal">${Math.round(meal.cal)} kcal</span>
+              <span class="macro-badge badge-p">P: ${Math.round(meal.p)}g</span>
+              <span class="macro-badge badge-c">C: ${Math.round(meal.c)}g</span>
+              <span class="macro-badge badge-f">F: ${Math.round(meal.f)}g</span>
             </div>
           </div>
           <div class="meal-body">
             ${foodItemsHtml}
+            ${prepNotesHtml}
             <div class="alternatives-container">
               <details>
                 <summary class="alternatives-summary">🔄 Swap / Alternative Options</summary>
                 <div class="alternatives-content">
                   <ul style="list-style-type: none; padding-left: 0;">
-                    ${altText ? altText : '<li>No common swaps available for this combo. Combine sources of similar protein weight.</li>'}
+                    ${swapsHtml}
                   </ul>
                 </div>
               </details>
             </div>
           </div>
         `;
+
         mealsList.appendChild(mealCard);
+      });
+    }
+
+    // Category-Level Swaps for Beginner mode
+    function compileBeginnerCategorySwaps(mealFoods) {
+      const safeFoods = state.generatedPlan.safeFoods;
+      let html = '';
+
+      mealFoods.forEach((item) => {
+        const food = item.food;
+        if (food.type === 'vegetable') return; // skip veggies
+
+        let categoryName = '';
+        let examplesList = [];
+
+        // Filter example items matching the same food type
+        const matches = safeFoods.filter(f => f.type === food.type && f.name !== food.name);
+
+        if (food.type === 'protein') {
+          categoryName = "Lean Protein Source";
+          examplesList = matches.slice(0, 3).map(f => f.name.split("/")[0].trim());
+        } else if (food.type === 'carb') {
+          categoryName = "Healthy Carbohydrate";
+          examplesList = matches.slice(0, 3).map(f => f.name.split("/")[0].trim());
+        } else if (food.type === 'fat') {
+          categoryName = "Healthy Fat Source";
+          examplesList = matches.slice(0, 3).map(f => f.name.split("/")[0].trim());
+        }
+
+        if (examplesList.length > 0) {
+          const listStr = examplesList.join(", ");
+          html += `<li class="alternative-row"><strong>${food.name.split("/")[0].trim()}</strong> → Swap with: Any equivalent <strong>${categoryName}</strong> (such as ${listStr})</li>`;
+        }
+      });
+
+      return html ? html : '<li>No common categories available. Keep portions equal.</li>';
+    }
+
+    // Standard Portion Swaps for Intermediate and Advanced
+    function compileStandardPortionSwaps(mealFoods, limitCount) {
+      const safeFoods = state.generatedPlan.safeFoods;
+      let html = '';
+
+      mealFoods.forEach((item) => {
+        const food = item.food;
+        const actualG = item.actualG;
+        if (food.type === 'vegetable') return;
+
+        // Find alternatives of same type
+        const matches = safeFoods.filter(f => f.type === food.type && f.name !== food.name);
+        const selectedSwaps = matches.slice(0, limitCount);
+
+        if (selectedSwaps.length > 0) {
+          let itemSwaps = [];
+          selectedSwaps.forEach(alt => {
+            let altWeight = 100;
+            // Solve equivalent portion weight to match main macro
+            if (food.type === 'protein') {
+              altWeight = (actualG * food.p) / alt.p;
+            } else if (food.type === 'carb') {
+              altWeight = (actualG * food.c) / alt.c;
+            } else if (food.type === 'fat') {
+              altWeight = (actualG * food.f) / alt.f;
+            }
+
+            if (alt.isWholeUnit) {
+              const pieceCount = Math.round(altWeight / alt.unitWeight);
+              itemSwaps.push(`${pieceCount} ${alt.unitName}`);
+            } else {
+              itemSwaps.push(`${Math.round(altWeight / 5) * 5}g ${alt.name.split("/")[0].trim()}`);
+            }
+          });
+
+          html += `<li class="alternative-row"><strong>${food.name.split("/")[0].trim()}</strong> → Swap options: ${itemSwaps.join(" OR ")}</li>`;
+        }
+      });
+
+      return html ? html : '<li>No common portion swaps found.</li>';
+    }
+
+    // Advanced manual input handler with limits clamping
+    function handleOverrideInput(mealIdx, foodIdx, val, isWhole, foodType) {
+      let numericVal = parseFloat(val);
+      if (isNaN(numericVal) || numericVal < 0) numericVal = 0;
+
+      // Clamping limits per category
+      if (isWhole) {
+        numericVal = Math.min(10, Math.round(numericVal)); // max 10 pieces
+      } else {
+        if (foodType === 'protein') {
+          numericVal = Math.min(400, numericVal);
+        } else if (foodType === 'carb') {
+          numericVal = Math.min(300, numericVal);
+        } else if (foodType === 'fat') {
+          numericVal = Math.min(50, numericVal);
+        } else {
+          numericVal = Math.min(300, numericVal); // veggies max 300g
+        }
+      }
+
+      // Update state and recalculate
+      state.generatedPlan.meals[mealIdx].foods[foodIdx].qty = numericVal;
+      recalculatePlanTotals();
+    }
+
+    function renderAlerts(calc) {
+      // Render health conditions alert warnings (if any)
+      const healthAlertCard = document.getElementById("healthResultAlert");
+      const healthList = document.getElementById("healthAlertList");
+      healthList.innerHTML = '';
+      
+      if (state.healthConditions.length > 0) {
+        healthAlertCard.style.display = 'block';
+        state.healthConditions.forEach(cond => {
+          let li = document.createElement("li");
+          if (cond === 'Diabetes') {
+            li.innerHTML = `<strong>Diabetes / Pre-diabetes</strong>: Pair carbohydrates with protein/fiber to slow glucose response. Avoid white sugar, sweetened beverages.`;
+          } else if (cond === 'Hypertension') {
+            li.innerHTML = `<strong>High Blood Pressure</strong>: Limit pickles, papad, processed/packaged snacks. Use minimal added salt.`;
+          } else if (cond === 'Thyroid') {
+            li.innerHTML = `<strong>Thyroid Issues</strong>: Note on iodine sources, soy timing. Limit soy chunks and tofu.`;
+          } else if (cond === 'PCOS') {
+            li.innerHTML = `<strong>PCOS / PCOD</strong>: Emphasize fiber, limit refined carbs. Focus on whole grains.`;
+          } else if (cond === 'Cholesterol') {
+            li.innerHTML = `<strong>High Cholesterol</strong>: Limit saturated fats, recommend fiber-rich foods. Limit butter, ghee, red meat, and deep-fried items.`;
+          } else if (cond === 'Lactose') {
+            li.innerHTML = `<strong>Lactose Intolerance</strong>: Exclude all dairy (curd, paneer, yogurt).`;
+          } else if (cond === 'Gluten') {
+            li.innerHTML = `<strong>Gluten Sensitivity</strong>: Exclude wheat-based items, suggest alternatives like rice, millets, quinoa.`;
+          } else if (cond === 'Kidney') {
+            li.innerHTML = `<strong>Kidney Concerns</strong>: <span style="color:var(--error-color); font-weight:700;">Moderate protein (capped at 1.2g/kg). Consult your doctor or a registered dietitian before starting.</span>`;
+          }
+          healthList.appendChild(li);
+        });
+      } else {
+        healthAlertCard.style.display = 'none';
       }
 
       // Render supplements advice if protein targets are high and hard to hit with food alone
       const supplementCard = document.getElementById("supplementAlertCard");
-      if (calc.isProteinHighMultiplier && accumulatedFoodProtein < (calc.proteinG * 0.8)) {
+      let accFoodP = 0;
+      state.generatedPlan.meals.forEach(m => {
+        m.foods.forEach(f => {
+          accFoodP += (f.actualG / 100) * f.food.p;
+        });
+      });
+
+      if (calc.isProteinHighMultiplier && accFoodP < (calc.proteinG * 0.8)) {
         supplementCard.style.display = 'block';
         document.getElementById("supplementText").innerHTML = `
           Based on your goal (${state.goal}), your protein target is high (${calc.proteinG}g). 
-          Your food-only plan achieves around ${Math.round(accumulatedFoodProtein)}g. 
+          Your food-only plan achieves around ${Math.round(accFoodP)}g. 
           We recommend adding <strong>1 scoop of Whey or Plant Protein Isolate (25g Protein, ~120 kcal)</strong> post-workout or with breakfast to easily hit your requirements.
         `;
       } else {
@@ -2279,25 +2718,21 @@
 
     // Export plan to local image
     function downloadAsImage() {
-      // Scroll to top of results to ensure complete capture
       const resultsContainer = document.getElementById("results");
       
-      // Temporarily hide buttons and feedback cards for clean export
       const actionRow = document.querySelector(".action-buttons");
       const feedback = document.querySelector(".feedback-card");
       actionRow.style.opacity = "0";
       feedback.style.opacity = "0";
       
       html2canvas(resultsContainer, {
-        scale: 2, // improve resolution
+        scale: 2,
         useCORS: true,
         backgroundColor: "#F4F7F6"
       }).then(canvas => {
-        // Restore buttons and feedback cards visibility
         actionRow.style.opacity = "1";
         feedback.style.opacity = "1";
         
-        // Trigger download link
         const link = document.createElement("a");
         link.download = `Personalized_Diet_Plan_${state.goal.replace(" ", "_")}.png`;
         link.href = canvas.toDataURL("image/png");
@@ -2316,11 +2751,8 @@
         alert("Please enter your feedback before submitting.");
         return;
       }
-      
-      // Clear input
       document.getElementById("feedbackText").value = "";
       
-      // Show toast
       const toast = document.getElementById("toastAlert");
       toast.classList.add("show");
       setTimeout(() => {
@@ -2331,15 +2763,11 @@
     function restartWizard() {
       state.currentStep = 1;
       
-      // Reset visibility elements
       document.getElementById("results").style.display = "none";
       document.getElementById("wizard").style.display = "block";
-      
-      // Restore header navigation steps
       document.getElementById("progressBar").parentElement.style.display = "block";
       document.getElementById("stepIndicator").style.display = "block";
       
-      // Go back to step 1
       for (let i = 1; i <= 7; i++) {
         document.getElementById(`step${i}`).classList.toggle("active", i === 1);
       }
@@ -2349,7 +2777,6 @@
     }
 
     function goToApexPro() {
-      // Open ApexPro Workout URL placeholder
       window.open("https://apexpro-workoutsplit-placeholder-url.com", "_blank");
     }
   </script>
