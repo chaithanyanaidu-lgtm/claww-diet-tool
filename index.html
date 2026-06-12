@@ -1,0 +1,2357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Personalized Diet Plan Generator</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- html2canvas for Image Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  
+  <style>
+    :root {
+      --primary: #1B5E20;
+      --primary-dark: #0F3813;
+      --primary-light: #C8E6C9;
+      --accent: #2E7D32;
+      --bg-gradient: linear-gradient(135deg, #F4F7F6 0%, #E8F5E9 100%);
+      --card-bg: #ffffff;
+      --text-main: #2C3E50;
+      --text-muted: #546E7A;
+      --border-color: #E0E0E0;
+      --error-color: #D32F2F;
+      --warning-bg: #FFF3E0;
+      --warning-border: #FFE0B2;
+      --warning-text: #E65100;
+      --success-bg: #E8F5E9;
+      --success-text: #2E7D32;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      --shadow-hover: 0 15px 35px rgba(27, 94, 32, 0.1);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.6;
+      padding-bottom: 60px;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    /* App Header */
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 24px 20px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header h1 {
+      color: white;
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      font-size: 0.95rem;
+      color: var(--primary-light);
+      font-weight: 500;
+    }
+
+    /* Progress bar wrapper */
+    .progress-container {
+      width: 100%;
+      max-width: 600px;
+      background: rgba(255, 255, 255, 0.2);
+      height: 8px;
+      border-radius: 4px;
+      margin: 16px auto 0 auto;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: #81C784;
+      width: 14.28%; /* 1/7 */
+      transition: var(--transition);
+      border-radius: 4px;
+    }
+
+    .step-indicator {
+      font-size: 0.85rem;
+      color: white;
+      margin-top: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Main Container */
+    main {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    /* Wizard Step Cards */
+    .wizard-step {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 40px;
+      box-shadow: var(--shadow);
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .wizard-step.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-title {
+      font-size: 1.6rem;
+      margin-bottom: 24px;
+      border-bottom: 3px solid var(--primary-light);
+      padding-bottom: 8px;
+      display: inline-block;
+    }
+
+    /* Form Fields Styling */
+    .form-group {
+      margin-bottom: 28px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+    }
+
+    .form-group label .optional {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .helper-text {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Gender Toggle */
+    .gender-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .gender-btn {
+      background: white;
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+
+    .gender-btn.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary-dark);
+    }
+
+    .gender-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    /* Input Fields */
+    input[type="number"], select, textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      color: var(--text-main);
+      outline: none;
+      transition: var(--transition);
+    }
+
+    input[type="number"]:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.15);
+    }
+
+    /* Range Sliders */
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .slider-container input[type="range"] {
+      flex-grow: 1;
+      height: 6px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--border-color);
+      border-radius: 3px;
+      outline: none;
+    }
+
+    .slider-container input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .slider-container input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .slider-value {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+      min-width: 45px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    /* Goal Choice Cards (Step 2) */
+    .goals-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .goals-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .goal-card {
+      background: white;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 24px;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .goal-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+      border-color: var(--primary-light);
+    }
+
+    .goal-card.active {
+      border-color: var(--primary);
+      background: #F1F8E9;
+    }
+
+    .goal-icon {
+      font-size: 2.2rem;
+      margin-bottom: 4px;
+    }
+
+    .goal-card h3 {
+      font-size: 1.2rem;
+    }
+
+    .goal-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Multi-select Pills (Checkboxes) */
+    .pills-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .pill-checkbox {
+      position: relative;
+    }
+
+    .pill-checkbox input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+      height: 0;
+      width: 0;
+    }
+
+    .pill-label {
+      display: inline-block;
+      padding: 10px 20px;
+      background: white;
+      border: 2px solid var(--border-color);
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .pill-checkbox input:checked + .pill-label {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .pill-checkbox input:focus + .pill-label {
+      box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.2);
+    }
+
+    /* Checkbox List Cards (Step 4 Health) */
+    .checkbox-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 600px) {
+      .checkbox-list {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      background: #F9F9F9;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .checkbox-item:hover {
+      background: #F1F8E9;
+    }
+
+    .checkbox-item input {
+      width: 18px;
+      height: 18px;
+      margin-right: 12px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .checkbox-item span {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    /* Warnings Banner */
+    .critical-banner {
+      background: var(--warning-bg);
+      border-left: 5px solid var(--warning-text);
+      color: var(--warning-text);
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      margin-top: 20px;
+      display: none;
+    }
+
+    /* Navigation Buttons */
+    .wizard-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 32px;
+      gap: 16px;
+    }
+
+    .btn {
+      padding: 12px 28px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+      outline: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: #E0E0E0;
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background: #D5D5D5;
+    }
+
+    .btn-submit {
+      background: #E65100;
+      color: white;
+    }
+
+    .btn-submit:hover {
+      background: #F57C00;
+      transform: translateY(-2px);
+    }
+
+    /* Inline Validation Error */
+    .error-message {
+      color: var(--error-color);
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 6px;
+      display: none;
+    }
+
+    .input-error {
+      border-color: var(--error-color) !important;
+    }
+
+    /* Review Table (Step 7) */
+    .review-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      background: #F9F9F9;
+      padding: 24px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 24px;
+    }
+
+    @media (min-width: 600px) {
+      .review-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .review-item {
+      border-bottom: 1px solid #ECEFF1;
+      padding-bottom: 8px;
+    }
+
+    .review-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .review-value {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    /* RESULTS PAGE CSS */
+    .results-container {
+      display: none;
+      animation: fadeIn 0.6s ease;
+    }
+
+    .results-header-card {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      border-radius: var(--radius);
+      padding: 32px;
+      margin-bottom: 30px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .results-header-card h2 {
+      color: white;
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .results-header-card p {
+      color: var(--primary-light);
+      font-size: 1.05rem;
+    }
+
+    /* Numbers Card */
+    .numbers-card {
+      background: white;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+    }
+
+    .card-header-green {
+      background: var(--primary);
+      color: white;
+      padding: 18px 24px;
+    }
+
+    .card-header-green h3 {
+      color: white;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .numbers-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      padding: 24px;
+      gap: 20px;
+    }
+
+    @media (min-width: 600px) {
+      .numbers-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .number-block {
+      background: #F9F9F9;
+      border-radius: 10px;
+      padding: 16px 20px;
+      border: 1px solid var(--border-color);
+    }
+
+    .number-title {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .number-val {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin: 4px 0;
+    }
+
+    .number-formula {
+      font-family: monospace;
+      font-size: 0.78rem;
+      color: #78909C;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* Macro Ring / Summary in numbers card */
+    .macro-bar-container {
+      grid-column: 1 / -1;
+      background: #ECEFF1;
+      padding: 20px;
+      border-radius: 12px;
+    }
+
+    .macro-label-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .macro-progress-track {
+      height: 16px;
+      background: #CFD8DC;
+      border-radius: 8px;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .macro-segment {
+      height: 100%;
+      text-align: center;
+      color: white;
+      font-size: 0.72rem;
+      font-weight: bold;
+      line-height: 16px;
+    }
+
+    .macro-p { background: #E53935; }
+    .macro-c { background: #1E88E5; }
+    .macro-f { background: #FDD835; color: #37474F; }
+
+    .macro-legend {
+      display: flex;
+      gap: 16px;
+      margin-top: 10px;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    /* Meal Plan Blocks */
+    .meals-title {
+      font-size: 1.6rem;
+      margin: 40px 0 20px 0;
+      text-align: center;
+    }
+
+    .meals-list {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+
+    .meal-card {
+      background: white;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .meal-header {
+      background: #F5F7F6;
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .meal-title-group h4 {
+      font-size: 1.15rem;
+      color: var(--primary-dark);
+    }
+
+    .meal-time {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .meal-macros {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .macro-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 12px;
+    }
+
+    .badge-cal { background: #ECEFF1; color: #37474F; }
+    .badge-p { background: #FFEBEE; color: #C62828; }
+    .badge-c { background: #E3F2FD; color: #1565C0; }
+    .badge-f { background: #FFFDE7; color: #F57F17; }
+
+    .meal-body {
+      padding: 24px;
+    }
+
+    .food-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px dashed #ECEFF1;
+    }
+
+    .food-item:last-child {
+      border-bottom: none;
+    }
+
+    .food-name {
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .food-qty {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.82rem;
+    }
+
+    /* Collapsible Alternatives */
+    .alternatives-container {
+      margin-top: 16px;
+      background: #F5F5F5;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .alternatives-summary {
+      padding: 10px 16px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .alternatives-summary:hover {
+      background: #ECEFF1;
+    }
+
+    .alternatives-content {
+      padding: 12px 16px;
+      border-top: 1px solid #E0E0E0;
+      font-size: 0.8rem;
+    }
+
+    .alternative-row {
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    .alternative-row:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Supplement & Condition Alerts */
+    .alert-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+    }
+
+    .alert-card h3 {
+      font-size: 1.15rem;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .supplement-alert {
+      border-left: 5px solid var(--accent);
+      background: #F1F8E9;
+    }
+
+    .supplement-alert h3 {
+      color: var(--accent);
+    }
+
+    .health-alert {
+      border-left: 5px solid #E65100;
+      background: #FFF3E0;
+    }
+
+    .health-alert h3 {
+      color: #E65100;
+    }
+
+    .health-alert li {
+      margin-left: 20px;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+    }
+
+    /* Limit Foods Card */
+    .limit-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+      border-left: 5px solid #D32F2F;
+    }
+
+    .limit-card h3 {
+      color: #D32F2F;
+      font-size: 1.15rem;
+      margin-bottom: 12px;
+    }
+
+    .limit-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    @media (min-width: 600px) {
+      .limit-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .limit-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      font-weight: 500;
+    }
+
+    .limit-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #D32F2F;
+      flex-shrink: 0;
+    }
+
+    /* Feedback Card */
+    .feedback-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+    }
+
+    .feedback-card textarea {
+      height: 90px;
+      margin: 12px 0;
+      resize: none;
+    }
+
+    /* Brand split box */
+    .brand-cta {
+      background: #E8F5E9;
+      border: 2px solid var(--primary-light);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .brand-cta h3 {
+      color: var(--primary-dark);
+      font-size: 1.2rem;
+      margin-bottom: 6px;
+    }
+
+    .brand-cta p {
+      font-size: 0.85rem;
+      color: var(--text-main);
+      margin-bottom: 16px;
+    }
+
+    /* Export buttons row */
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .btn-download {
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-download:hover {
+      background: var(--primary-dark);
+    }
+
+    /* SVG icon utility styling */
+    .btn svg {
+      fill: currentColor;
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #333;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      z-index: 1000;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- App Header -->
+  <header>
+    <h1>AI Diet Plan Generator</h1>
+    <p>Get a completely personalized meal plan, backed by science</p>
+    
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="step-indicator" id="stepIndicator">Step 1 of 7</div>
+  </header>
+
+  <!-- Main Wizard Window -->
+  <main>
+    <div id="wizard">
+      
+      <!-- STEP 1: Basic Info -->
+      <div class="wizard-step active" id="step1">
+        <h2 class="step-title">Basic Information</h2>
+        
+        <div class="form-group">
+          <label>Gender</label>
+          <div class="gender-toggle">
+            <button type="button" class="gender-btn active" id="genderMale" onclick="selectGender('Male')">
+              <svg viewBox="0 0 24 24"><path d="M9 9c1.93 0 3.5 1.57 3.5 3.5S10.93 16 9 16s-3.5-1.57-3.5-3.5S7.07 9 9 9m0-2c-3.03 0-5.5 2.47-5.5 5.5S5.97 18 9 18s5.5-2.47 5.5-5.5S12.03 7 9 7m11.5 1h-4.24l2.05 2.05c-1.42 1.4-2.88 2.76-4.29 4.19.46.46.9.9 1.34 1.34 1.41-1.42 2.78-2.87 4.2-4.29L21.86 11.3V7.05l-.36.95M20 9c0 1-.8 1.8-1.8 1.8s-1.8-.8-1.8-1.8.8-1.8 1.8-1.8 1.8.8 1.8 1.8z"/></svg>
+              Male
+            </button>
+            <button type="button" class="gender-btn" id="genderFemale" onclick="selectGender('Female')">
+              <svg viewBox="0 0 24 24"><path d="M12 2c3.03 0 5.5 2.47 5.5 5.5S15.03 13 12 13s-5.5-2.47-5.5-5.5S8.97 2 12 2m0 2c-1.93 0-3.5 1.57-3.5 3.5S10.07 11 12 11s3.5-1.57 3.5-3.5S13.93 4 12 4m1 11h-2v3H8v2h3v2h2v-2h3v-2h-3v-3z"/></svg>
+              Female
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="age">Age <span class="optional">(years)</span></label>
+          <input type="number" id="age" min="15" max="80" placeholder="e.g. 28">
+          <div class="error-message" id="ageError">Age must be between 15 and 80.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="height">Height <span class="optional">(cm)</span></label>
+          <input type="number" id="height" min="100" max="250" placeholder="e.g. 175">
+          <div class="error-message" id="heightError">Height must be between 100 and 250 cm.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="weight">Current Weight <span class="optional">(kg)</span></label>
+          <input type="number" id="weight" min="30" max="200" placeholder="e.g. 75">
+          <div class="error-message" id="weightError">Weight must be between 30 and 200 kg.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="bodyfat">Body Fat % <span class="optional">(optional)</span></label>
+          <input type="number" id="bodyfat" min="3" max="60" placeholder="e.g. 18">
+          <div class="helper-text">Used the Body Fat Calculator? Enter your result here for more accuracy.</div>
+          <div class="error-message" id="bodyfatError">Body fat must be between 3 and 60.</div>
+        </div>
+      </div>
+
+      <!-- STEP 2: Goal -->
+      <div class="wizard-step" id="step2">
+        <h2 class="step-title">Select Your Goal</h2>
+        
+        <div class="goals-grid">
+          <div class="goal-card" id="goalFatLoss" onclick="selectGoal('Fat loss')">
+            <div class="goal-icon">🔥</div>
+            <h3>Fat Loss</h3>
+            <p>Burn body fat, preserve muscle tissue, and improve lean definition.</p>
+          </div>
+          <div class="goal-card" id="goalLeanBulk" onclick="selectGoal('Lean bulk')">
+            <div class="goal-icon">💪</div>
+            <h3>Lean Bulk</h3>
+            <p>Build muscle mass progressively with minimal body fat addition.</p>
+          </div>
+          <div class="goal-card" id="goalMaintenance" onclick="selectGoal('Maintenance')">
+            <div class="goal-icon">⚖️</div>
+            <h3>Maintenance</h3>
+            <p>Maintain your current body weight, improve energy, and optimize health.</p>
+          </div>
+          <div class="goal-card" id="goalRecomp" onclick="selectGoal('Recomposition')">
+            <div class="goal-icon">🔄</div>
+            <h3>Recomposition</h3>
+            <p>Simultaneously reduce fat and gain muscle mass. Hard but rewarding.</p>
+          </div>
+        </div>
+        <div class="error-message" id="goalError" style="margin-top:16px;">Please select a goal.</div>
+      </div>
+
+      <!-- STEP 3: Activity & Training -->
+      <div class="wizard-step" id="step3">
+        <h2 class="step-title">Activity & Training</h2>
+        
+        <div class="form-group">
+          <label for="activityLevel">Daily Activity Level</label>
+          <select id="activityLevel">
+            <option value="" disabled selected>Select activity level...</option>
+            <option value="Sedentary">Sedentary (Little to no active exercise + desk job)</option>
+            <option value="Lightly active">Lightly active (Light exercise or sports 1-3 days/week)</option>
+            <option value="Moderately active">Moderately active (Moderate exercise or sports 3-5 days/week)</option>
+            <option value="Very active">Very active (Hard exercise or sports 6-7 days/week)</option>
+            <option value="Athlete">Athlete (Heavy training, physical work, two workouts daily)</option>
+          </select>
+          <div class="error-message" id="activityError">Please select your daily activity level.</div>
+        </div>
+
+        <div class="form-group">
+          <label>Training Days per Week</label>
+          <div class="slider-container">
+            <input type="range" id="trainingDays" min="0" max="7" value="3" oninput="updateSliderVal('trainingDays', 'trainingDaysVal')">
+            <span class="slider-value" id="trainingDaysVal">3</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Primary Training Type(s)</label>
+          <div class="pills-grid">
+            <div class="pill-checkbox">
+              <input type="checkbox" id="trainWeight" value="Weightlifting">
+              <label for="trainWeight" class="pill-label">Weightlifting</label>
+            </div>
+            <div class="pill-checkbox">
+              <input type="checkbox" id="trainCardio" value="Cardio">
+              <label for="trainCardio" class="pill-label">Cardio</label>
+            </div>
+            <div class="pill-checkbox">
+              <input type="checkbox" id="trainSports" value="Sports">
+              <label for="trainSports" class="pill-label">Sports</label>
+            </div>
+            <div class="pill-checkbox">
+              <input type="checkbox" id="trainYoga" value="Yoga">
+              <label for="trainYoga" class="pill-label">Yoga</label>
+            </div>
+            <div class="pill-checkbox">
+              <input type="checkbox" id="trainMixed" value="Mixed">
+              <label for="trainMixed" class="pill-label">Mixed</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: Health Conditions -->
+      <div class="wizard-step" id="step4">
+        <h2 class="step-title">Health Conditions</h2>
+        <p style="margin-bottom: 20px; font-size: 0.9rem; color: var(--text-muted);">Select any existing conditions (we will adjust food suggestions and macro splits accordingly):</p>
+        
+        <div class="checkbox-list">
+          <label class="checkbox-item">
+            <input type="checkbox" class="health-cond" value="Diabetes" onchange="toggleHealthCondition(this)">
+            <span>Diabetes / Pre-diabetes</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" class="health-cond" value="Hypertension" onchange="toggleHealthCondition(this)">
+            <span>High Blood Pressure</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" class="health-cond" value="Thyroid" onchange="toggleHealthCondition(this)">
+            <span>Thyroid issues (hypo/hyper)</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" class="health-cond" value="PCOS" onchange="toggleHealthCondition(this)">
+            <span>PCOS / PCOD</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" class="health-cond" value="Cholesterol" onchange="toggleHealthCondition(this)">
+            <span>High Cholesterol</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" class="health-cond" value="Lactose" onchange="toggleHealthCondition(this)">
+            <span>Lactose Intolerance</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" class="health-cond" value="Gluten" onchange="toggleHealthCondition(this)">
+            <span>Gluten Sensitivity</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" class="health-cond" value="Kidney" onchange="toggleHealthCondition(this)">
+            <span>Kidney concerns</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" id="healthNone" value="None" checked onchange="toggleHealthNone(this)">
+            <span>None of the above</span>
+          </label>
+        </div>
+
+        <div class="critical-banner" id="healthDisclaimer">
+          This plan is for general guidance only. Please consult your doctor or a registered dietitian before making major dietary changes, especially with existing health conditions.
+        </div>
+      </div>
+
+      <!-- STEP 5: Dietary Preferences -->
+      <div class="wizard-step" id="step5">
+        <h2 class="step-title">Dietary Preferences</h2>
+        
+        <div class="form-group">
+          <label for="dietType">Diet Type</label>
+          <select id="dietType">
+            <option value="Vegetarian" selected>Vegetarian (Dairy allowed, no meat/eggs)</option>
+            <option value="Non-vegetarian">Non-vegetarian (Meats, fish, eggs, dairy allowed)</option>
+            <option value="Eggetarian">Eggetarian (Dairy, eggs allowed, no meat/fish)</option>
+            <option value="Vegan">Vegan (Strictly plant-based only)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Exclude Specific Foods</label>
+          <div class="pills-grid">
+            <div class="pill-checkbox">
+              <input type="checkbox" class="exclude-food" id="exDairy" value="dairy">
+              <label for="exDairy" class="pill-label">Dairy</label>
+            </div>
+            <div class="pill-checkbox">
+              <input type="checkbox" class="exclude-food" id="exSeafood" value="seafood">
+              <label for="exSeafood" class="pill-label">Seafood</label>
+            </div>
+            <div class="pill-checkbox">
+              <input type="checkbox" class="exclude-food" id="exPaneer" value="paneer">
+              <label for="exPaneer" class="pill-label">Paneer</label>
+            </div>
+            <div class="pill-checkbox">
+              <input type="checkbox" class="exclude-food" id="exSoy" value="soy">
+              <label for="exSoy" class="pill-label">Soy Products</label>
+            </div>
+            <div class="pill-checkbox">
+              <input type="checkbox" class="exclude-food" id="exNuts" value="nuts">
+              <label for="exNuts" class="pill-label">Nuts</label>
+            </div>
+            <div class="pill-checkbox">
+              <input type="checkbox" class="exclude-food" id="exGluten" value="gluten">
+              <label for="exGluten" class="pill-label">Gluten</label>
+            </div>
+            <div class="pill-checkbox">
+              <input type="checkbox" class="exclude-food" id="exRedmeat" value="redmeat">
+              <label for="exRedmeat" class="pill-label">Red Meat</label>
+            </div>
+            <div class="pill-checkbox">
+              <input type="checkbox" class="exclude-food" id="exMushroom" value="mushroom">
+              <label for="exMushroom" class="pill-label">Mushroom</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="excludeOther">Other Exclusions <span class="optional">(specify)</span></label>
+          <input type="text" id="excludeOther" placeholder="e.g. Brinjal, Garlic (comma separated)">
+        </div>
+
+        <div class="form-group">
+          <label for="cuisine">Cuisine Preference</label>
+          <select id="cuisine">
+            <option value="Mixed" selected>Mixed (North & South Indian)</option>
+            <option value="North Indian">North Indian</option>
+            <option value="South Indian">South Indian</option>
+            <option value="No preference">No preference</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- STEP 6: Food Habits & Budget -->
+      <div class="wizard-step" id="step6">
+        <h2 class="step-title">Food Habits & Budget</h2>
+        
+        <div class="form-group">
+          <label for="likedFoods">List 3-5 foods you eat regularly and enjoy</label>
+          <textarea id="likedFoods" placeholder="e.g. Oatmeal, Eggs, Dal Rice, Peanut Butter"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="dislikedFoods">List any foods you dislike or want to avoid</label>
+          <textarea id="dislikedFoods" placeholder="e.g. Bittergourd, Broccoli, Papaya"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="budget">Meal Budget Category</label>
+          <select id="budget">
+            <option value="Budget">Budget (Under ₹150/day on food - Dal, Rice, Eggs, Seasonal Veg)</option>
+            <option value="Moderate" selected>Moderate (₹150-300/day - Adds Chicken, Paneer alternatives, Fruits)</option>
+            <option value="Flexible">Flexible (₹300+/day - Adds Salmon/Fish, Quinoa, Supplements, Avocados)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Number of Meals per Day</label>
+          <div class="slider-container">
+            <input type="range" id="mealsCount" min="3" max="6" value="4" oninput="updateSliderVal('mealsCount', 'mealsCountVal')">
+            <span class="slider-value" id="mealsCountVal">4</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="prepTime">Meal Prep Time Available</label>
+          <select id="prepTime">
+            <option value="Moderate" selected>Moderate (30 mins cooking/meal)</option>
+            <option value="Minimal">Minimal (Grab and go, fast assembly)</option>
+            <option value="Flexible">Flexible (Can cook properly, no rush)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- STEP 7: Review & Generate -->
+      <div class="wizard-step" id="step7">
+        <h2 class="step-title">Review & Generate</h2>
+        <p style="margin-bottom: 20px; font-size: 0.95rem;">Please review your profile values. If anything needs editing, click Back.</p>
+        
+        <div class="review-grid" id="reviewContainer">
+          <!-- Populated dynamically by JS -->
+        </div>
+
+        <button type="button" class="btn btn-primary btn-submit" style="width: 100%; font-size: 1.15rem; padding: 16px 0;" onclick="generatePlan()">
+          Generate My Personalized Plan
+        </button>
+      </div>
+
+      <!-- Nav buttons -->
+      <div class="wizard-buttons">
+        <button type="button" class="btn btn-secondary" id="btnBack" onclick="prevStep()">Back</button>
+        <button type="button" class="btn btn-primary" id="btnNext" onclick="nextStep()">Next</button>
+      </div>
+
+    </div>
+
+    <!-- Generated Plan Output Section -->
+    <div id="results" class="results-container">
+      
+      <div class="results-header-card">
+        <h2>Your Personalized Plan</h2>
+        <p>Calculated dynamically according to your physiological data and fitness target</p>
+      </div>
+
+      <!-- Calculations Card -->
+      <div class="numbers-card" id="calculationCard">
+        <div class="card-header-green">
+          <h3>📊 Your Numbers & Formulas</h3>
+        </div>
+        <div class="numbers-grid" id="numbersGrid">
+          <!-- Populated dynamically by JS -->
+        </div>
+      </div>
+
+      <!-- Plan disclaimer if conditions selected -->
+      <div class="alert-card health-alert" id="healthResultAlert" style="display:none;">
+        <h3>⚠️ Critical Medical Advisory</h3>
+        <p style="margin-bottom: 10px; font-weight: 500;" id="healthDisclaimerText">This plan is adjusted for your health conditions. Seek advice from a general practitioner before making major adjustments.</p>
+        <ul id="healthAlertList">
+          <!-- Conditional list tags -->
+        </ul>
+      </div>
+
+      <!-- Supplement Alert card if protein is high -->
+      <div class="alert-card supplement-alert" id="supplementAlertCard" style="display:none;">
+        <h3>🥤 Suggested Supplementation</h3>
+        <p id="supplementText">To hit your protein goals efficiently, we recommend incorporating a clean whey or plant-based protein isolate daily.</p>
+      </div>
+
+      <!-- Meal Plan Section -->
+      <h3 class="meals-title">🍽️ Recommended Daily Meals</h3>
+      <div class="meals-list" id="mealsList">
+        <!-- Populated dynamically by JS -->
+      </div>
+
+      <!-- Limit Section -->
+      <div class="limit-card">
+        <h3>🚫 Foods to Strictly Limit</h3>
+        <div class="limit-grid">
+          <div class="limit-item"><div class="limit-dot"></div>Processed & packaged foods (chips, instant noodles)</div>
+          <div class="limit-item"><div class="limit-dot"></div>Carbonated sugary sodas & rich desserts</div>
+          <div class="limit-item"><div class="limit-dot"></div>Deep fried snacks (samosas, pakoras)</div>
+          <div class="limit-item"><div class="limit-dot"></div>Excessive caffeine intakes (>400mg equivalent to 4 cups)</div>
+          <div class="limit-item"><div class="limit-dot"></div>Alcohol (high calorie, decreases muscle recovery)</div>
+        </div>
+      </div>
+
+      <!-- Branding Box -->
+      <div class="brand-cta">
+        <h3>💪 Want a workout plan that matches this diet?</h3>
+        <p>ApexPro builds your training split based on your goal and recovery capacity.</p>
+        <button class="btn btn-primary" onclick="goToApexPro()">Get My Free Workout Plan →</button>
+      </div>
+
+      <!-- Action Button Row -->
+      <div class="action-buttons">
+        <button class="btn btn-primary btn-download" onclick="downloadAsImage()">
+          <svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zm0-10h4V4h6v6h4l-7 7-7-7z"/></svg>
+          Download Plan (Image)
+        </button>
+        <button class="btn btn-secondary" onclick="restartWizard()">
+          Modify Data
+        </button>
+      </div>
+
+      <!-- Feedback Section -->
+      <div class="feedback-card">
+        <h3>📝 Don't like something in this plan?</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Tell us what you'd swap it for and we'll factor it into future versions.</p>
+        <textarea id="feedbackText" placeholder="e.g. Replace tofu with Paneer, I dislike broccoli..."></textarea>
+        <button class="btn btn-primary" style="font-size:0.9rem; padding: 10px 20px;" onclick="submitFeedback()">Submit Feedback</button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Toast alert box -->
+  <div class="toast" id="toastAlert">Feedback submitted! Thank you.</div>
+
+  <!-- JavaScript Code Section -->
+  <script>
+    // State object to hold questionnaire data
+    const state = {
+      currentStep: 1,
+      gender: 'Male',
+      age: null,
+      height: null,
+      weight: null,
+      bodyfat: null,
+      goal: '',
+      activityLevel: '',
+      trainingDays: 3,
+      trainingTypes: [],
+      healthConditions: [],
+      dietType: 'Vegetarian',
+      exclusions: [],
+      excludeOther: '',
+      cuisine: 'Mixed',
+      likedFoods: '',
+      dislikedFoods: '',
+      budget: 'Moderate',
+      mealsCount: 4,
+      prepTime: 'Moderate'
+    };
+
+    // Food Database Definitions
+    const FOOD_DATABASE = [
+      // PROTEINS
+      { name: "Dal / Lentils (Cooked)", type: "protein", category: "vegan", cal: 116, p: 9, c: 20, f: 0.4, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["high-fiber", "gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi"] },
+      { name: "Chickpeas (Boiled)", type: "protein", category: "vegan", cal: 164, p: 9, c: 27, f: 2.6, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["high-fiber", "gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi"] },
+      { name: "Rajma / Kidney Beans (Boiled)", type: "protein", category: "vegan", cal: 127, p: 8.7, c: 22.8, f: 0.5, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["high-fiber", "gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi"] },
+      { name: "Soy Chunks (Boiled)", type: "protein", category: "vegan", cal: 150, p: 25, c: 10, f: 0.5, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["soy", "gluten-free", "lactose-free", "nuts-free", "low-gi"] },
+      { name: "Organic Tofu", type: "protein", category: "vegan", cal: 76, p: 8, c: 1.9, f: 4.8, unit: "g", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["soy", "gluten-free", "lactose-free", "nuts-free", "low-gi"] },
+      { name: "Low Fat Paneer", type: "protein", category: "veg", cal: 180, p: 18, c: 2, f: 12, unit: "g", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["dairy", "paneer", "gluten-free", "soy-free", "nuts-free"] },
+      { name: "Unsweetened Greek Yogurt", type: "protein", category: "veg", cal: 97, p: 10, c: 3.6, f: 5, unit: "g", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["dairy", "gluten-free", "soy-free", "nuts-free"] },
+      { name: "Whole Eggs (Boiled)", type: "protein", category: "egg", cal: 155, p: 13, c: 1.1, f: 11, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["egg", "gluten-free", "lactose-free", "soy-free", "nuts-free"] },
+      { name: "Egg Whites", type: "protein", category: "egg", cal: 52, p: 11, c: 0.7, f: 0.2, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["egg", "gluten-free", "lactose-free", "soy-free", "nuts-free"] },
+      { name: "Chicken Breast (Grilled)", type: "protein", category: "non-veg", cal: 165, p: 31, c: 0, f: 3.6, unit: "g", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["chicken", "gluten-free", "lactose-free", "soy-free", "nuts-free", "low-sodium"] },
+      { name: "Rohu / Surmai Fish (Grilled)", type: "protein", category: "non-veg", cal: 140, p: 20, c: 0, f: 6, unit: "g", unitWeight: 1, budget: ["Flexible"], tags: ["seafood", "fish", "gluten-free", "lactose-free", "soy-free", "nuts-free", "low-sodium"] },
+      { name: "Lean Mutton (Cooked)", type: "protein", category: "non-veg", cal: 220, p: 26, c: 0, f: 12, unit: "g", unitWeight: 1, budget: ["Flexible"], tags: ["redmeat", "mutton", "gluten-free", "lactose-free", "soy-free", "nuts-free"] },
+
+      // CARBS
+      { name: "Brown Rice (Cooked)", type: "carb", category: "vegan", cal: 111, p: 2.6, c: 23, f: 0.9, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "high-fiber"] },
+      { name: "White Rice (Cooked)", type: "carb", category: "vegan", cal: 130, p: 2.7, c: 28, f: 0.3, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free"] },
+      { name: "Whole Wheat Roti / Chapati", type: "carb", category: "vegan", cal: 267, p: 8, c: 53, f: 1.1, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten", "lactose-free", "soy-free", "nuts-free", "high-fiber"] },
+      { name: "Oats (Cooked in water)", type: "carb", category: "vegan", cal: 71, p: 2.5, c: 12, f: 1.4, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "high-fiber"] },
+      { name: "Quinoa (Cooked)", type: "carb", category: "vegan", cal: 120, p: 4.4, c: 21.3, f: 1.9, unit: "g", unitWeight: 1, budget: ["Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "high-fiber"] },
+      { name: "Sweet Potato (Boiled)", type: "carb", category: "vegan", cal: 86, p: 1.6, c: 20, f: 0.1, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "high-fiber"] },
+      { name: "Poha (Flattened Rice)", type: "carb", category: "vegan", cal: 110, p: 2.3, c: 25, f: 0.2, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free"] },
+      { name: "Idli", type: "carb", category: "vegan", cal: 111, p: 2.8, c: 23, f: 0.3, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free"] },
+      { name: "Dosa (Plain)", type: "carb", category: "vegan", cal: 220, p: 4.2, c: 43, f: 4.2, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free"] },
+      { name: "Ragi Millet Roti", type: "carb", category: "vegan", cal: 255, p: 5, c: 55, f: 1.3, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "high-fiber"] },
+      { name: "Banana", type: "carb", category: "vegan", cal: 89, p: 1.1, c: 23, f: 0.3, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free"] },
+      { name: "Apple", type: "carb", category: "vegan", cal: 52, p: 0.3, c: 14, f: 0.2, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "high-fiber"] },
+
+      // FATS
+      { name: "Mixed Nuts (Almonds / Walnuts)", type: "fat", category: "vegan", cal: 607, p: 20, c: 21, f: 54, unit: "g", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["nuts", "gluten-free", "lactose-free", "soy-free", "high-fiber"] },
+      { name: "Chia Seeds / Flaxseeds", type: "fat", category: "vegan", cal: 486, p: 17, c: 42, f: 31, unit: "g", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "high-fiber"] },
+      { name: "Olive Oil", type: "fat", category: "vegan", cal: 884, p: 0, c: 0, f: 100, unit: "ml", unitWeight: 1, budget: ["Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free"] },
+      { name: "Peanut Butter", type: "fat", category: "vegan", cal: 588, p: 25, c: 20, f: 50, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["nuts", "gluten-free", "lactose-free", "soy-free"] },
+      { name: "Pure Ghee", type: "fat", category: "veg", cal: 900, p: 0, c: 0, f: 100, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["dairy", "gluten-free", "soy-free", "nuts-free"] },
+      { name: "Avocado", type: "fat", category: "vegan", cal: 160, p: 2, c: 8.5, f: 14.7, unit: "g", unitWeight: 1, budget: ["Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "high-fiber"] },
+
+      // VEGETABLES
+      { name: "Spinach (Boiled)", type: "vegetable", category: "vegan", cal: 23, p: 3, c: 3.6, f: 0.3, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "high-fiber", "low-gi"] },
+      { name: "Broccoli (Steamed)", type: "vegetable", category: "vegan", cal: 35, p: 2.8, c: 7, f: 0.4, unit: "g", unitWeight: 1, budget: ["Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "high-fiber", "low-gi"] },
+      { name: "Mixed Vegetable Sabzi", type: "vegetable", category: "vegan", cal: 65, p: 2, c: 10, f: 2, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "high-fiber"] },
+      { name: "Fresh Cucumber Salad", type: "vegetable", category: "vegan", cal: 15, p: 0.6, c: 3.6, f: 0.1, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "low-sodium"] },
+      { name: "Bottle Gourd (Lauki Sabzi)", type: "vegetable", category: "vegan", cal: 40, p: 1, c: 6, f: 1, unit: "g", unitWeight: 1, budget: ["Budget", "Moderate", "Flexible"], tags: ["gluten-free", "lactose-free", "soy-free", "nuts-free", "low-gi", "low-sodium"] }
+    ];
+
+    // Page Load Setup
+    document.addEventListener("DOMContentLoaded", () => {
+      updateProgressBar();
+      toggleButtonsVisibility();
+    });
+
+    // Helper functions for Wizard Form Step Navigation
+    function updateProgressBar() {
+      const bar = document.getElementById("progressBar");
+      const indicator = document.getElementById("stepIndicator");
+      const percentage = (state.currentStep / 7) * 100;
+      bar.style.width = `${percentage}%`;
+      indicator.innerText = `Step ${state.currentStep} of 7`;
+    }
+
+    function toggleButtonsVisibility() {
+      const btnBack = document.getElementById("btnBack");
+      const btnNext = document.getElementById("btnNext");
+      
+      if (state.currentStep === 1) {
+        btnBack.style.visibility = 'hidden';
+      } else {
+        btnBack.style.visibility = 'visible';
+      }
+
+      if (state.currentStep === 7) {
+        btnNext.style.display = 'none';
+      } else {
+        btnNext.style.display = 'inline-block';
+      }
+    }
+
+    function selectGender(gender) {
+      state.gender = gender;
+      document.getElementById("genderMale").classList.toggle("active", gender === 'Male');
+      document.getElementById("genderFemale").classList.toggle("active", gender === 'Female');
+    }
+
+    function selectGoal(goal) {
+      state.goal = goal;
+      document.getElementById("goalFatLoss").classList.toggle("active", goal === 'Fat loss');
+      document.getElementById("goalLeanBulk").classList.toggle("active", goal === 'Lean bulk');
+      document.getElementById("goalMaintenance").classList.toggle("active", goal === 'Maintenance');
+      document.getElementById("goalRecomp").classList.toggle("active", goal === 'Recomposition');
+      
+      document.getElementById("goalError").style.display = 'none';
+    }
+
+    function updateSliderVal(sliderId, bubbleId) {
+      const slider = document.getElementById(sliderId);
+      const bubble = document.getElementById(bubbleId);
+      bubble.innerText = slider.value;
+      
+      if (sliderId === 'trainingDays') state.trainingDays = parseInt(slider.value);
+      if (sliderId === 'mealsCount') state.mealsCount = parseInt(slider.value);
+    }
+
+    function toggleHealthCondition(chk) {
+      const healthNone = document.getElementById("healthNone");
+      if (chk.checked) {
+        healthNone.checked = false;
+      }
+      
+      // Update Disclaimer visibility
+      updateDisclaimerVisibility();
+    }
+
+    function toggleHealthNone(noneChk) {
+      if (noneChk.checked) {
+        document.querySelectorAll(".health-cond").forEach(item => {
+          item.checked = false;
+        });
+      }
+      updateDisclaimerVisibility();
+    }
+
+    function updateDisclaimerVisibility() {
+      const hasAnyConditions = Array.from(document.querySelectorAll(".health-cond")).some(c => c.checked);
+      document.getElementById("healthDisclaimer").style.display = hasAnyConditions ? 'block' : 'none';
+    }
+
+    function getSelectedHealthConditions() {
+      const selected = [];
+      document.querySelectorAll(".health-cond").forEach(item => {
+        if (item.checked) selected.push(item.value);
+      });
+      return selected;
+    }
+
+    function getSelectedTrainingTypes() {
+      const types = [];
+      if (document.getElementById("trainWeight").checked) types.push("Weightlifting");
+      if (document.getElementById("trainCardio").checked) types.push("Cardio");
+      if (document.getElementById("trainSports").checked) types.push("Sports");
+      if (document.getElementById("trainYoga").checked) types.push("Yoga");
+      if (document.getElementById("trainMixed").checked) types.push("Mixed");
+      return types;
+    }
+
+    function getSelectedExclusions() {
+      const exclusions = [];
+      document.querySelectorAll(".exclude-food").forEach(item => {
+        if (item.checked) exclusions.push(item.value);
+      });
+      return exclusions;
+    }
+
+    // Step Form Validations
+    function validateStep(step) {
+      let isValid = true;
+      
+      if (step === 1) {
+        const age = parseInt(document.getElementById("age").value);
+        const height = parseInt(document.getElementById("height").value);
+        const weight = parseInt(document.getElementById("weight").value);
+        const bodyfatInput = document.getElementById("bodyfat").value;
+        const bodyfat = bodyfatInput !== '' ? parseInt(bodyfatInput) : null;
+        
+        // Age validate
+        if (isNaN(age) || age < 15 || age > 80) {
+          document.getElementById("ageError").style.display = 'block';
+          document.getElementById("age").classList.add("input-error");
+          isValid = false;
+        } else {
+          document.getElementById("ageError").style.display = 'none';
+          document.getElementById("age").classList.remove("input-error");
+          state.age = age;
+        }
+
+        // Height validate
+        if (isNaN(height) || height < 100 || height > 250) {
+          document.getElementById("heightError").style.display = 'block';
+          document.getElementById("height").classList.add("input-error");
+          isValid = false;
+        } else {
+          document.getElementById("heightError").style.display = 'none';
+          document.getElementById("height").classList.remove("input-error");
+          state.height = height;
+        }
+
+        // Weight validate
+        if (isNaN(weight) || weight < 30 || weight > 200) {
+          document.getElementById("weightError").style.display = 'block';
+          document.getElementById("weight").classList.add("input-error");
+          isValid = false;
+        } else {
+          document.getElementById("weightError").style.display = 'none';
+          document.getElementById("weight").classList.remove("input-error");
+          state.weight = weight;
+        }
+
+        // Body fat validate
+        if (bodyfat !== null && (isNaN(bodyfat) || bodyfat < 3 || bodyfat > 60)) {
+          document.getElementById("bodyfatError").style.display = 'block';
+          document.getElementById("bodyfat").classList.add("input-error");
+          isValid = false;
+        } else {
+          document.getElementById("bodyfatError").style.display = 'none';
+          document.getElementById("bodyfat").classList.remove("input-error");
+          state.bodyfat = bodyfat;
+        }
+      }
+
+      if (step === 2) {
+        if (!state.goal) {
+          document.getElementById("goalError").style.display = 'block';
+          isValid = false;
+        } else {
+          document.getElementById("goalError").style.display = 'none';
+        }
+      }
+
+      if (step === 3) {
+        const activity = document.getElementById("activityLevel").value;
+        if (!activity) {
+          document.getElementById("activityError").style.display = 'block';
+          document.getElementById("activityLevel").classList.add("input-error");
+          isValid = false;
+        } else {
+          document.getElementById("activityError").style.display = 'none';
+          document.getElementById("activityLevel").classList.remove("input-error");
+          state.activityLevel = activity;
+        }
+        state.trainingTypes = getSelectedTrainingTypes();
+      }
+
+      if (step === 4) {
+        state.healthConditions = getSelectedHealthConditions();
+      }
+
+      if (step === 5) {
+        state.dietType = document.getElementById("dietType").value;
+        state.exclusions = getSelectedExclusions();
+        state.excludeOther = document.getElementById("excludeOther").value;
+        state.cuisine = document.getElementById("cuisine").value;
+      }
+
+      if (step === 6) {
+        state.likedFoods = document.getElementById("likedFoods").value;
+        state.dislikedFoods = document.getElementById("dislikedFoods").value;
+        state.budget = document.getElementById("budget").value;
+        state.prepTime = document.getElementById("prepTime").value;
+      }
+
+      return isValid;
+    }
+
+    function nextStep() {
+      if (!validateStep(state.currentStep)) return;
+
+      document.getElementById(`step${state.currentStep}`).classList.remove("active");
+      state.currentStep++;
+      document.getElementById(`step${state.currentStep}`).classList.add("active");
+      
+      updateProgressBar();
+      toggleButtonsVisibility();
+
+      if (state.currentStep === 7) {
+        renderReview();
+      }
+    }
+
+    function prevStep() {
+      if (state.currentStep === 1) return;
+
+      document.getElementById(`step${state.currentStep}`).classList.remove("active");
+      state.currentStep--;
+      document.getElementById(`step${state.currentStep}`).classList.add("active");
+      
+      updateProgressBar();
+      toggleButtonsVisibility();
+    }
+
+    function renderReview() {
+      const container = document.getElementById("reviewContainer");
+      
+      // Formatting training types
+      const trainingStr = state.trainingTypes.length > 0 
+        ? `${state.trainingDays} days/week (${state.trainingTypes.join(", ")})` 
+        : `${state.trainingDays} days/week`;
+
+      // Formatting health conditions
+      const healthStr = state.healthConditions.length > 0 
+        ? state.healthConditions.join(", ") 
+        : 'None';
+
+      // Formatting exclusions
+      let exclList = [...state.exclusions];
+      if (state.excludeOther.trim()) {
+        exclList.push(state.excludeOther.trim());
+      }
+      const exclusionsStr = exclList.length > 0 ? exclList.join(", ") : 'None';
+
+      container.innerHTML = `
+        <div class="review-item">
+          <div class="review-label">Biological Sex</div>
+          <div class="review-value">${state.gender}</div>
+        </div>
+        <div class="review-item">
+          <div class="review-label">Age / Height / Weight</div>
+          <div class="review-value">${state.age} yrs / ${state.height} cm / ${state.weight} kg</div>
+        </div>
+        <div class="review-item">
+          <div class="review-label">Body Fat %</div>
+          <div class="review-value">${state.bodyfat ? state.bodyfat + '%' : 'Not provided'}</div>
+        </div>
+        <div class="review-item">
+          <div class="review-label">Goal Selected</div>
+          <div class="review-value">${state.goal}</div>
+        </div>
+        <div class="review-item">
+          <div class="review-label">Activity Level</div>
+          <div class="review-value">${state.activityLevel}</div>
+        </div>
+        <div class="review-item">
+          <div class="review-label">Training Routine</div>
+          <div class="review-value">${trainingStr}</div>
+        </div>
+        <div class="review-item">
+          <div class="review-label">Medical Conditions</div>
+          <div class="review-value">${healthStr}</div>
+        </div>
+        <div class="review-item">
+          <div class="review-label">Diet & Cuisine</div>
+          <div class="review-value">${state.dietType} (${state.cuisine})</div>
+        </div>
+        <div class="review-item">
+          <div class="review-label">Exclusions</div>
+          <div class="review-value">${exclusionsStr}</div>
+        </div>
+        <div class="review-item">
+          <div class="review-label">Daily Meals & Prep</div>
+          <div class="review-value">${state.mealsCount} meals / ${state.prepTime} prep</div>
+        </div>
+        <div class="review-item">
+          <div class="review-label">Meal Budget</div>
+          <div class="review-value">${state.budget}</div>
+        </div>
+        <div class="review-item">
+          <div class="review-label">Enjoyed Foods</div>
+          <div class="review-value" style="font-weight: 500; font-size: 0.85rem;">${state.likedFoods ? state.likedFoods : 'None listed'}</div>
+        </div>
+      `;
+    }
+
+    // MAIN CALCULATOR ENGINE
+    function runCalculations() {
+      // 1. BMR (Mifflin-St Jeor)
+      let bmr = 0;
+      let bmrFormula = '';
+      if (state.gender === 'Male') {
+        bmr = 10 * state.weight + 6.25 * state.height - 5 * state.age + 5;
+        bmrFormula = `BMR = 10 × ${state.weight} (wt) + 6.25 × ${state.height} (ht) - 5 × ${state.age} (age) + 5\n= ${Math.round(bmr)} kcal`;
+      } else {
+        bmr = 10 * state.weight + 6.25 * state.height - 5 * state.age - 161;
+        bmrFormula = `BMR = 10 × ${state.weight} (wt) + 6.25 × ${state.height} (ht) - 5 × ${state.age} (age) - 161\n= ${Math.round(bmr)} kcal`;
+      }
+
+      // 2. TDEE
+      const activityMultipliers = {
+        'Sedentary': 1.2,
+        'Lightly active': 1.375,
+        'Moderately active': 1.55,
+        'Very active': 1.725,
+        'Athlete': 1.9
+      };
+      const multiplier = activityMultipliers[state.activityLevel] || 1.2;
+      const tdee = bmr * multiplier;
+      const tdeeFormula = `TDEE = BMR × ${multiplier} (activity multiplier)\n= ${Math.round(bmr)} × ${multiplier}\n= ${Math.round(tdee)} kcal`;
+
+      // 3. Goal Adjustment
+      let targetCalories = 0;
+      let goalFormula = '';
+      if (state.goal === 'Fat loss') {
+        const reduction = Math.min(500, tdee * 0.20);
+        targetCalories = tdee - reduction;
+        goalFormula = `Fat Loss Target = TDEE - Min(500, TDEE × 20%)\n= ${Math.round(tdee)} - ${Math.round(reduction)}\n= ${Math.round(targetCalories)} kcal`;
+      } else if (state.goal === 'Lean bulk') {
+        targetCalories = tdee + 250;
+        goalFormula = `Lean Bulk Target = TDEE + 250 (surplus for hypertrophy)\n= ${Math.round(tdee)} + 250\n= ${Math.round(targetCalories)} kcal`;
+      } else if (state.goal === 'Recomposition') {
+        targetCalories = tdee - 150;
+        goalFormula = `Recomposition Target = TDEE - 150 (slight deficit for fat loss with high protein)\n= ${Math.round(tdee)} - 150\n= ${Math.round(targetCalories)} kcal`;
+      } else {
+        targetCalories = tdee;
+        goalFormula = `Maintenance Target = TDEE\n= ${Math.round(targetCalories)} kcal`;
+      }
+      
+      // Ensure targetCalories is sensible
+      targetCalories = Math.max(1200, Math.round(targetCalories));
+
+      // 4. BMI
+      const heightInMeters = state.height / 100;
+      const bmi = state.weight / (heightInMeters * heightInMeters);
+      let bmiCategory = '';
+      if (bmi < 18.5) bmiCategory = 'Underweight';
+      else if (bmi < 25) bmiCategory = 'Normal';
+      else if (bmi < 30) bmiCategory = 'Overweight';
+      else bmiCategory = 'Obese';
+      
+      const bmiFormula = `BMI = weight(kg) / height(m)²\n= ${state.weight} / (${heightInMeters.toFixed(2)})²\n= ${bmi.toFixed(1)} (${bmiCategory})`;
+
+      // 5. Macro Splits
+      let proteinPerKg = 1.8;
+      let fatPerKg = 0.8;
+      
+      if (state.goal === 'Fat loss') {
+        proteinPerKg = 2.3;
+        fatPerKg = 0.8;
+      } else if (state.goal === 'Lean bulk') {
+        proteinPerKg = 2.1;
+        fatPerKg = 0.95;
+      } else if (state.goal === 'Recomposition') {
+        proteinPerKg = 2.5;
+        fatPerKg = 0.8;
+      } else {
+        proteinPerKg = 1.9;
+        fatPerKg = 1.0;
+      }
+
+      // Check Kidney Concerns: cap protein at 1.2g/kg
+      const hasKidneyIssues = state.healthConditions.includes("Kidney");
+      if (hasKidneyIssues) {
+        proteinPerKg = 1.2;
+      }
+
+      let proteinG = state.weight * proteinPerKg;
+      let fatG = state.weight * fatPerKg;
+      
+      // Calories from protein and fats
+      let proteinCal = proteinG * 4;
+      let fatCal = fatG * 9;
+      
+      // Remaining for carbs
+      let carbCal = targetCalories - (proteinCal + fatCal);
+      let carbG = Math.max(30, carbCal / 4); // clamp min carb to 30g
+      
+      // Re-calculate actual totals if carbs clamped
+      if (carbCal < 120) {
+        carbG = 30;
+        carbCal = 120;
+        // recalculate fat slightly to match total calories
+        fatCal = targetCalories - (proteinCal + carbCal);
+        fatG = Math.max(30, fatCal / 9);
+      }
+
+      proteinG = Math.round(proteinG);
+      fatG = Math.round(fatG);
+      carbG = Math.round(carbG);
+
+      const isProteinHighMultiplier = proteinPerKg >= 2.0;
+
+      const macroFormula = `Protein: ${proteinPerKg}g/kg × ${state.weight}kg = ${proteinG}g\n` +
+                           `Fat: ${fatPerKg}g/kg × ${state.weight}kg = ${fatG}g\n` +
+                           `Carbs: [${Math.round(targetCalories)}kcal - (${proteinG}g×4 + ${fatG}g×9)] / 4 = ${carbG}g`;
+
+      // 6. Macro Calories Calculation
+      const actualCal = (proteinG * 4) + (carbG * 4) + (fatG * 9);
+      const calCalculationFormula = `Total Target = (${proteinG}g × 4) + (${carbG}g × 4) + (${fatG}g × 9)\n= ${proteinG*4} + ${carbG*4} + ${fatG*9} = ${actualCal} kcal`;
+
+      return {
+        bmr: Math.round(bmr), bmrFormula,
+        tdee: Math.round(tdee), tdeeFormula,
+        targetCalories: actualCal, goalFormula,
+        bmi: bmi.toFixed(1), bmiCategory, bmiFormula,
+        proteinG, fatG, carbG, macroFormula,
+        calCalculationFormula, isProteinHighMultiplier, hasKidneyIssues
+      };
+    }
+
+    // DIET GENERATOR FILTERING ENGINE
+    function filterFoodDatabase(healthConditions, dietType, exclusions, excludeOtherText, budget) {
+      let filtered = [...FOOD_DATABASE];
+
+      // 1. Filter by Diet Type
+      if (dietType === 'Vegetarian') {
+        filtered = filtered.filter(f => f.category === 'veg' || f.category === 'vegan');
+      } else if (dietType === 'Eggetarian') {
+        filtered = filtered.filter(f => f.category === 'veg' || f.category === 'vegan' || f.category === 'egg');
+      } else if (dietType === 'Vegan') {
+        filtered = filtered.filter(f => f.category === 'vegan');
+      } // non-veg allows all
+
+      // 2. Filter by explicit checkboxes exclusions
+      exclusions.forEach(ex => {
+        if (ex === 'dairy') {
+          // exclude dairy, paneer, and whey if any dairy tag is present
+          filtered = filtered.filter(f => !f.tags.includes('dairy') && !f.tags.includes('paneer'));
+        } else {
+          filtered = filtered.filter(f => !f.tags.includes(ex));
+        }
+      });
+
+      // 3. Filter by other text input exclusions
+      if (excludeOtherText.trim()) {
+        const customExclusions = excludeOtherText.toLowerCase().split(",").map(s => s.trim()).filter(s => s.length > 0);
+        customExclusions.forEach(word => {
+          filtered = filtered.filter(f => !f.name.toLowerCase().includes(word));
+        });
+      }
+
+      // 4. Filter by Budget Category
+      filtered = filtered.filter(f => f.budget.includes(budget));
+
+      // 5. Filter by Health Condition specific adjustments
+      if (healthConditions.includes("Diabetes") || healthConditions.includes("PCOS")) {
+        // Exclude white/refined grains with high GI
+        filtered = filtered.filter(f => !f.name.includes("White Rice") && !f.name.includes("Poha") && !f.name.includes("Dosa (Plain)") && !f.name.includes("Idli"));
+      }
+
+      if (healthConditions.includes("Thyroid")) {
+        // Exclude Soy Products
+        filtered = filtered.filter(f => !f.tags.includes('soy'));
+      }
+
+      if (healthConditions.includes("Gluten")) {
+        filtered = filtered.filter(f => !f.tags.includes('gluten'));
+      }
+
+      if (healthConditions.includes("Lactose")) {
+        filtered = filtered.filter(f => !f.tags.includes('dairy') && !f.tags.includes('paneer'));
+      }
+
+      if (healthConditions.includes("Cholesterol")) {
+        // Limit ghee and whole eggs
+        filtered = filtered.filter(f => !f.name.includes("Pure Ghee") && !f.name.includes("Whole Eggs") && !f.tags.includes('redmeat'));
+      }
+
+      return filtered;
+    }
+
+    function generatePlan() {
+      // Run calculations first
+      const calc = runCalculations();
+      
+      // Filter foods
+      const safeFoods = filterFoodDatabase(state.healthConditions, state.dietType, state.exclusions, state.excludeOther, state.budget);
+      
+      // Select UI elements and display container
+      document.getElementById("wizard").style.display = "none";
+      document.getElementById("results").style.display = "block";
+      
+      // Hide header wizard navigation steps
+      document.getElementById("progressBar").parentElement.style.display = "none";
+      document.getElementById("stepIndicator").style.display = "none";
+      
+      // Render "Your Numbers" Dashboard
+      const grid = document.getElementById("numbersGrid");
+      grid.innerHTML = `
+        <div class="number-block">
+          <div class="number-title">1. BMR (Mifflin-St Jeor)</div>
+          <div class="number-val">${calc.bmr} kcal</div>
+          <div class="number-formula">${calc.bmrFormula}</div>
+        </div>
+        <div class="number-block">
+          <div class="number-title">2. TDEE (Maintenance)</div>
+          <div class="number-val">${calc.tdee} kcal</div>
+          <div class="number-formula">${calc.tdeeFormula}</div>
+        </div>
+        <div class="number-block">
+          <div class="number-title">3. Goal Intake Target</div>
+          <div class="number-val">${calc.targetCalories} kcal</div>
+          <div class="number-formula">${calc.goalFormula}</div>
+        </div>
+        <div class="number-block">
+          <div class="number-title">4. Body Mass Index (BMI)</div>
+          <div class="number-val">${calc.bmi} <span style="font-size:0.9rem; font-weight:600;">(${calc.bmiCategory})</span></div>
+          <div class="number-formula">${calc.bmiFormula}</div>
+        </div>
+        <div class="number-block" style="grid-column: 1 / -1;">
+          <div class="number-title">5. Macronutrient Splits</div>
+          <div class="number-val">${calc.proteinG}g P | ${calc.carbG}g C | ${calc.fatG}g F</div>
+          <div class="number-formula">${calc.macroFormula}</div>
+        </div>
+        <div class="number-block" style="grid-column: 1 / -1;">
+          <div class="number-title">6. Macro Calories Verifications</div>
+          <div class="number-val">${calc.targetCalories} kcal</div>
+          <div class="number-formula">${calc.calCalculationFormula}</div>
+        </div>
+        <div class="macro-bar-container">
+          <div class="macro-label-row">
+            <span>Macro Ratios (Caloric Weight)</span>
+            <span>P: ${Math.round((calc.proteinG*4/calc.targetCalories)*100)}% | C: ${Math.round((calc.carbG*4/calc.targetCalories)*100)}% | F: ${Math.round((calc.fatG*9/calc.targetCalories)*100)}%</span>
+          </div>
+          <div class="macro-progress-track">
+            <div class="macro-segment macro-p" style="width: ${(calc.proteinG*4/calc.targetCalories)*100}%">Protein</div>
+            <div class="macro-segment macro-c" style="width: ${(calc.carbG*4/calc.targetCalories)*100}%">Carbs</div>
+            <div class="macro-segment macro-f" style="width: ${(calc.fatG*9/calc.targetCalories)*100}%">Fat</div>
+          </div>
+          <div class="macro-legend">
+            <div class="legend-item"><div class="legend-color macro-p"></div>Protein (${calc.proteinG}g)</div>
+            <div class="legend-item"><div class="legend-color macro-c"></div>Carbs (${calc.carbG}g)</div>
+            <div class="legend-item"><div class="legend-color macro-f"></div>Fats (${calc.fatG}g)</div>
+          </div>
+        </div>
+      `;
+
+      // Render health conditions alert warnings (if any)
+      const healthAlertCard = document.getElementById("healthResultAlert");
+      const healthList = document.getElementById("healthAlertList");
+      healthList.innerHTML = '';
+      
+      if (state.healthConditions.length > 0) {
+        healthAlertCard.style.display = 'block';
+        state.healthConditions.forEach(cond => {
+          let li = document.createElement("li");
+          if (cond === 'Diabetes') {
+            li.innerHTML = `<strong>Diabetes / Pre-diabetes</strong>: Pair carbohydrates with lean protein and plant fiber to slow glycemic index curves. Avoid refined sugar and fruit juices.`;
+          } else if (cond === 'Hypertension') {
+            li.innerHTML = `<strong>High Blood Pressure</strong>: Limit sodium-dense foods, pickles, papads, and processed snacks. Use rock salt sparingly.`;
+          } else if (cond === 'Thyroid') {
+            li.innerHTML = `<strong>Thyroid Issues</strong>: Minimize consumption of raw cruciferous greens (cabbage, cauliflower) and monitor iodine intakes. Limit soy timing.`;
+          } else if (cond === 'PCOS') {
+            li.innerHTML = `<strong>PCOS / PCOD</strong>: Focus on high-fiber whole food items, legumes, and lean protein, which help balance insulin. Limit sweet confectionery.`;
+          } else if (cond === 'Cholesterol') {
+            li.innerHTML = `<strong>High Cholesterol</strong>: Restrict butter, margarine, deep fry fats, and red meats. Maximize soluble fiber feeds (oats, apple pectin).`;
+          } else if (cond === 'Lactose') {
+            li.innerHTML = `<strong>Lactose Intolerance</strong>: Milk sugar filtered out. Substitute with plant milk, curd (usually safe), or lactose-free dairy.`;
+          } else if (cond === 'Gluten') {
+            li.innerHTML = `<strong>Gluten Sensitivity</strong>: Wheat products excluded. Utilize ragi, rice, millets, and potatoes as clean starches.`;
+          } else if (cond === 'Kidney') {
+            li.innerHTML = `<strong>Kidney Concerns</strong>: <span style="color:var(--error-color); font-weight:700;">WARNING: Cap protein at 1.2g/kg (applied in calculations). Consult a nephrologist before committing to high-protein schedules.</span>`;
+          }
+          healthList.appendChild(li);
+        });
+      } else {
+        healthAlertCard.style.display = 'none';
+      }
+
+      // Render dynamic meal blocks
+      const mealsList = document.getElementById("mealsList");
+      mealsList.innerHTML = '';
+      
+      const mealsNum = state.mealsCount;
+      const caloriePerMeal = calc.targetCalories / mealsNum;
+      const proteinPerMeal = calc.proteinG / mealsNum;
+      const carbPerMeal = calc.carbG / mealsNum;
+      const fatPerMeal = calc.fatG / mealsNum;
+
+      // Group foods for generating meals
+      const proteins = safeFoods.filter(f => f.type === 'protein');
+      const carbs = safeFoods.filter(f => f.type === 'carb');
+      const fats = safeFoods.filter(f => f.type === 'fat');
+      const veggies = safeFoods.filter(f => f.type === 'vegetable');
+
+      // Fallback arrays if database is empty due to too many exclusions
+      const fallbackP = [{ name: "Tofu", cal: 76, p: 8, c: 1.9, f: 4.8, unit: "g" }];
+      const fallbackC = [{ name: "Brown Rice", cal: 111, p: 2.6, c: 23, f: 0.9, unit: "g" }];
+      const fallbackF = [{ name: "Peanut Butter", cal: 588, p: 25, c: 20, f: 50, unit: "g" }];
+
+      const pSource = proteins.length > 0 ? proteins : fallbackP;
+      const cSource = carbs.length > 0 ? carbs : fallbackC;
+      const fSource = fats.length > 0 ? fats : fallbackF;
+
+      const mealTimes = {
+        3: ["8:30 AM (Breakfast)", "1:30 PM (Lunch)", "8:00 PM (Dinner)"],
+        4: ["8:30 AM (Breakfast)", "1:30 PM (Lunch)", "5:00 PM (Evening Snack)", "8:30 PM (Dinner)"],
+        5: ["8:00 AM (Breakfast)", "11:30 AM (Mid-Day Snack)", "1:30 PM (Lunch)", "5:30 PM (Evening Snack)", "8:30 PM (Dinner)"],
+        6: ["8:00 AM (Breakfast)", "11:00 AM (Snack 1)", "1:30 PM (Lunch)", "4:30 PM (Snack 2)", "7:00 PM (Snack 3)", "9:00 PM (Dinner)"]
+      };
+
+      const mealNames = {
+        3: ["Breakfast", "Lunch", "Dinner"],
+        4: ["Breakfast", "Lunch", "Evening Snack", "Dinner"],
+        5: ["Breakfast", "Mid-Day Snack", "Lunch", "Evening Snack", "Dinner"],
+        6: ["Breakfast", "Mid-day Snack 1", "Lunch", "Evening Snack 2", "Late Snack 3", "Dinner"]
+      };
+
+      let accumulatedFoodProtein = 0;
+
+      for (let i = 0; i < mealsNum; i++) {
+        // Select ingredients based on index to ensure variety
+        const pFood = pSource[i % pSource.length];
+        const cFood = cSource[i % cSource.length];
+        
+        // Include fats in some meals, veggies in main meals (lunch/dinner)
+        const hasFat = (i % 2 === 0);
+        const fFood = hasFat ? fSource[i % fSource.length] : null;
+        
+        const isMainMeal = (mealNames[mealsNum][i].includes("Lunch") || mealNames[mealsNum][i].includes("Dinner"));
+        const vegFood = isMainMeal && veggies.length > 0 ? veggies[i % veggies.length] : null;
+
+        // Base quantities
+        let pQty = 100;
+        let cQty = 100;
+        let fQty = 10;
+        let vQty = 100;
+
+        // Scaling logic based on target meal macronutrients
+        // Protein source calculation
+        if (pFood.p > 0) {
+          pQty = (proteinPerMeal / pFood.p) * 100;
+        }
+        
+        // Carb source calculation (adjusting for protein source carbs)
+        const carbsInProtein = (pQty / 100) * pFood.c;
+        const netCarbGoal = Math.max(10, carbPerMeal - carbsInProtein);
+        if (cFood.c > 0) {
+          cQty = (netCarbGoal / cFood.c) * 100;
+        }
+
+        // Fat source calculation (adjusting for protein/carb fats)
+        const fatsInProtein = (pQty / 100) * pFood.f;
+        const fatsInCarb = (cQty / 100) * cFood.f;
+        const netFatGoal = Math.max(2, fatPerMeal - (fatsInProtein + fatsInCarb));
+        if (fFood && fFood.f > 0) {
+          fQty = (netFatGoal / fFood.f) * 100;
+        }
+
+        // Enforce range clamping for logical serving sizes
+        if (pFood.name.includes("Eggs")) {
+          // Convert from grams to count
+          pQty = Math.max(1, Math.round((proteinPerMeal / 13) * 2)) / 2; // increments of 0.5 egg
+        } else {
+          pQty = Math.max(40, Math.min(300, Math.round(pQty / 5) * 5)); // round to nearest 5g
+        }
+
+        if (cFood.name.includes("Roti") || cFood.name.includes("Idli") || cFood.name.includes("Dosa")) {
+          // Roti is ~120 cal, 24g carb, idli ~39cal, 8g carb.
+          // Let's divide required carb grams by carb content per piece
+          const carbPerPiece = cFood.name.includes("Roti") ? 24 : (cFood.name.includes("Idli") ? 8 : 26);
+          cQty = Math.max(1, Math.round(carbPerMeal / carbPerPiece));
+        } else {
+          cQty = Math.max(30, Math.min(250, Math.round(cQty / 5) * 5));
+        }
+
+        if (fFood) {
+          if (fFood.name.includes("Nuts") || fFood.name.includes("Seeds") || fFood.name.includes("Avocado")) {
+            fQty = Math.max(10, Math.min(60, Math.round(fQty / 5) * 5));
+          } else {
+            fQty = Math.max(5, Math.min(30, Math.round(fQty))); // oil / ghee in ml/grams
+          }
+        }
+
+        // Compile actual macro counts for this meal
+        let mealP = 0;
+        let mealC = 0;
+        let mealF = 0;
+        let mealCal = 0;
+
+        // P item contribution
+        if (pFood.name.includes("Eggs")) {
+          // Egg counts: pQty is egg units, egg weight ~50g
+          const totalEggG = pQty * 50;
+          mealP += (totalEggG / 100) * pFood.p;
+          mealC += (totalEggG / 100) * pFood.c;
+          mealF += (totalEggG / 100) * pFood.f;
+        } else {
+          mealP += (pQty / 100) * pFood.p;
+          mealC += (pQty / 100) * pFood.c;
+          mealF += (pQty / 100) * pFood.f;
+        }
+
+        // C item contribution
+        if (cFood.name.includes("Roti") || cFood.name.includes("Idli") || cFood.name.includes("Dosa")) {
+          const pieceWeight = cFood.name.includes("Roti") ? 45 : (cFood.name.includes("Idli") ? 35 : 60);
+          const totalG = cQty * pieceWeight;
+          mealP += (totalG / 100) * cFood.p;
+          mealC += (totalG / 100) * cFood.c;
+          mealF += (totalG / 100) * cFood.f;
+        } else {
+          mealP += (cQty / 100) * cFood.p;
+          mealC += (cQty / 100) * cFood.c;
+          mealF += (cQty / 100) * cFood.f;
+        }
+
+        // F item contribution
+        if (fFood) {
+          mealP += (fQty / 100) * fFood.p;
+          mealC += (fQty / 100) * fFood.c;
+          mealF += (fQty / 100) * fFood.f;
+        }
+
+        // Veg item contribution
+        if (vegFood) {
+          mealP += (vQty / 100) * vegFood.p;
+          mealC += (vQty / 100) * vegFood.c;
+          mealF += (vQty / 100) * vegFood.f;
+        }
+
+        mealCal = (mealP * 4) + (mealC * 4) + (mealF * 9);
+        accumulatedFoodProtein += mealP;
+
+        // Generate Alternatives String
+        let altText = '';
+        if (pFood.name.includes("Chicken Breast")) {
+          altText += `<li><strong>${pQty}g Chicken Breast</strong> → Alternatives: Low Fat Paneer ${Math.round(pQty * 1.7)}g, Organic Tofu ${Math.round(pQty * 3.8)}g, or Egg Whites ${Math.round(pQty / 10)} whites</li>`;
+        } else if (pFood.name.includes("Paneer")) {
+          altText += `<li><strong>${pQty}g Paneer</strong> → Alternatives: Organic Tofu ${Math.round(pQty * 2.2)}g, Cooked Lentils ${Math.round(pQty * 2)}g, or Egg Whites ${Math.round(pQty / 6)} whites</li>`;
+        } else if (pFood.name.includes("Tofu")) {
+          altText += `<li><strong>${pQty}g Tofu</strong> → Alternatives: Low Fat Paneer ${Math.round(pQty * 0.45)}g, Cooked Lentils ${Math.round(pQty * 0.9)}g, or Soy Chunks ${Math.round(pQty * 0.3)}g</li>`;
+        } else if (pFood.name.includes("Dal") || pFood.name.includes("Chickpeas") || pFood.name.includes("Rajma")) {
+          altText += `<li><strong>${pQty}g ${pFood.name.split("/")[0].trim()}</strong> → Alternatives: Tofu ${Math.round(pQty * 1.1)}g, Paneer ${Math.round(pQty * 0.5)}g, or Soy Chunks ${Math.round(pQty * 0.35)}g</li>`;
+        } else if (pFood.name.includes("Eggs")) {
+          altText += `<li><strong>${pQty} boiled egg(s)</strong> → Alternatives: Low Fat Paneer ${Math.round(pQty * 36)}g, Greek Yogurt ${Math.round(pQty * 65)}g, or Egg Whites ${Math.round(pQty * 1.2)} whites</li>`;
+        }
+
+        if (cFood.name.includes("Rice")) {
+          altText += `<li><strong>${cQty}g ${cFood.name.split("(")[0].trim()}</strong> → Alternatives: Quinoa ${Math.round(cQty * 1.1)}g, Sweet Potato ${Math.round(cQty * 1.3)}g, or Oats ${Math.round(cQty * 1.8)}g cooked</li>`;
+        } else if (cFood.name.includes("Roti")) {
+          altText += `<li><strong>${cQty} wheat Roti</strong> → Alternatives: Ragi Roti ${Math.round(cQty)} piece(s), White Rice ${Math.round(cQty * 85)}g cooked, or Oats ${Math.round(cQty * 150)}g cooked</li>`;
+        } else if (cFood.name.includes("Oats")) {
+          altText += `<li><strong>${cQty}g Oats</strong> → Alternatives: Sweet Potato ${Math.round(cQty * 0.6)}g, White Rice ${Math.round(cQty * 0.4)}g cooked, or Roti ${Math.round(cQty / 150)} piece(s)</li>`;
+        }
+
+        // Build HTML
+        const mealCard = document.createElement("div");
+        mealCard.className = "meal-card";
+        
+        let foodItemsHtml = `
+          <div class="food-item">
+            <span class="food-name">${pFood.name.includes("Eggs") ? `${pQty} whole boiled egg(s)` : `${pQty}g of ${pFood.name}`}</span>
+            <span class="food-qty">${pFood.name.includes("Eggs") ? `${Math.round(pQty * 50)}g` : `Portion: ${pQty}g`}</span>
+          </div>
+          <div class="food-item">
+            <span class="food-name">${cFood.name.includes("Roti") || cFood.name.includes("Idli") || cFood.name.includes("Dosa") ? `${cQty} piece(s) of ${cFood.name}` : `${cQty}g of ${cFood.name}`}</span>
+            <span class="food-qty">${cFood.name.includes("Roti") || cFood.name.includes("Idli") || cFood.name.includes("Dosa") ? `${cQty} piece(s)` : `Portion: ${cQty}g`}</span>
+          </div>
+        `;
+
+        if (fFood) {
+          foodItemsHtml += `
+            <div class="food-item">
+              <span class="food-name">${fQty}g / ml of ${fFood.name}</span>
+              <span class="food-qty">Portion: ${fQty}g</span>
+            </div>
+          `;
+        }
+
+        if (vegFood) {
+          foodItemsHtml += `
+            <div class="food-item">
+              <span class="food-name">${vQty}g of ${vegFood.name}</span>
+              <span class="food-qty">Portion: ${vQty}g</span>
+            </div>
+          `;
+        }
+
+        mealCard.innerHTML = `
+          <div class="meal-header">
+            <div class="meal-title-group">
+              <h4>Meal ${i+1}: ${mealNames[mealsNum][i]}</h4>
+              <span class="meal-time">🕒 Suggested Time: ${mealTimes[mealsNum][i]}</span>
+            </div>
+            <div class="meal-macros">
+              <span class="macro-badge badge-cal">${Math.round(mealCal)} kcal</span>
+              <span class="macro-badge badge-p">P: ${Math.round(mealP)}g</span>
+              <span class="macro-badge badge-c">C: ${Math.round(mealC)}g</span>
+              <span class="macro-badge badge-f">F: ${Math.round(mealF)}g</span>
+            </div>
+          </div>
+          <div class="meal-body">
+            ${foodItemsHtml}
+            <div class="alternatives-container">
+              <details>
+                <summary class="alternatives-summary">🔄 Swap / Alternative Options</summary>
+                <div class="alternatives-content">
+                  <ul style="list-style-type: none; padding-left: 0;">
+                    ${altText ? altText : '<li>No common swaps available for this combo. Combine sources of similar protein weight.</li>'}
+                  </ul>
+                </div>
+              </details>
+            </div>
+          </div>
+        `;
+        mealsList.appendChild(mealCard);
+      }
+
+      // Render supplements advice if protein targets are high and hard to hit with food alone
+      const supplementCard = document.getElementById("supplementAlertCard");
+      if (calc.isProteinHighMultiplier && accumulatedFoodProtein < (calc.proteinG * 0.8)) {
+        supplementCard.style.display = 'block';
+        document.getElementById("supplementText").innerHTML = `
+          Based on your goal (${state.goal}), your protein target is high (${calc.proteinG}g). 
+          Your food-only plan achieves around ${Math.round(accumulatedFoodProtein)}g. 
+          We recommend adding <strong>1 scoop of Whey or Plant Protein Isolate (25g Protein, ~120 kcal)</strong> post-workout or with breakfast to easily hit your requirements.
+        `;
+      } else {
+        supplementCard.style.display = 'none';
+      }
+    }
+
+    // Export plan to local image
+    function downloadAsImage() {
+      // Scroll to top of results to ensure complete capture
+      const resultsContainer = document.getElementById("results");
+      
+      // Temporarily hide buttons and feedback cards for clean export
+      const actionRow = document.querySelector(".action-buttons");
+      const feedback = document.querySelector(".feedback-card");
+      actionRow.style.opacity = "0";
+      feedback.style.opacity = "0";
+      
+      html2canvas(resultsContainer, {
+        scale: 2, // improve resolution
+        useCORS: true,
+        backgroundColor: "#F4F7F6"
+      }).then(canvas => {
+        // Restore buttons and feedback cards visibility
+        actionRow.style.opacity = "1";
+        feedback.style.opacity = "1";
+        
+        // Trigger download link
+        const link = document.createElement("a");
+        link.download = `Personalized_Diet_Plan_${state.goal.replace(" ", "_")}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      }).catch(err => {
+        console.error("Capture error: ", err);
+        alert("Failed to export plan. Please try manually capturing a screenshot.");
+        actionRow.style.opacity = "1";
+        feedback.style.opacity = "1";
+      });
+    }
+
+    function submitFeedback() {
+      const fbText = document.getElementById("feedbackText").value;
+      if (!fbText.trim()) {
+        alert("Please enter your feedback before submitting.");
+        return;
+      }
+      
+      // Clear input
+      document.getElementById("feedbackText").value = "";
+      
+      // Show toast
+      const toast = document.getElementById("toastAlert");
+      toast.classList.add("show");
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 3000);
+    }
+
+    function restartWizard() {
+      state.currentStep = 1;
+      
+      // Reset visibility elements
+      document.getElementById("results").style.display = "none";
+      document.getElementById("wizard").style.display = "block";
+      
+      // Restore header navigation steps
+      document.getElementById("progressBar").parentElement.style.display = "block";
+      document.getElementById("stepIndicator").style.display = "block";
+      
+      // Go back to step 1
+      for (let i = 1; i <= 7; i++) {
+        document.getElementById(`step${i}`).classList.toggle("active", i === 1);
+      }
+      
+      updateProgressBar();
+      toggleButtonsVisibility();
+    }
+
+    function goToApexPro() {
+      // Open ApexPro Workout URL placeholder
+      window.open("https://apexpro-workoutsplit-placeholder-url.com", "_blank");
+    }
+  </script>
+</body>
+</html>
