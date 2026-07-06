@@ -1,0 +1,3408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CLAWW | Adaptive Nutrition Engine</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome for Premium Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- jsPDF & jsPDF AutoTable for professional PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #f8fafc;
+      --bg-card: #ffffff;
+      --border-color: #e2e8f0;
+      --primary: #2563eb;
+      --primary-glow: rgba(37, 99, 235, 0.08);
+      --primary-hover: #1d4ed8;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --accent: #0d9488;
+      --accent-glow: rgba(13, 148, 136, 0.08);
+      --shadow-premium: 0 4px 12px rgba(0, 0, 0, 0.05);
+      --transition: all 0.2s ease-in-out;
+      --radius: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.6;
+      padding-bottom: 60px;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, h5 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Simple Header */
+    header {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo-block {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .logo-img {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 1px solid var(--border-color);
+    }
+
+    .brand-name {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .brand-name span {
+      color: var(--primary);
+    }
+
+    .tagline {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      background: #f1f5f9;
+      padding: 4px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    /* Main Content */
+    main {
+      padding: 30px 0;
+    }
+
+    /* Card Wrapper */
+    .wizard-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-premium);
+      padding: 30px;
+      margin-bottom: 30px;
+      animation: slideUp 0.4s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      color: var(--text-main);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+
+    .section-title i {
+      color: var(--primary);
+    }
+
+    /* Grid Layouts for Inputs */
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-group label span {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 400;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-wrapper i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .form-control {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 12px 10px 36px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: var(--transition);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+
+    /* Toggle Grids */
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .option-card {
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .option-card i {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      transition: var(--transition);
+    }
+
+    .option-card.active {
+      border-color: var(--primary);
+      background: var(--primary-glow);
+    }
+
+    .option-card.active i {
+      color: var(--primary);
+    }
+
+    .option-card span {
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* Food Select Grid */
+    .food-selection-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .food-tag-card {
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: var(--transition);
+      user-select: none;
+    }
+
+    .food-tag-card.active {
+      background: var(--primary);
+      color: #ffffff;
+      font-weight: 700;
+      border-color: var(--primary);
+    }
+
+    /* Action Buttons */
+    .btn-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 30px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    /* Results Dashboard */
+    .results-wrapper {
+      display: none;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Highlight Banner Targets */
+    .targets-header-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-premium);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .target-box {
+      text-align: center;
+      padding: 8px;
+      min-width: 120px;
+    }
+
+    .target-val {
+      font-size: 1.8rem;
+      font-weight: 800;
+      font-family: 'Outfit', sans-serif;
+      color: var(--text-main);
+    }
+
+    .target-val.calories {
+      color: var(--primary);
+    }
+
+    .target-val.protein {
+      color: var(--accent);
+    }
+
+    .target-val.fat {
+      color: #f43f5e;
+    }
+
+    .target-val.carbs {
+      color: #b45309;
+    }
+
+    .target-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    /* Meal Card Grid */
+    .meals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .meal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-premium);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .meal-card:hover {
+      border-color: var(--primary);
+    }
+
+    .meal-card-header {
+      background: #f8fafc;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .meal-name-title {
+      font-size: 1.1rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .meal-name-title i {
+      color: var(--primary);
+    }
+
+    .meal-calories-badge {
+      background: var(--primary-glow);
+      border: 1px solid var(--border-color);
+      color: var(--primary);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .meal-card-body {
+      padding: 16px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .meal-plate-list {
+      list-style: none;
+      margin-bottom: 16px;
+    }
+
+    .meal-plate-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      padding: 6px 0;
+      border-bottom: 1px dashed var(--border-color);
+      color: var(--text-main);
+    }
+
+    .meal-plate-item:last-child {
+      border-bottom: none;
+    }
+
+    .meal-plate-qty {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .meal-macros-summary-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 10px;
+      font-size: 0.7rem;
+      text-align: center;
+    }
+
+    .meal-macro-badge {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .meal-macro-val {
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .meal-macro-lbl {
+      color: var(--text-muted);
+    }
+
+    /* Meal Alternatives styling */
+    .alternatives-accordion {
+      margin-top: 10px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 10px;
+    }
+
+    .alt-trigger {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: var(--transition);
+    }
+
+    .alt-trigger:hover {
+      color: var(--accent);
+      opacity: 0.8;
+    }
+
+    .alt-content {
+      display: none;
+      margin-top: 10px;
+      font-size: 0.75rem;
+    }
+
+    .alt-meal-option {
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+
+    .alt-meal-option:last-child {
+      margin-bottom: 0;
+    }
+
+    .alt-meal-header {
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 4px;
+    }
+
+    .alt-meal-foods {
+      margin-bottom: 4px;
+      line-height: 1.3;
+      color: var(--text-muted);
+    }
+
+    .alt-meal-macros {
+      display: flex;
+      gap: 8px;
+      font-size: 0.65rem;
+      font-weight: 600;
+    }
+
+    .alt-meal-macros span {
+      background: var(--border-color);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .alt-meal-macros .alt-cal { color: var(--primary); }
+    .alt-meal-macros .alt-p { color: var(--accent); }
+    .alt-meal-macros .alt-c { color: #b45309; }
+    .alt-meal-macros .alt-f { color: #f43f5e; }
+
+    /* Validation logs */
+    .validation-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 30px;
+      box-shadow: var(--shadow-premium);
+    }
+
+    .validation-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .validation-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .validation-item i {
+      color: var(--primary);
+      font-size: 0.95rem;
+    }
+
+    /* Master replacement table style */
+    .table-container {
+      overflow-x: auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-premium);
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: var(--text-main);
+      font-weight: 600;
+      padding: 12px 16px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: #f8fafc;
+    }
+
+    /* Floating PDF Button or footer CTAs */
+    .results-cta {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+
+    /* Calibration Overlay Screen */
+    .overlay-loader {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(241, 245, 249, 0.95);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .loader-ring {
+      width: 60px;
+      height: 60px;
+      border: 4px solid #cbd5e1;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s infinite linear;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loader-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      text-align: center;
+    }
+
+    .loader-log {
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      height: 50px;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .wizard-card {
+        padding: 20px;
+      }
+      .input-grid {
+        grid-template-columns: 1fr;
+      }
+      .option-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .targets-header-card {
+        padding: 16px;
+      }
+      .target-box {
+        min-width: 90px;
+      }
+      .target-val {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Calibration Loader Overlay -->
+  <div class="overlay-loader" id="loaderOverlay">
+    <div class="loader-ring"></div>
+    <div class="loader-text" id="loaderText">Initializing Engine...</div>
+    <div class="loader-log" id="loaderLog">Preloading nutritional databases...</div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="container header-content">
+      <a href="#" class="logo-block">
+        <img src="data:image/jpeg;base64,{{CLAWW_LOGO_BASE64}}" alt="CLAWW Logo" class="logo-img">
+        <div class="brand-name">CLAW<span>W</span></div>
+      </a>
+      <div class="tagline">Adaptive Nutrition Engine</div>
+    </div>
+  </header>
+
+  <!-- Main Section -->
+  <main class="container">
+    
+    <!-- User Input Wizard -->
+    <div class="wizard-card" id="wizardSection">
+      <h2 class="section-title"><i class="fa-solid fa-calculator"></i> Bio-Data Profile</h2>
+      
+      <div class="input-grid">
+        <div class="form-group">
+          <label><i class="fa-solid fa-calendar-days"></i> Age <span>(years)</span></label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-hashtag"></i>
+            <input type="number" class="form-control" id="inputAge" placeholder="25" min="15" max="80" value="28">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label><i class="fa-solid fa-ruler-vertical"></i> Height <span>(cm)</span></label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-arrows-up-down"></i>
+            <input type="number" class="form-control" id="inputHeight" placeholder="175" min="100" max="250" value="175">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label><i class="fa-solid fa-weight-scale"></i> Weight <span>(kg)</span></label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-weight-scale"></i>
+            <input type="number" class="form-control" id="inputWeight" placeholder="70" min="30" max="200" value="72">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label><i class="fa-solid fa-percent"></i> Body Fat % <span>(required)</span></label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-percent"></i>
+            <input type="number" class="form-control" id="inputBodyFat" placeholder="15" min="3" max="60" value="16">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label><i class="fa-solid fa-venus-mars"></i> Gender</label>
+        <div class="option-grid" id="genderGrid">
+          <div class="option-card active" data-val="Male">
+            <i class="fa-solid fa-mars"></i>
+            <span>Male</span>
+          </div>
+          <div class="option-card" data-val="Female">
+            <i class="fa-solid fa-venus"></i>
+            <span>Female</span>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="section-title"><i class="fa-solid fa-dumbbell"></i> Training & Goals</h2>
+      
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label><i class="fa-solid fa-bullseye"></i> Goal</label>
+        <div class="option-grid" id="goalGrid">
+          <div class="option-card active" data-val="Weight Loss">
+            <i class="fa-solid fa-arrow-trend-down"></i>
+            <span>Weight Loss</span>
+          </div>
+          <div class="option-card" data-val="Lean Muscle Gain">
+            <i class="fa-solid fa-dumbbell"></i>
+            <span>Lean Muscle Gain</span>
+          </div>
+          <div class="option-card" data-val="Weight Gain">
+            <i class="fa-solid fa-arrow-trend-up"></i>
+            <span>Weight Gain</span>
+          </div>
+          <div class="option-card" data-val="Body Recomposition">
+            <i class="fa-solid fa-arrows-spin"></i>
+            <span>Body Recomposition</span>
+          </div>
+          <div class="option-card" data-val="Maintenance">
+            <i class="fa-solid fa-scale-balanced"></i>
+            <span>Maintenance</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label><i class="fa-solid fa-calendar-week"></i> Workout Frequency</label>
+        <div class="option-grid" id="freqGrid">
+          <div class="option-card" data-val="0–1 Days">
+            <i class="fa-solid fa-couch"></i>
+            <span>0–1 Days</span>
+          </div>
+          <div class="option-card active" data-val="2–3 Days">
+            <i class="fa-solid fa-shoe-prints"></i>
+            <span>2–3 Days</span>
+          </div>
+          <div class="option-card" data-val="4–5 Days">
+            <i class="fa-solid fa-person-running"></i>
+            <span>4–5 Days</span>
+          </div>
+          <div class="option-card" data-val="6–7 Days">
+            <i class="fa-solid fa-fire"></i>
+            <span>6–7 Days</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label><i class="fa-solid fa-stairs"></i> Training Level</label>
+        <div class="option-grid" id="levelGrid">
+          <div class="option-card active" data-val="Beginner">
+            <i class="fa-solid fa-seedling"></i>
+            <span>Beginner</span>
+          </div>
+          <div class="option-card" data-val="Intermediate">
+            <i class="fa-solid fa-award"></i>
+            <span>Intermediate</span>
+          </div>
+          <div class="option-card" data-val="Advanced">
+            <i class="fa-solid fa-crown"></i>
+            <span>Advanced</span>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="section-title"><i class="fa-solid fa-utensils"></i> Diet & Cuisine Preference</h2>
+      
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label><i class="fa-solid fa-leaf"></i> Food Preference</label>
+        <div class="option-grid" id="foodPrefGrid">
+          <div class="option-card" data-val="Vegetarian">
+            <i class="fa-solid fa-seedling"></i>
+            <span>Vegetarian</span>
+          </div>
+          <div class="option-card" data-val="Eggetarian">
+            <i class="fa-solid fa-egg"></i>
+            <span>Eggetarian</span>
+          </div>
+          <div class="option-card active" data-val="Non-Vegetarian">
+            <i class="fa-solid fa-bacon"></i>
+            <span>Non-Vegetarian</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label><i class="fa-solid fa-map-location-dot"></i> Cuisine Preference</label>
+        <div class="option-grid" id="cuisineGrid">
+          <div class="option-card" data-val="South Indian">
+            <i class="fa-solid fa-bowl-food"></i>
+            <span>South Indian</span>
+          </div>
+          <div class="option-card" data-val="North Indian">
+            <i class="fa-solid fa-wheat-awn"></i>
+            <span>North Indian</span>
+          </div>
+          <div class="option-card active" data-val="Mixed Indian">
+            <i class="fa-solid fa-plate-wheat"></i>
+            <span>Mixed Indian</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label><i class="fa-solid fa-heart"></i> Preferred Foods <span>(Optional — we will prioritize these in your meals)</span></label>
+        <div class="food-selection-grid" id="prefFoodsGrid">
+          <div class="food-tag-card active" data-val="Rice">Rice</div>
+          <div class="food-tag-card active" data-val="Chapati">Chapati</div>
+          <div class="food-tag-card active" data-val="Oats">Oats</div>
+          <div class="food-tag-card active" data-val="Chicken">Chicken</div>
+          <div class="food-tag-card active" data-val="Eggs">Eggs</div>
+          <div class="food-tag-card" data-val="Paneer">Paneer</div>
+          <div class="food-tag-card" data-val="Soya Chunks">Soya Chunks</div>
+          <div class="food-tag-card" data-val="Dal">Dal</div>
+          <div class="food-tag-card" data-val="Milk">Milk</div>
+          <div class="food-tag-card" data-val="Curd">Curd</div>
+          <div class="food-tag-card" data-val="Peanut Butter">Peanut Butter</div>
+          <div class="food-tag-card" data-val="Brown Bread">Brown Bread</div>
+          <div class="food-tag-card" data-val="Sweet Potato">Sweet Potato</div>
+          <div class="food-tag-card" data-val="Banana">Banana</div>
+          <div class="food-tag-card" data-val="Apple">Apple</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label><i class="fa-solid fa-ban"></i> Foods to Avoid <span>(Comma-separated list, e.g. Curd, Milk, Dal)</span></label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <input type="text" class="form-control" id="inputAvoidFoods" placeholder="Enter foods to exclude completely...">
+        </div>
+      </div>
+
+      <div class="btn-container">
+        <button class="btn-primary" onclick="triggerPlanGeneration()"><i class="fa-solid fa-wand-magic-sparkles"></i> Calculate & Plan</button>
+      </div>
+    </div>
+
+    <!-- Results Panel -->
+    <div class="results-wrapper" id="resultsSection">
+      
+      <!-- Top Target Banner -->
+      <div class="targets-header-card">
+        <div class="target-box">
+          <div class="target-val calories" id="lblTargetCal">0</div>
+          <div class="target-label">Daily Calories</div>
+        </div>
+        <div class="target-box">
+          <div class="target-val protein" id="lblTargetP">0g</div>
+          <div class="target-label">Protein</div>
+        </div>
+        <div class="target-box">
+          <div class="target-val fat" id="lblTargetF">0g</div>
+          <div class="target-label">Fat</div>
+        </div>
+        <div class="target-box">
+          <div class="target-val carbs" id="lblTargetC">0g</div>
+          <div class="target-label">Carbohydrates</div>
+        </div>
+        <div class="target-box">
+          <div class="target-val" id="lblTargetFib" style="color: #7c3aed;">0g</div>
+          <div class="target-label">Fiber</div>
+        </div>
+      </div>
+
+      <!-- Meal Cards Grid -->
+      <h2 class="section-title"><i class="fa-solid fa-plate-wheat"></i> Daily Meal Plates</h2>
+      <div class="meals-grid" id="mealsGridContainer">
+        <!-- JS generates meal cards here -->
+      </div>
+
+      <!-- Complete Alternatives -->
+      <h2 class="section-title"><i class="fa-solid fa-arrows-spin"></i> Complete Meal Alternatives</h2>
+      <div class="meals-grid" id="alternativesContainer">
+        <!-- JS generates alternative plans here -->
+      </div>
+
+      <!-- Master Food Replacement Table -->
+      <h2 class="section-title"><i class="fa-solid fa-right-left"></i> Master Food Replacement Table</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Original Food</th>
+              <th>Original Qty</th>
+              <th>Replacement Food</th>
+              <th>Replacement Qty</th>
+              <th>Calories</th>
+              <th>Protein</th>
+              <th>Carbs</th>
+              <th>Fat</th>
+              <th>Fiber</th>
+              <th>Suitable For</th>
+            </tr>
+          </thead>
+          <tbody id="replacementTableBody">
+            <!-- Dynamic rows inserted here -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Self Validation Engine Report -->
+      <h2 class="section-title"><i class="fa-solid fa-shield-halved"></i> Engine Self-Validation Log</h2>
+      <div class="validation-card">
+        <div class="validation-grid" id="validationGrid">
+          <!-- Dynamically inserted logs -->
+        </div>
+      </div>
+
+      <!-- PDF Download and Back buttons -->
+      <div class="results-cta">
+        <button class="btn-primary" onclick="downloadDietPDF()"><i class="fa-solid fa-file-pdf"></i> Export Diet PDF</button>
+        <button class="btn-primary" style="background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border-color); box-shadow: none;" onclick="resetWizard()"><i class="fa-solid fa-arrow-left"></i> Adjust Settings</button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // In-memory active values
+    let activeGender = 'Male';
+    let activeGoal = 'Weight Loss';
+    let activeFreq = '2–3 Days';
+    let activeLevel = 'Beginner';
+    let activeFoodPref = 'Non-Vegetarian';
+    let activeCuisine = 'Mixed Indian';
+    
+    // Setup wizard button selections
+    function setupGridListeners(gridId, callback) {
+      const cards = document.querySelectorAll(`#${gridId} .option-card`);
+      cards.forEach(card => {
+        card.addEventListener('click', () => {
+          document.querySelectorAll(`#${gridId} .option-card`).forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+          callback(card.getAttribute('data-val'));
+        });
+      });
+    }
+
+    setupGridListeners('genderGrid', val => activeGender = val);
+    setupGridListeners('goalGrid', val => activeGoal = val);
+    setupGridListeners('freqGrid', val => activeFreq = val);
+    setupGridListeners('levelGrid', val => activeLevel = val);
+    setupGridListeners('foodPrefGrid', val => activeFoodPref = val);
+    setupGridListeners('cuisineGrid', val => activeCuisine = val);
+
+    // Preferred food multi-select tags
+    const foodTags = document.querySelectorAll('#prefFoodsGrid .food-tag-card');
+    foodTags.forEach(tag => {
+      tag.addEventListener('click', () => {
+        tag.classList.toggle('active');
+      });
+    });
+
+    function getSelectedPreferredFoods() {
+      const activeTags = document.querySelectorAll('#prefFoodsGrid .food-tag-card.active');
+      return Array.from(activeTags).map(t => t.getAttribute('data-val'));
+    }
+
+    function resetWizard() {
+      document.getElementById('resultsSection').style.display = 'none';
+      document.getElementById('wizardSection').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ==========================================
+    // NUTRITION DATABASE
+    // Values per 1 gram or unit
+    // ==========================================
+    const FOOD_DB = {
+      // CARBS
+      rice: { name: "Cooked White Rice", type: "carb", cal: 1.30, p: 0.027, c: 0.28, f: 0.003, fib: 0.004, unit: "g", min: 80, max: 400 },
+      brown_rice: { name: "Cooked Brown Rice", type: "carb", cal: 1.11, p: 0.026, c: 0.23, f: 0.009, fib: 0.018, unit: "g", min: 80, max: 400 },
+      chapati: { name: "Whole Wheat Chapati", type: "carb", cal: 2.67, p: 0.08, c: 0.53, f: 0.011, fib: 0.08, unit: "g", min: 40, max: 240 },
+      bread: { name: "Brown Bread", type: "carb", cal: 2.65, p: 0.09, c: 0.43, f: 0.042, fib: 0.06, unit: "g", min: 28, max: 140 },
+      oats: { name: "Oats (Dry)", type: "carb", cal: 3.89, p: 0.169, c: 0.66, f: 0.069, fib: 0.106, unit: "g", min: 30, max: 150 },
+      sweet_potato: { name: "Sweet Potato (Boiled)", type: "carb", cal: 0.86, p: 0.016, c: 0.20, f: 0.001, fib: 0.03, unit: "g", min: 50, max: 300 },
+      banana: { name: "Banana", type: "fruit", cal: 0.89, p: 0.011, c: 0.23, f: 0.003, fib: 0.026, unit: "g", min: 50, max: 200 },
+      apple: { name: "Apple", type: "fruit", cal: 0.52, p: 0.003, c: 0.14, f: 0.002, fib: 0.024, unit: "g", min: 50, max: 200 },
+      poha: { name: "Poha (Cooked)", type: "carb", cal: 1.30, p: 0.025, c: 0.29, f: 0.003, fib: 0.01, unit: "g", min: 50, max: 250 },
+      idli: { name: "Idli", type: "carb", cal: 1.50, p: 0.04, c: 0.32, f: 0.005, fib: 0.015, unit: "g", min: 70, max: 210 },
+      dosa: { name: "Dosa (Plain)", type: "carb", cal: 1.65, p: 0.035, c: 0.32, f: 0.025, fib: 0.01, unit: "g", min: 60, max: 180 },
+
+      // PROTEINS
+      chicken: { name: "Chicken Breast (Cooked)", type: "protein", cal: 1.65, p: 0.31, c: 0.0, f: 0.036, fib: 0.0, unit: "g", min: 60, max: 250 },
+      fish: { name: "Rohu / Surmai Fish (Grilled)", type: "protein", cal: 1.40, p: 0.20, c: 0.0, f: 0.06, fib: 0.0, unit: "g", min: 60, max: 250 },
+      eggs: { name: "Whole Eggs (Boiled)", type: "protein", cal: 1.55, p: 0.13, c: 0.011, f: 0.11, fib: 0.0, unit: "g", min: 50, max: 250 },
+      egg_whites: { name: "Egg Whites", type: "protein", cal: 0.52, p: 0.11, c: 0.007, f: 0.002, fib: 0.0, unit: "g", min: 33, max: 330 },
+      paneer: { name: "Paneer", type: "protein", cal: 2.65, p: 0.18, c: 0.02, f: 0.20, fib: 0.0, unit: "g", min: 50, max: 250 },
+      paneer_bhurji: { name: "Paneer Bhurji", type: "protein", cal: 2.0, p: 0.14, c: 0.03, f: 0.15, fib: 0.01, unit: "g", min: 50, max: 250 },
+      soya: { name: "Soya Chunks (Dry)", type: "protein", cal: 3.45, p: 0.52, c: 0.33, f: 0.005, fib: 0.13, unit: "g", min: 20, max: 120 },
+      dal: { name: "Dal (Cooked)", type: "protein", cal: 1.16, p: 0.09, c: 0.20, f: 0.004, fib: 0.05, unit: "g", min: 50, max: 300 },
+      milk: { name: "Milk", type: "protein", cal: 0.61, p: 0.032, c: 0.048, f: 0.033, fib: 0.0, unit: "ml", min: 100, max: 400 },
+      curd: { name: "Low Fat Curd", type: "protein", cal: 0.43, p: 0.037, c: 0.047, f: 0.01, fib: 0.0, unit: "g", min: 50, max: 300 },
+
+      // FATS
+      pb: { name: "Peanut Butter", type: "fat", cal: 5.88, p: 0.25, c: 0.20, f: 0.50, fib: 0.06, unit: "g", min: 5, max: 40 },
+      almonds: { name: "Almonds", type: "fat", cal: 5.79, p: 0.21, c: 0.22, f: 0.49, fib: 0.12, unit: "g", min: 5, max: 45 },
+      peanuts: { name: "Peanuts", type: "fat", cal: 5.67, p: 0.26, c: 0.16, f: 0.49, fib: 0.09, unit: "g", min: 5, max: 45 },
+      ghee: { name: "Pure Ghee", type: "fat", cal: 9.00, p: 0.0, c: 0.0, f: 1.0, fib: 0.0, unit: "g", min: 2, max: 15 },
+
+      // VEGGIES
+      veg_curry: { name: "Mixed Vegetable Curry", type: "veg", cal: 0.65, p: 0.02, c: 0.10, f: 0.02, fib: 0.03, unit: "g", min: 50, max: 200 },
+      salad: { name: "Carrot & Cucumber Salad", type: "veg", cal: 0.15, p: 0.006, c: 0.036, f: 0.001, fib: 0.015, unit: "g", min: 50, max: 200 }
+    };
+
+    const fmt = {
+      kcal: (v) => Number.isFinite(v) ? `${Math.round(v)} kcal` : "—",
+      g1: (v) => Number.isFinite(v) ? `${(Math.round(v * 10) / 10).toFixed(1)}g` : "—",
+      qty: (v, unit="g") => Number.isFinite(v) ? `${Math.round(v)} ${unit}` : "—",
+      num1: (v) => Number.isFinite(v) ? (Math.round(v * 10) / 10).toFixed(1) : "—"
+    };
+
+    const PRACTICAL_RULES = {
+      snack: {
+        pbMin: 10,
+        pbPreferred: 15,
+        pbBreadRatioMin: 0.12,
+        bananaMaxWithBread: 150,
+        minFatPerSnack: 8
+      },
+      breakfast: {
+        oatsHighThreshold: 80,
+        minMilkWithHighOats: 200,
+        minEggsWithHighOats: 100,
+        minPaneerWithHighOats: 60,
+        pbMinIfPresent: 10
+      },
+      lunchDinner: {
+        minChicken: 90,
+        minFish: 90,
+        minPaneer: 70,
+        minDalMajor: 120,
+        minCurdIfIncluded: 80
+      },
+      distribution: {
+        minFatCalorieSharePerMeal: 0.15,
+        minFatCalorieSharePerMealByGoal: {
+          "Weight Loss": 0.10,
+          "Body Recomposition": 0.12,
+          "Maintenance": 0.15,
+          "Lean Muscle Gain": 0.15,
+          "Weight Gain": 0.15
+        },
+        maxSingleItemCalorieShare: 0.70
+      },
+      tolerances: {
+        cal: 20,
+        protein: 2,
+        fat: 2,
+        carbs: 5,
+        fiber: 5
+      }
+    };
+
+    // Store generated plans globally for PDF export
+    let latestReport = null;
+
+    // ==========================================
+    // MATH CALCULATIONS
+    // ==========================================
+    function calculateDailyTargets() {
+      const age = parseInt(document.getElementById('inputAge').value) || 28;
+      const height = parseFloat(document.getElementById('inputHeight').value) || 175;
+      const weight = parseFloat(document.getElementById('inputWeight').value) || 72;
+      const bodyFat = parseFloat(document.getElementById('inputBodyFat').value) || 16;
+      
+      // Maintenance Calories (Mifflin-St Jeor)
+      let bmr = 0;
+      if (activeGender === 'Male') {
+        bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+      } else {
+        bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+      }
+
+      const activityMultipliers = {
+        '0–1 Days': 1.2,
+        '2–3 Days': 1.375,
+        '4–5 Days': 1.55,
+        '6–7 Days': 1.725
+      };
+      const multiplier = activityMultipliers[activeFreq] || 1.375;
+      const maintenanceCal = bmr * multiplier;
+
+      // Goal Calories
+      let goalAdjustment = 0;
+      if (activeGoal === 'Weight Loss') goalAdjustment = -500;
+      else if (activeGoal === 'Lean Muscle Gain') goalAdjustment = 300;
+      else if (activeGoal === 'Weight Gain') goalAdjustment = 500;
+      else if (activeGoal === 'Body Recomposition') goalAdjustment = -200;
+      
+      const targetCalories = maintenanceCal + goalAdjustment;
+
+      // Protein Calculation
+      let targetProtein = 0;
+      let multiplierP = 0;
+      if (activeLevel === 'Beginner') multiplierP = 1.6;
+      else if (activeLevel === 'Intermediate') multiplierP = 1.9;
+      else if (activeLevel === 'Advanced') multiplierP = 2.2;
+
+      if (bodyFat > 25) {
+        const leanBodyMass = weight * (1 - bodyFat / 100);
+        targetProtein = leanBodyMass * multiplierP;
+      } else {
+        targetProtein = weight * multiplierP;
+      }
+      const proteinCalories = targetProtein * 4;
+
+      // Fat Calculation
+      let multiplierF = 0;
+      if (activeLevel === 'Beginner') multiplierF = 0.6;
+      else if (activeLevel === 'Intermediate') multiplierF = 0.8;
+      else if (activeLevel === 'Advanced') multiplierF = 1.0;
+
+      const targetFat = weight * multiplierF;
+      const fatCalories = targetFat * 9;
+
+      // Carbohydrates Calculation
+      const remainingCalories = targetCalories - (proteinCalories + fatCalories);
+      const targetCarbs = remainingCalories / 4;
+
+      // Fiber Calculation
+      let targetFiber = 0;
+      if (activeGender === 'Male') {
+        targetFiber = Math.max(30, 14 * targetCalories / 1000);
+      } else {
+        targetFiber = Math.max(25, 14 * targetCalories / 1000);
+      }
+
+      return {
+        goal: activeGoal,
+        age, height, weight, bodyFat,
+        bmr: Math.round(bmr),
+        maintenanceCal: Math.round(maintenanceCal),
+        targetCalories: Math.round(targetCalories),
+        protein: Math.round(targetProtein * 10) / 10,
+        proteinCalories: Math.round(proteinCalories),
+        fat: Math.round(targetFat * 10) / 10,
+        fatCalories: Math.round(fatCalories),
+        carbs: Math.round(targetCarbs * 10) / 10,
+        carbsCalories: Math.round(targetCarbs * 4),
+        fiber: Math.round(targetFiber * 10) / 10
+      };
+    }
+
+    // ==========================================
+    // MEAL TEMPLATE GENERATOR
+    // ==========================================
+    function isFoodAllowed(key, avoidedList) {
+      const food = FOOD_DB[key];
+      if (!food) return false;
+      
+      // Check diets
+      if (activeFoodPref === 'Vegetarian') {
+        if (['chicken', 'fish', 'eggs', 'egg_whites'].includes(key)) return false;
+      } else if (activeFoodPref === 'Eggetarian') {
+        if (['chicken', 'fish'].includes(key)) return false;
+      }
+      
+      // Check avoided words
+      const matchesAvoid = avoidedList.some(word => food.name.toLowerCase().includes(word.toLowerCase()));
+      if (matchesAvoid) return false;
+
+      return true;
+    }
+
+    function pickMealFood(type, choices, fallback, preferredFoods, avoidedList) {
+      const allowedChoices = choices.filter(k => isFoodAllowed(k, avoidedList));
+      if (allowedChoices.length === 0) {
+        const allowedFallback = fallback.filter(k => isFoodAllowed(k, avoidedList));
+        if (allowedFallback.length === 0) {
+          const anyAllowed = Object.keys(FOOD_DB).filter(k => FOOD_DB[k].type === type && isFoodAllowed(k, avoidedList));
+          return anyAllowed[0] || null;
+        }
+        return allowedFallback[0];
+      }
+      // Prioritize user selected foods
+      const preferred = allowedChoices.filter(k => {
+        const f = FOOD_DB[k];
+        return preferredFoods.some(pf => f.name.toLowerCase().includes(pf.toLowerCase()));
+      });
+      if (preferred.length > 0) return preferred[0];
+      return allowedChoices[0];
+    }
+
+    function getOriginalTemplates(preferredFoods, avoidedList) {
+      // 1. Breakfast
+      let bfCarbChoices = (activeCuisine === 'South Indian') ? ['idli', 'dosa', 'poha', 'oats'] : ['oats', 'bread', 'poha'];
+      let bfCarb = pickMealFood('carb', bfCarbChoices, ['oats', 'bread'], preferredFoods, avoidedList);
+      
+      let bfProteinChoices = (activeFoodPref === 'Vegetarian') ? ['milk', 'paneer'] : ['eggs', 'egg_whites', 'milk'];
+      let bfProtein = pickMealFood('protein', bfProteinChoices, ['milk', 'eggs'], preferredFoods, avoidedList);
+      let bfFat = pickMealFood('fat', ['pb', 'almonds', 'peanuts'], ['pb'], preferredFoods, avoidedList);
+      let bfFruit = pickMealFood('fruit', ['banana', 'apple'], ['banana'], preferredFoods, avoidedList);
+      
+      // 2. Lunch
+      let lunchCarbChoices = (activeCuisine === 'North Indian') ? ['chapati'] : ['rice', 'brown_rice', 'chapati'];
+      let lunchCarb = pickMealFood('carb', lunchCarbChoices, ['rice', 'chapati'], preferredFoods, avoidedList);
+      
+      let lunchProteinChoices = (activeFoodPref === 'Non-Vegetarian') ? ['chicken', 'fish'] : ['paneer', 'soya', 'dal'];
+      let lunchProtein = pickMealFood('protein', lunchProteinChoices, ['paneer', 'dal'], preferredFoods, avoidedList);
+      let lunchCurd = isFoodAllowed('curd', avoidedList) ? 'curd' : null;
+      let lunchVeg1 = isFoodAllowed('veg_curry', avoidedList) ? 'veg_curry' : null;
+      let lunchVeg2 = isFoodAllowed('salad', avoidedList) ? 'salad' : null;
+
+      // 3. Snack
+      let snackCarb = pickMealFood('carb', ['bread', 'sweet_potato', 'oats'], ['bread', 'sweet_potato'], preferredFoods, avoidedList);
+      let snackFat = pickMealFood('fat', ['pb', 'almonds', 'peanuts'], ['pb'], preferredFoods, avoidedList);
+      let snackFruit = pickMealFood('fruit', ['apple', 'banana'], ['apple'], preferredFoods, avoidedList);
+
+      // 4. Dinner
+      let dinnerCarbChoices = (activeCuisine === 'North Indian') ? ['chapati'] : ['chapati', 'rice'];
+      let dinnerCarb = pickMealFood('carb', dinnerCarbChoices, ['chapati', 'rice'], preferredFoods, avoidedList);
+      
+      let dinnerProteinChoices = (activeFoodPref === 'Non-Vegetarian') ? ['chicken', 'paneer_bhurji', 'eggs'] : ['paneer_bhurji', 'paneer', 'dal', 'soya'];
+      let dinnerProtein = pickMealFood('protein', dinnerProteinChoices, ['paneer_bhurji', 'dal'], preferredFoods, avoidedList);
+      let dinnerCurd = isFoodAllowed('curd', avoidedList) ? 'curd' : null;
+      let dinnerVeg1 = isFoodAllowed('veg_curry', avoidedList) ? 'veg_curry' : null;
+      let dinnerVeg2 = isFoodAllowed('salad', avoidedList) ? 'salad' : null;
+
+      return {
+        breakfast: [bfCarb, bfProtein, bfFat, bfFruit].filter(Boolean),
+        lunch: [lunchCarb, lunchProtein, lunchCurd, lunchVeg1, lunchVeg2].filter(Boolean),
+        snack: [snackCarb, snackFat, snackFruit].filter(Boolean),
+        dinner: [dinnerCarb, dinnerProtein, dinnerCurd, dinnerVeg1, dinnerVeg2].filter(Boolean)
+      };
+    }
+
+    // ==========================================
+    // GLOBAL COORDINATE DESCENT OPTIMIZER
+    // ==========================================
+    function getPracticalMin(mealKey, foodKey, templates, targets) {
+      const fd = FOOD_DB[foodKey];
+      let newMin = fd.min;
+      const targetCalVal = targets.targetCalories || targets.cal;
+
+      if (mealKey.toLowerCase() === 'snack') {
+        const r = PRACTICAL_RULES.snack;
+        if (foodKey === 'pb') {
+          const hasBread = templates.snack.includes('bread');
+          const estimatedBread = 60;
+          const targetPBMin = targetCalVal > 2000 ? r.pbPreferred : r.pbMin;
+          let pbMinFromBread = Math.max(targetPBMin, r.pbBreadRatioMin * estimatedBread);
+          const neededPBFromFat = Math.ceil(r.minFatPerSnack / 0.50);
+          newMin = Math.max(pbMinFromBread, neededPBFromFat);
+        }
+        if (foodKey === 'almonds') {
+          newMin = Math.ceil(r.minFatPerSnack / 0.49);
+        }
+        if (foodKey === 'peanuts') {
+          newMin = Math.ceil(r.minFatPerSnack / 0.49);
+        }
+      }
+      
+      if (mealKey.toLowerCase() === 'breakfast') {
+        const r = PRACTICAL_RULES.breakfast;
+        const hasOats = templates.breakfast.includes('oats');
+        if (hasOats) {
+          if (foodKey === 'milk') newMin = r.minMilkWithHighOats;
+          if (foodKey === 'eggs') newMin = r.minEggsWithHighOats;
+          if (foodKey === 'paneer') newMin = r.minPaneerWithHighOats;
+        }
+        if (foodKey === 'pb') newMin = r.pbMinIfPresent;
+      }
+      
+      if (mealKey.toLowerCase() === 'lunch' || mealKey.toLowerCase() === 'dinner') {
+        const r = PRACTICAL_RULES.lunchDinner;
+        if (foodKey === 'chicken') newMin = r.minChicken;
+        if (foodKey === 'fish') newMin = r.minFish;
+        if (foodKey === 'paneer') newMin = r.minPaneer;
+        if (foodKey === 'paneer_bhurji') newMin = r.minPaneer;
+        if (foodKey === 'dal') {
+          const hasOtherProtein = templates[mealKey].some(x => ['chicken', 'fish', 'paneer', 'paneer_bhurji', 'soya', 'eggs'].includes(x));
+          if (!hasOtherProtein) newMin = r.minDalMajor;
+        }
+        if (foodKey === 'curd') newMin = r.minCurdIfIncluded;
+      }
+      
+      return newMin;
+    }
+
+    function runGlobalOptimization(templates, targets) {
+      let state = [];
+      const mealIndices = ['breakfast', 'lunch', 'snack', 'dinner'];
+      
+      mealIndices.forEach((mealKey, mealIndex) => {
+        templates[mealKey].forEach(foodKey => {
+          const fd = FOOD_DB[foodKey];
+          const pMin = getPracticalMin(mealKey, foodKey, templates, targets);
+          state.push({
+            mealIndex,
+            key: foodKey,
+            qty: (pMin + fd.max) / 2,
+            min: pMin,
+            max: fd.max,
+            cal: fd.cal,
+            p: fd.p,
+            c: fd.c,
+            f: fd.f,
+            fib: fd.fib
+          });
+        });
+      });
+
+      function getLoss(st, weights) {
+        let totalP = 0, totalC = 0, totalF = 0, totalFib = 0;
+        let mealCal = [0, 0, 0, 0];
+        let mealF = [0, 0, 0, 0];
+        
+        st.forEach(s => {
+          totalP += s.qty * s.p;
+          totalC += s.qty * s.c;
+          totalF += s.qty * s.f;
+          totalFib += s.qty * s.fib;
+          mealCal[s.mealIndex] += s.qty * s.cal;
+          mealF[s.mealIndex] += s.qty * s.f;
+        });
+
+        let totalCal = totalP * 4 + totalC * 4 + totalF * 9;
+        
+        let dCal = totalCal - targets.targetCalories;
+        let dP = totalP - targets.protein;
+        let dC = totalC - targets.carbs;
+        let dF = totalF - targets.fat;
+        let dFib = totalFib - targets.fiber;
+        
+        let targetLoss = (dCal * dCal * weights.cal) + 
+                         (dP * dP * weights.p) + 
+                         (dC * dC * weights.c) + 
+                         (dF * dF * weights.f) + 
+                         (dFib * dFib * weights.fib);
+        
+        const mealRatios = [0.25, 0.35, 0.15, 0.25];
+        let ratioLoss = 0;
+        for (let i = 0; i < 4; i++) {
+          const targetMealCal = targets.targetCalories * mealRatios[i];
+          const dMealCal = mealCal[i] - targetMealCal;
+          ratioLoss += dMealCal * dMealCal * 0.25;
+        }
+
+        let penaltyLoss = 0;
+        const dist = PRACTICAL_RULES.distribution;
+        
+        for (let i = 0; i < 4; i++) {
+          const mealFoods = st.filter(s => s.mealIndex === i);
+          const qtyMap = {};
+          mealFoods.forEach(s => { qtyMap[s.key] = s.qty; });
+          
+          const has = (key) => qtyMap[key] !== undefined && qtyMap[key] > 0;
+          const getQty = (key) => qtyMap[key] || 0;
+
+          const mCal = mealCal[i];
+          const mF = mealF[i];
+
+          const fatCal = mF * 9;
+          const currentGoal = targets.goal || (typeof activeGoal !== 'undefined' ? activeGoal : 'Maintenance');
+          const minFatShareThreshold = dist.minFatCalorieSharePerMealByGoal[currentGoal] !== undefined
+            ? dist.minFatCalorieSharePerMealByGoal[currentGoal]
+            : dist.minFatCalorieSharePerMeal;
+          if (mCal > 0) {
+            const fatShare = fatCal / mCal;
+            if (fatShare < minFatShareThreshold) {
+              const diff = (minFatShareThreshold * mCal) - fatCal;
+              penaltyLoss += diff * diff * 2.0;
+            }
+          }
+
+          mealFoods.forEach(s => {
+            const itemCal = s.qty * s.cal;
+            if (mCal > 0) {
+              const share = itemCal / mCal;
+              if (share > dist.maxSingleItemCalorieShare) {
+                const diff = itemCal - (dist.maxSingleItemCalorieShare * mCal);
+                penaltyLoss += diff * diff * 2.0;
+              }
+            }
+          });
+
+          if (i === 0) {
+            const r = PRACTICAL_RULES.breakfast;
+            if (has('oats') && getQty('oats') > r.oatsHighThreshold) {
+              let companionDiff = 0;
+              if (has('milk')) companionDiff = Math.max(0, r.minMilkWithHighOats - getQty('milk'));
+              else if (has('eggs')) companionDiff = Math.max(0, r.minEggsWithHighOats - getQty('eggs'));
+              else if (has('paneer')) companionDiff = Math.max(0, r.minPaneerWithHighOats - getQty('paneer'));
+              if (companionDiff > 0) {
+                penaltyLoss += companionDiff * companionDiff * 15.0;
+              }
+            }
+            if (has('pb') && getQty('pb') < r.pbMinIfPresent) {
+              const diff = r.pbMinIfPresent - getQty('pb');
+              penaltyLoss += diff * diff * 25.0;
+            }
+          }
+
+          if (i === 1 || i === 3) {
+            const r = PRACTICAL_RULES.lunchDinner;
+            if (has('chicken') && getQty('chicken') < r.minChicken) {
+              const diff = r.minChicken - getQty('chicken');
+              penaltyLoss += diff * diff * 25.0;
+            }
+            if (has('fish') && getQty('fish') < r.minFish) {
+              const diff = r.minFish - getQty('fish');
+              penaltyLoss += diff * diff * 25.0;
+            }
+            if (has('paneer') && getQty('paneer') < r.minPaneer) {
+              const diff = r.minPaneer - getQty('paneer');
+              penaltyLoss += diff * diff * 25.0;
+            }
+            if (has('paneer_bhurji') && getQty('paneer_bhurji') < r.minPaneer) {
+              const diff = r.minPaneer - getQty('paneer_bhurji');
+              penaltyLoss += diff * diff * 25.0;
+            }
+            if (has('dal') && getQty('dal') < r.minDalMajor) {
+              const hasOtherProtein = has('chicken') || has('fish') || has('paneer') || has('paneer_bhurji') || has('soya') || has('eggs');
+              if (!hasOtherProtein) {
+                const diff = r.minDalMajor - getQty('dal');
+                penaltyLoss += diff * diff * 25.0;
+              }
+            }
+            if (has('curd') && getQty('curd') < r.minCurdIfIncluded) {
+              const diff = r.minCurdIfIncluded - getQty('curd');
+              penaltyLoss += diff * diff * 25.0;
+            }
+          }
+
+          if (i === 2) {
+            const r = PRACTICAL_RULES.snack;
+            if (has('bread') && has('pb')) {
+              const bread_g = getQty('bread');
+              const pb_g = getQty('pb');
+              const targetPBMin = targets.targetCalories > 2000 ? r.pbPreferred : r.pbMin;
+              const minPB = Math.max(targetPBMin, r.pbBreadRatioMin * bread_g);
+              if (pb_g < minPB) {
+                const diff = minPB - pb_g;
+                penaltyLoss += diff * diff * 25.0;
+              }
+            }
+            if (getQty('bread') > 100) {
+              if (has('pb')) {
+                const pb_g = getQty('pb');
+                const almondsQty = getQty('almonds');
+                const peanutsQty = getQty('peanuts');
+                if (pb_g < 12 && almondsQty < 10 && peanutsQty < 10) {
+                  const diff = 12 - pb_g;
+                  penaltyLoss += diff * diff * 25.0;
+                }
+              }
+            }
+            if (has('bread') && has('banana') && getQty('banana') > r.bananaMaxWithBread) {
+              const diff = getQty('banana') - r.bananaMaxWithBread;
+              penaltyLoss += diff * diff * 25.0;
+            }
+            let currentFat = 0;
+            mealFoods.forEach(s => { currentFat += s.qty * s.f; });
+            if (currentFat < r.minFatPerSnack) {
+              const diff = r.minFatPerSnack - currentFat;
+              penaltyLoss += diff * diff * 250.0;
+            }
+          }
+        }
+
+        return targetLoss + ratioLoss + penaltyLoss;
+      }
+
+      let weights = { cal: 1, p: 25, c: 25, f: 100, fib: 25 };
+      let bestState = state.map(s => ({...s}));
+      let attempts = 0;
+      let targetsSatisfied = false;
+
+      while (!targetsSatisfied && attempts < 8) {
+        let currentBestLoss = getLoss(bestState, weights);
+        let steps = [15, 8, 4, 2, 1, 0.5, 0.1];
+        
+        for (let step of steps) {
+          let improved = true;
+          let iter = 0;
+          while (improved && iter < 120) {
+            improved = false;
+            iter++;
+            for (let i = 0; i < state.length; i++) {
+              const originalQty = state[i].qty;
+              
+              state[i].qty = Math.min(state[i].max, originalQty + step);
+              let lossUp = getLoss(state, weights);
+              if (lossUp < currentBestLoss) {
+                currentBestLoss = lossUp;
+                bestState = state.map(s => ({...s}));
+                improved = true;
+                continue;
+              }
+
+              state[i].qty = Math.max(state[i].min, originalQty - step);
+              let lossDown = getLoss(state, weights);
+              if (lossDown < currentBestLoss) {
+                currentBestLoss = lossDown;
+                bestState = state.map(s => ({...s}));
+                improved = true;
+                continue;
+              }
+
+              state[i].qty = originalQty;
+            }
+
+            for (let idx1 = 0; idx1 < state.length; idx1++) {
+              for (let idx2 = 0; idx2 < state.length; idx2++) {
+                if (idx1 === idx2) continue;
+                
+                const s1 = state[idx1];
+                const s2 = state[idx2];
+                const q1_orig = s1.qty;
+                const q2_orig = s2.qty;
+                
+                const step2 = step * (s1.cal / s2.cal);
+                
+                s1.qty = Math.min(s1.max, q1_orig + step);
+                s2.qty = Math.max(s2.min, q2_orig - step2);
+                let lossMut = getLoss(state, weights);
+                if (lossMut < currentBestLoss) {
+                  currentBestLoss = lossMut;
+                  bestState = state.map(s => ({...s}));
+                  improved = true;
+                  continue;
+                }
+                
+                s1.qty = Math.max(s1.min, q1_orig - step);
+                s2.qty = Math.min(s2.max, q2_orig + step2);
+                lossMut = getLoss(state, weights);
+                if (lossMut < currentBestLoss) {
+                  currentBestLoss = lossMut;
+                  bestState = state.map(s => ({...s}));
+                  improved = true;
+                  continue;
+                }
+                
+                s1.qty = q1_orig;
+                s2.qty = q2_orig;
+              }
+            }
+          }
+        }
+
+        let totalP = 0, totalC = 0, totalF = 0, totalFib = 0;
+        bestState.forEach(s => {
+          totalP += s.qty * s.p;
+          totalC += s.qty * s.c;
+          totalF += s.qty * s.f;
+          totalFib += s.qty * s.fib;
+        });
+        let totalCal = totalP * 4 + totalC * 4 + totalF * 9;
+
+        const errCal = Math.abs(totalCal - targets.targetCalories);
+        const errP = Math.abs(totalP - targets.protein);
+        const errC = Math.abs(totalC - targets.carbs);
+        const errF = Math.abs(totalF - targets.fat);
+        const errFib = Math.abs(totalFib - targets.fiber);
+
+        const t = PRACTICAL_RULES.tolerances;
+        if (errCal <= t.cal && errP <= t.protein && errF <= t.fat && errC <= t.carbs && errFib <= t.fiber) {
+          targetsSatisfied = true;
+        } else {
+          if (errCal > t.cal) weights.cal *= 8;
+          if (errP > t.protein) weights.p *= 8;
+          if (errC > t.carbs) weights.c *= 8;
+          if (errF > t.fat) weights.f *= 8;
+          if (errFib > t.fiber) weights.fib *= 8;
+          
+          state = bestState.map(s => ({...s}));
+          attempts++;
+        }
+      }
+
+      const finalMeals = [
+        { name: "Breakfast", foods: [] },
+        { name: "Lunch", foods: [] },
+        { name: "Snack", foods: [] },
+        { name: "Dinner", foods: [] }
+      ];
+
+      bestState.forEach(s => {
+        const roundedQty = Math.round(s.qty);
+        const mealObj = finalMeals[s.mealIndex];
+        const foodItem = FOOD_DB[s.key];
+        
+        mealObj.foods.push({
+          key: s.key,
+          name: foodItem.name,
+          qty: roundedQty,
+          unit: foodItem.unit,
+          cal: Math.round(roundedQty * s.cal),
+          p: Math.round(roundedQty * s.p * 10) / 10,
+          c: Math.round(roundedQty * s.c * 10) / 10,
+          f: Math.round(roundedQty * s.f * 10) / 10,
+          fib: Math.round(roundedQty * s.fib * 10) / 10
+        });
+      });
+
+      finalMeals.forEach(meal => {
+        let cal = 0, p = 0, c = 0, f = 0, fib = 0;
+        meal.foods.forEach(food => {
+          cal += food.cal;
+          p += food.p;
+          c += food.c;
+          f += food.f;
+          fib += food.fib;
+        });
+        meal.totals = {
+          cal: Math.round(cal),
+          p: Math.round(p * 10) / 10,
+          c: Math.round(c * 10) / 10,
+          f: Math.round(f * 10) / 10,
+          fib: Math.round(fib * 10) / 10
+        };
+      });
+
+      return finalMeals;
+    }
+
+    // ==========================================
+    // PRACTICAL Completeness & Rebalancing Layer
+    // ==========================================
+    function scorePracticality(meals, goal) {
+      let warnings = [];
+      const currentGoal = goal || (typeof activeGoal !== 'undefined' ? activeGoal : 'Maintenance');
+      const dist = PRACTICAL_RULES.distribution;
+      const minFatShareThreshold = dist.minFatCalorieSharePerMealByGoal[currentGoal] !== undefined
+        ? dist.minFatCalorieSharePerMealByGoal[currentGoal]
+        : dist.minFatCalorieSharePerMeal;
+      meals.forEach(meal => {
+        const foods = meal.foods;
+        const foodMap = {};
+        foods.forEach(f => { foodMap[f.key] = f.qty; });
+
+        const has = (key) => foodMap[key] !== undefined && foodMap[key] > 0;
+        const qty = (key) => foodMap[key] || 0;
+
+        if (meal.name.toLowerCase() === 'snack') {
+          const r = PRACTICAL_RULES.snack;
+          if (has('bread') && has('pb')) {
+            const bread_g = qty('bread');
+            const pb_g = qty('pb');
+            const minPB = Math.max(r.pbMin, r.pbBreadRatioMin * bread_g);
+            if (pb_g < minPB) {
+              warnings.push({
+                mealName: meal.name,
+                message: `Peanut butter portion is too low (${pb_g}g) for bread (${bread_g}g). Needs to be at least ${Math.round(minPB)}g.`,
+                rule: 'snack_pb_ratio'
+              });
+            }
+          }
+          if (qty('bread') > 100) {
+            const pb_g = qty('pb');
+            const almonds_g = qty('almonds');
+            const peanuts_g = qty('peanuts');
+            const hasAltFat = almonds_g >= 10 || peanuts_g >= 10;
+            if (pb_g < 12 && !hasAltFat) {
+              warnings.push({
+                mealName: meal.name,
+                message: `Snack with >100g bread requires either peanut butter >= 12g or almonds/peanuts >= 10g.`,
+                rule: 'snack_high_bread_fat'
+              });
+            }
+          }
+          if (has('bread') && has('banana') && qty('banana') > r.bananaMaxWithBread) {
+            warnings.push({
+              mealName: meal.name,
+              message: `Banana portion (${qty('banana')}g) exceeds snack cap with bread. Cap at ${r.bananaMaxWithBread}g.`,
+              rule: 'snack_banana_cap'
+            });
+          }
+          let snackFat = 0;
+          foods.forEach(f => {
+            snackFat += f.qty * FOOD_DB[f.key].f;
+          });
+          if (snackFat < r.minFatPerSnack) {
+            warnings.push({
+              mealName: meal.name,
+              message: `Snack fat is too low (${snackFat.toFixed(1)}g). Needs at least ${r.minFatPerSnack}g to prevent a dry meal.`,
+              rule: 'snack_min_fat'
+            });
+          }
+        }
+
+        if (meal.name.toLowerCase() === 'breakfast') {
+          const r = PRACTICAL_RULES.breakfast;
+          if (has('oats') && qty('oats') > r.oatsHighThreshold) {
+            const milkOk = has('milk') && qty('milk') >= r.minMilkWithHighOats;
+            const eggsOk = has('eggs') && qty('eggs') >= r.minEggsWithHighOats;
+            const paneerOk = has('paneer') && qty('paneer') >= r.minPaneerWithHighOats;
+            if (!milkOk && !eggsOk && !paneerOk) {
+              warnings.push({
+                mealName: meal.name,
+                message: `Oats > ${r.oatsHighThreshold}g requires companion protein: Milk >= 200ml, Eggs >= 100g, or Paneer >= 60g.`,
+                rule: 'breakfast_high_oats_protein'
+              });
+            }
+          }
+          if (has('pb') && qty('pb') < r.pbMinIfPresent) {
+            warnings.push({
+              mealName: meal.name,
+              message: `Peanut butter portion is too low (${qty('pb')}g). Enforce min ${r.pbMinIfPresent}g if present.`,
+              rule: 'breakfast_pb_min'
+            });
+          }
+        }
+
+        if (meal.name.toLowerCase() === 'lunch' || meal.name.toLowerCase() === 'dinner') {
+          const r = PRACTICAL_RULES.lunchDinner;
+          if (has('chicken') && qty('chicken') < r.minChicken) {
+            warnings.push({
+              mealName: meal.name,
+              message: `Chicken Breast portion is too low (${qty('chicken')}g). Enforce min ${r.minChicken}g.`,
+              rule: 'main_chicken_min'
+            });
+          }
+          if (has('fish') && qty('fish') < r.minFish) {
+            warnings.push({
+              mealName: meal.name,
+              message: `Fish portion is too low (${qty('fish')}g). Enforce min ${r.minFish}g.`,
+              rule: 'main_fish_min'
+            });
+          }
+          if (has('paneer') && qty('paneer') < r.minPaneer) {
+            warnings.push({
+              mealName: meal.name,
+              message: `Paneer portion is too low (${qty('paneer')}g). Enforce min ${r.minPaneer}g.`,
+              rule: 'main_paneer_min'
+            });
+          }
+          if (has('paneer_bhurji') && qty('paneer_bhurji') < r.minPaneer) {
+            warnings.push({
+              mealName: meal.name,
+              message: `Paneer Bhurji portion is too low (${qty('paneer_bhurji')}g). Enforce min ${r.minPaneer}g.`,
+              rule: 'main_paneer_bhurji_min'
+            });
+          }
+          if (has('dal') && qty('dal') < r.minDalMajor) {
+            const hasOtherProtein = has('chicken') || has('fish') || has('paneer') || has('paneer_bhurji') || has('soya') || has('eggs');
+            if (!hasOtherProtein) {
+              warnings.push({
+                mealName: meal.name,
+                message: `Dal portion is too low (${qty('dal')}g) as major protein source. Enforce min ${r.minDalMajor}g.`,
+                rule: 'main_dal_major_min'
+              });
+            }
+          }
+          if (has('curd') && qty('curd') < r.minCurdIfIncluded) {
+            warnings.push({
+              mealName: meal.name,
+              message: `Curd portion is too low (${qty('curd')}g). Enforce min ${r.minCurdIfIncluded}g if included.`,
+              rule: 'main_curd_min'
+            });
+          }
+
+          let hasCarb = foods.some(f => FOOD_DB[f.key].type === 'carb');
+          let hasProtein = foods.some(f => FOOD_DB[f.key].type === 'protein');
+          let hasVeg = foods.some(f => FOOD_DB[f.key].type === 'veg');
+          if (!hasCarb || !hasProtein || !hasVeg) {
+            warnings.push({
+              mealName: meal.name,
+              message: `Meal must contain a carb base, a major protein, and a vegetable/fiber component.`,
+              rule: 'main_completeness'
+            });
+          }
+        }
+
+        const mealTotals = meal.totals;
+        const fatCal = mealTotals.f * 9;
+        const fatShare = fatCal / mealTotals.cal;
+        if (mealTotals.cal > 0 && fatShare < minFatShareThreshold) {
+          warnings.push({
+            mealName: meal.name,
+            message: `Fat calorie share is too low (${(fatShare*100).toFixed(1)}%). Enforce min ${(minFatShareThreshold*100).toFixed(0)}% of meal calories for goal '${currentGoal}'.`,
+            rule: 'dist_fat_share'
+          });
+        }
+
+        foods.forEach(f => {
+          const foodItem = FOOD_DB[f.key];
+          const itemCal = f.qty * foodItem.cal;
+          const itemShare = itemCal / mealTotals.cal;
+          if (mealTotals.cal > 0 && itemShare > dist.maxSingleItemCalorieShare) {
+            warnings.push({
+              mealName: meal.name,
+              message: `Single item '${f.name}' dominates meal calories (${(itemShare*100).toFixed(1)}%). Maximum allowed is ${(dist.maxSingleItemCalorieShare*100).toFixed(0)}%.`,
+              rule: 'dist_single_dominance'
+            });
+          }
+        });
+      });
+      return warnings;
+    }
+
+    function applyPracticalConstraints(meals, targets, context) {
+      let adjusted = false;
+      const targetCalVal = targets.targetCalories || targets.cal;
+
+      meals.forEach(meal => {
+        const foodMap = {};
+        meal.foods.forEach(f => { foodMap[f.key] = f; });
+
+        const has = (key) => foodMap[key] !== undefined && foodMap[key].qty > 0;
+        const getFood = (key) => foodMap[key];
+
+        if (meal.name.toLowerCase() === 'snack') {
+          const r = PRACTICAL_RULES.snack;
+          if (has('bread') && has('pb')) {
+            const bread = getFood('bread');
+            const pb = getFood('pb');
+            const targetPBMin = targetCalVal > 2000 ? r.pbPreferred : r.pbMin;
+            const requiredPB = Math.max(targetPBMin, r.pbBreadRatioMin * bread.qty);
+            if (pb.qty < requiredPB) {
+              pb.qty = Math.round(requiredPB);
+              adjusted = true;
+            }
+          }
+          if (has('bread') && getFood('bread').qty > 100) {
+            if (has('pb')) {
+              const pb = getFood('pb');
+              const almondsQty = has('almonds') ? getFood('almonds').qty : 0;
+              const peanutsQty = has('peanuts') ? getFood('peanuts').qty : 0;
+              if (pb.qty < 12 && almondsQty < 10 && peanutsQty < 10) {
+                pb.qty = 12;
+                adjusted = true;
+              }
+            }
+          }
+          if (has('bread') && has('banana')) {
+            const banana = getFood('banana');
+            if (banana.qty > r.bananaMaxWithBread) {
+              banana.qty = r.bananaMaxWithBread;
+              adjusted = true;
+            }
+          }
+          let currentFat = 0;
+          meal.foods.forEach(f => {
+            currentFat += f.qty * FOOD_DB[f.key].f;
+          });
+          if (currentFat < r.minFatPerSnack) {
+            if (has('pb')) {
+              const pb = getFood('pb');
+              const neededPB = Math.ceil(r.minFatPerSnack / 0.50);
+              if (pb.qty < neededPB) {
+                pb.qty = neededPB;
+                adjusted = true;
+              }
+            } else if (has('almonds')) {
+              const almonds = getFood('almonds');
+              const neededAlmonds = Math.ceil(r.minFatPerSnack / 0.49);
+              if (almonds.qty < neededAlmonds) {
+                almonds.qty = neededAlmonds;
+                adjusted = true;
+              }
+            }
+          }
+        }
+
+        if (meal.name.toLowerCase() === 'breakfast') {
+          const r = PRACTICAL_RULES.breakfast;
+          if (has('oats') && getFood('oats').qty > r.oatsHighThreshold) {
+            if (has('milk') && getFood('milk').qty < r.minMilkWithHighOats) {
+              getFood('milk').qty = r.minMilkWithHighOats;
+              adjusted = true;
+            } else if (has('eggs') && getFood('eggs').qty < r.minEggsWithHighOats) {
+              getFood('eggs').qty = r.minEggsWithHighOats;
+              adjusted = true;
+            } else if (has('paneer') && getFood('paneer').qty < r.minPaneerWithHighOats) {
+              getFood('paneer').qty = r.minPaneerWithHighOats;
+              adjusted = true;
+            }
+          }
+          if (has('pb') && getFood('pb').qty < r.pbMinIfPresent) {
+            getFood('pb').qty = r.pbMinIfPresent;
+            adjusted = true;
+          }
+        }
+
+        if (meal.name.toLowerCase() === 'lunch' || meal.name.toLowerCase() === 'dinner') {
+          const r = PRACTICAL_RULES.lunchDinner;
+          if (has('chicken') && getFood('chicken').qty < r.minChicken) {
+            getFood('chicken').qty = r.minChicken;
+            adjusted = true;
+          }
+          if (has('fish') && getFood('fish').qty < r.minFish) {
+            getFood('fish').qty = r.minFish;
+            adjusted = true;
+          }
+          if (has('paneer') && getFood('paneer').qty < r.minPaneer) {
+            getFood('paneer').qty = r.minPaneer;
+            adjusted = true;
+          }
+          if (has('paneer_bhurji') && getFood('paneer_bhurji').qty < r.minPaneer) {
+            getFood('paneer_bhurji').qty = r.minPaneer;
+            adjusted = true;
+          }
+          if (has('dal') && getFood('dal').qty < r.minDalMajor) {
+            const hasOtherProtein = has('chicken') || has('fish') || has('paneer') || has('paneer_bhurji') || has('soya') || has('eggs');
+            if (!hasOtherProtein) {
+              getFood('dal').qty = r.minDalMajor;
+              adjusted = true;
+            }
+          }
+          if (has('curd') && getFood('curd').qty < r.minCurdIfIncluded) {
+            getFood('curd').qty = r.minCurdIfIncluded;
+            adjusted = true;
+          }
+        }
+      });
+
+      meals.forEach(meal => {
+        let cal = 0, p = 0, c = 0, f = 0, fib = 0;
+        meal.foods.forEach(food => {
+          const fd = FOOD_DB[food.key];
+          food.cal = Math.round(food.qty * fd.cal);
+          food.p = Math.round(food.qty * fd.p * 10) / 10;
+          food.c = Math.round(food.qty * fd.c * 10) / 10;
+          food.f = Math.round(food.qty * fd.f * 10) / 10;
+          food.fib = Math.round(food.qty * fd.fib * 10) / 10;
+
+          cal += food.qty * fd.cal;
+          p += food.qty * fd.p;
+          c += food.qty * fd.c;
+          f += food.qty * fd.f;
+          fib += food.qty * fd.fib;
+        });
+
+        meal.totals = {
+          cal: Math.round(p * 4 + c * 4 + f * 9),
+          p: Math.round(p * 10) / 10,
+          c: Math.round(c * 10) / 10,
+          f: Math.round(f * 10) / 10,
+          fib: Math.round(fib * 10) / 10
+        };
+      });
+
+      if (adjusted) {
+        meals.forEach(m => { m.adjustedForUsability = true; });
+      }
+
+      return adjusted;
+    }
+
+    function rebalanceAfterPracticalAdjustments(meals, targets) {
+      let state = [];
+      meals.forEach((meal, mealIndex) => {
+        meal.foods.forEach(f => {
+          const fd = FOOD_DB[f.key];
+          let newMin = fd.min;
+          
+          if (meal.name.toLowerCase() === 'snack') {
+            const r = PRACTICAL_RULES.snack;
+            if (f.key === 'pb') {
+              const breadFood = meal.foods.find(x => x.key === 'bread');
+              const bread_qty = breadFood ? breadFood.qty : 0;
+              const targetPBMin = (targets.targetCalories || targets.cal) > 2000 ? r.pbPreferred : r.pbMin;
+              let pbMinFromBread = Math.max(targetPBMin, r.pbBreadRatioMin * bread_qty);
+              const neededPBFromFat = Math.ceil(r.minFatPerSnack / 0.50);
+              newMin = Math.max(pbMinFromBread, neededPBFromFat);
+            }
+            if (f.key === 'almonds') {
+              newMin = Math.ceil(r.minFatPerSnack / 0.49);
+            }
+            if (f.key === 'peanuts') {
+              newMin = Math.ceil(r.minFatPerSnack / 0.49);
+            }
+          } else {
+            const tempTemplates = { [meal.name.toLowerCase()]: meal.foods.map(x => x.key) };
+            newMin = getPracticalMin(meal.name.toLowerCase(), f.key, tempTemplates, targets);
+          }
+
+          state.push({
+            mealIndex,
+            key: f.key,
+            qty: f.qty,
+            min: newMin,
+            max: fd.max,
+            cal: fd.cal,
+            p: fd.p,
+            c: fd.c,
+            f: fd.f,
+            fib: fd.fib
+          });
+        });
+      });
+
+      function getLoss(st, weights) {
+        let totalP = 0, totalC = 0, totalF = 0, totalFib = 0;
+        let mealCal = [0, 0, 0, 0];
+        let mealF = [0, 0, 0, 0];
+        st.forEach(s => {
+          totalP += s.qty * s.p;
+          totalC += s.qty * s.c;
+          totalF += s.qty * s.f;
+          totalFib += s.qty * s.fib;
+          mealCal[s.mealIndex] += s.qty * s.cal;
+          mealF[s.mealIndex] += s.qty * s.f;
+        });
+        let totalCal = totalP * 4 + totalC * 4 + totalF * 9;
+        let dCal = totalCal - (targets.targetCalories || targets.cal);
+        let dP = totalP - targets.protein;
+        let dC = totalC - targets.carbs;
+        let dF = totalF - targets.fat;
+        let dFib = totalFib - targets.fiber;
+        
+        let targetLoss = (dCal * dCal * weights.cal) + 
+                         (dP * dP * weights.p) + 
+                         (dC * dC * weights.c) + 
+                         (dF * dF * weights.f) + 
+                         (dFib * dFib * weights.fib);
+        
+        const mealRatios = [0.25, 0.35, 0.15, 0.25];
+        let ratioLoss = 0;
+        for (let i = 0; i < 4; i++) {
+          const targetMealCal = (targets.targetCalories || targets.cal) * mealRatios[i];
+          const dMealCal = mealCal[i] - targetMealCal;
+          ratioLoss += dMealCal * dMealCal * 0.25;
+        }
+
+        // Add penalties for fat concentration, single item dominance, and completeness rules
+        let penaltyLoss = 0;
+        const dist = PRACTICAL_RULES.distribution;
+        
+        for (let i = 0; i < 4; i++) {
+          const mealFoods = st.filter(s => s.mealIndex === i);
+          const qtyMap = {};
+          mealFoods.forEach(s => { qtyMap[s.key] = s.qty; });
+          
+          const has = (key) => qtyMap[key] !== undefined && qtyMap[key] > 0;
+          const getQty = (key) => qtyMap[key] || 0;
+
+          const mCal = mealCal[i];
+          const mF = mealF[i];
+
+          // Fat concentration
+          const fatCal = mF * 9;
+          const currentGoal = targets.goal || (typeof activeGoal !== 'undefined' ? activeGoal : 'Maintenance');
+          const minFatShareThreshold = dist.minFatCalorieSharePerMealByGoal[currentGoal] !== undefined
+            ? dist.minFatCalorieSharePerMealByGoal[currentGoal]
+            : dist.minFatCalorieSharePerMeal;
+          if (mCal > 0) {
+            const fatShare = fatCal / mCal;
+            if (fatShare < minFatShareThreshold) {
+              const diff = (minFatShareThreshold * mCal) - fatCal;
+              penaltyLoss += diff * diff * 2.0;
+            }
+          }
+
+          // Single item dominance
+          mealFoods.forEach(s => {
+            const itemCal = s.qty * s.cal;
+            if (mCal > 0) {
+              const share = itemCal / mCal;
+              if (share > dist.maxSingleItemCalorieShare) {
+                const diff = itemCal - (dist.maxSingleItemCalorieShare * mCal);
+                penaltyLoss += diff * diff * 2.0;
+              }
+            }
+          });
+
+          // Breakfast companion protein & PB
+          if (i === 0) {
+            const r = PRACTICAL_RULES.breakfast;
+            if (has('oats') && getQty('oats') > r.oatsHighThreshold) {
+              let companionDiff = 0;
+              if (has('milk')) companionDiff = Math.max(0, r.minMilkWithHighOats - getQty('milk'));
+              else if (has('eggs')) companionDiff = Math.max(0, r.minEggsWithHighOats - getQty('eggs'));
+              else if (has('paneer')) companionDiff = Math.max(0, r.minPaneerWithHighOats - getQty('paneer'));
+              if (companionDiff > 0) {
+                penaltyLoss += companionDiff * companionDiff * 15.0;
+              }
+            }
+            if (has('pb') && getQty('pb') < r.pbMinIfPresent) {
+              const diff = r.pbMinIfPresent - getQty('pb');
+              penaltyLoss += diff * diff * 25.0;
+            }
+          }
+
+          // Lunch & Dinner protein min & curd
+          if (i === 1 || i === 3) {
+            const r = PRACTICAL_RULES.lunchDinner;
+            if (has('chicken') && getQty('chicken') < r.minChicken) {
+              const diff = r.minChicken - getQty('chicken');
+              penaltyLoss += diff * diff * 25.0;
+            }
+            if (has('fish') && getQty('fish') < r.minFish) {
+              const diff = r.minFish - getQty('fish');
+              penaltyLoss += diff * diff * 25.0;
+            }
+            if (has('paneer') && getQty('paneer') < r.minPaneer) {
+              const diff = r.minPaneer - getQty('paneer');
+              penaltyLoss += diff * diff * 25.0;
+            }
+            if (has('paneer_bhurji') && getQty('paneer_bhurji') < r.minPaneer) {
+              const diff = r.minPaneer - getQty('paneer_bhurji');
+              penaltyLoss += diff * diff * 25.0;
+            }
+            if (has('dal') && getQty('dal') < r.minDalMajor) {
+              const hasOtherProtein = has('chicken') || has('fish') || has('paneer') || has('paneer_bhurji') || has('soya') || has('eggs');
+              if (!hasOtherProtein) {
+                const diff = r.minDalMajor - getQty('dal');
+                penaltyLoss += diff * diff * 25.0;
+              }
+            }
+            if (has('curd') && getQty('curd') < r.minCurdIfIncluded) {
+              const diff = r.minCurdIfIncluded - getQty('curd');
+              penaltyLoss += diff * diff * 25.0;
+            }
+          }
+
+          // Snack PB & banana cap & min fat
+          if (i === 2) {
+            const r = PRACTICAL_RULES.snack;
+            if (has('bread') && has('pb')) {
+              const bread_g = getQty('bread');
+              const pb_g = getQty('pb');
+              const targetPBMin = (targets.targetCalories || targets.cal) > 2000 ? r.pbPreferred : r.pbMin;
+              const minPB = Math.max(targetPBMin, r.pbBreadRatioMin * bread_g);
+              if (pb_g < minPB) {
+                const diff = minPB - pb_g;
+                penaltyLoss += diff * diff * 25.0;
+              }
+            }
+            if (getQty('bread') > 100) {
+              if (has('pb')) {
+                const pb_g = getQty('pb');
+                const almondsQty = getQty('almonds');
+                const peanutsQty = getQty('peanuts');
+                if (pb_g < 12 && almondsQty < 10 && peanutsQty < 10) {
+                  const diff = 12 - pb_g;
+                  penaltyLoss += diff * diff * 25.0;
+                }
+              }
+            }
+            if (has('bread') && has('banana') && getQty('banana') > r.bananaMaxWithBread) {
+              const diff = getQty('banana') - r.bananaMaxWithBread;
+              penaltyLoss += diff * diff * 25.0;
+            }
+            // min fat per snack
+            let currentFat = 0;
+            mealFoods.forEach(s => { currentFat += s.qty * s.f; });
+            if (currentFat < r.minFatPerSnack) {
+              const diff = r.minFatPerSnack - currentFat;
+              penaltyLoss += diff * diff * 250.0;
+            }
+          }
+        }
+
+        return targetLoss + ratioLoss + penaltyLoss;
+      }
+
+      let weights = { cal: 1, p: 25, c: 25, f: 100, fib: 25 };
+      let bestState = state.map(s => ({...s}));
+      let targetsSatisfied = false;
+      let attempts = 0;
+
+      while (!targetsSatisfied && attempts < 8) {
+        let currentBestLoss = getLoss(bestState, weights);
+        let steps = [15, 8, 4, 2, 1, 0.5, 0.1];
+
+        for (let step of steps) {
+          let improved = true;
+          let iter = 0;
+          while (improved && iter < 120) {
+            improved = false;
+            iter++;
+            for (let i = 0; i < state.length; i++) {
+              const originalQty = state[i].qty;
+              state[i].qty = Math.min(state[i].max, originalQty + step);
+              let lossUp = getLoss(state, weights);
+              if (lossUp < currentBestLoss) {
+                currentBestLoss = lossUp;
+                bestState = state.map(s => ({...s}));
+                improved = true;
+                continue;
+              }
+              state[i].qty = Math.max(state[i].min, originalQty - step);
+              let lossDown = getLoss(state, weights);
+              if (lossDown < currentBestLoss) {
+                currentBestLoss = lossDown;
+                bestState = state.map(s => ({...s}));
+                improved = true;
+                continue;
+              }
+              state[i].qty = originalQty;
+            }
+
+            // Deterministic pairwise mutations to escape saddle points (calorie-neutral scaled swaps)
+            for (let idx1 = 0; idx1 < state.length; idx1++) {
+              for (let idx2 = 0; idx2 < state.length; idx2++) {
+                if (idx1 === idx2) continue;
+                
+                const s1 = state[idx1];
+                const s2 = state[idx2];
+                const q1_orig = s1.qty;
+                const q2_orig = s2.qty;
+                
+                const step2 = step * (s1.cal / s2.cal);
+                
+                s1.qty = Math.min(s1.max, q1_orig + step);
+                s2.qty = Math.max(s2.min, q2_orig - step2);
+                let lossMut = getLoss(state, weights);
+                if (lossMut < currentBestLoss) {
+                  currentBestLoss = lossMut;
+                  bestState = state.map(s => ({...s}));
+                  improved = true;
+                  continue;
+                }
+                
+                s1.qty = Math.max(s1.min, q1_orig - step);
+                s2.qty = Math.min(s2.max, q2_orig + step2);
+                lossMut = getLoss(state, weights);
+                if (lossMut < currentBestLoss) {
+                  currentBestLoss = lossMut;
+                  bestState = state.map(s => ({...s}));
+                  improved = true;
+                  continue;
+                }
+                
+                s1.qty = q1_orig;
+                s2.qty = q2_orig;
+              }
+            }
+          }
+        }
+
+        let totalP = 0, totalC = 0, totalF = 0, totalFib = 0;
+        bestState.forEach(s => {
+          totalP += s.qty * s.p;
+          totalC += s.qty * s.c;
+          totalF += s.qty * s.f;
+          totalFib += s.qty * s.fib;
+        });
+        let totalCal = totalP * 4 + totalC * 4 + totalF * 9;
+
+        const errCal = Math.abs(totalCal - (targets.targetCalories || targets.cal));
+        const errP = Math.abs(totalP - targets.protein);
+        const errC = Math.abs(totalC - targets.carbs);
+        const errF = Math.abs(totalF - targets.fat);
+        const errFib = Math.abs(totalFib - targets.fiber);
+
+        const t = PRACTICAL_RULES.tolerances;
+        if (errCal <= t.cal && errP <= t.protein && errF <= t.fat && errC <= t.carbs && errFib <= t.fiber) {
+          targetsSatisfied = true;
+        } else {
+          if (errCal > t.cal) weights.cal *= 8;
+          if (errP > t.protein) weights.p *= 8;
+          if (errC > t.carbs) weights.c *= 8;
+          if (errF > t.fat) weights.f *= 8;
+          if (errFib > t.fiber) weights.fib *= 8;
+          state = bestState.map(s => ({...s}));
+          attempts++;
+        }
+      }
+
+      bestState.forEach(s => {
+        const meal = meals[s.mealIndex];
+        const food = meal.foods.find(f => f.key === s.key);
+        if (food) {
+          const fd = FOOD_DB[s.key];
+          food.qty = Math.round(s.qty);
+          food.cal = Math.round(food.qty * fd.cal);
+          food.p = Math.round(food.qty * fd.p * 10) / 10;
+          food.c = Math.round(food.qty * fd.c * 10) / 10;
+          food.f = Math.round(food.qty * fd.f * 10) / 10;
+          food.fib = Math.round(food.qty * fd.fib * 10) / 10;
+        }
+      });
+
+      meals.forEach(meal => {
+        let cal = 0, p = 0, c = 0, f = 0, fib = 0;
+        meal.foods.forEach(food => {
+          cal += food.p * 4 + food.c * 4 + food.f * 9;
+          p += food.p;
+          c += food.c;
+          f += food.f;
+          fib += food.fib;
+        });
+        meal.totals = {
+          cal: Math.round(cal),
+          p: Math.round(p * 10) / 10,
+          c: Math.round(c * 10) / 10,
+          f: Math.round(f * 10) / 10,
+          fib: Math.round(fib * 10) / 10
+        };
+      });
+    }
+
+    // ==========================================
+    // MEAL ALTERNATIVES SOLVER
+    // ==========================================
+    function getAlternativeTemplates(originalMeals, preferredFoods, avoidedList) {
+      const altTemplates = { breakfast: [], lunch: [], snack: [], dinner: [] };
+      const diets = activeFoodPref;
+
+      // 1. Breakfast alternatives templates
+      const bfAltFoods = [
+        ['bread', diets === 'Vegetarian' ? 'paneer' : 'eggs', 'pb', 'apple'],
+        ['poha', diets === 'Vegetarian' ? 'milk' : 'egg_whites', 'almonds', 'banana'],
+        ['idli', diets === 'Vegetarian' ? 'paneer' : 'eggs', 'peanuts', 'apple']
+      ];
+      altTemplates.breakfast = bfAltFoods.map(list => list.filter(k => FOOD_DB[k] && isFoodAllowed(k, avoidedList)));
+
+      // 2. Lunch alternative templates
+      altTemplates.lunch = [
+        ['chapati', diets === 'Non-Vegetarian' ? 'fish' : 'soya', 'curd', 'veg_curry', 'salad'],
+        ['brown_rice', diets === 'Non-Vegetarian' ? 'chicken' : 'dal', 'curd', 'veg_curry', 'salad'],
+        ['chapati', diets === 'Non-Vegetarian' ? 'eggs' : 'paneer', 'curd', 'veg_curry', 'salad']
+      ].map(list => list.filter(k => FOOD_DB[k] && isFoodAllowed(k, avoidedList)));
+
+      // 3. Snack alternative templates
+      altTemplates.snack = [
+        ['sweet_potato', 'almonds', 'apple'],
+        ['oats', 'pb', 'banana'],
+        ['bread', 'peanuts', 'apple']
+      ].map(list => list.filter(k => FOOD_DB[k] && isFoodAllowed(k, avoidedList)));
+
+      // 4. Dinner alternative templates
+      altTemplates.dinner = [
+        ['rice', diets === 'Non-Vegetarian' ? 'chicken' : 'dal', 'curd', 'veg_curry', 'salad'],
+        ['chapati', diets === 'Non-Vegetarian' ? 'fish' : 'soya', 'curd', 'veg_curry', 'salad'],
+        ['chapati', diets === 'Non-Vegetarian' ? 'eggs' : 'paneer', 'curd', 'veg_curry', 'salad']
+      ].map(list => list.filter(k => FOOD_DB[k] && isFoodAllowed(k, avoidedList)));
+
+      // Fallbacks if empty
+      if (altTemplates.lunch.length === 0) {
+        if (diets === 'Non-Vegetarian') {
+          altTemplates.lunch = [
+            ['chapati', 'chicken', 'curd', 'veg_curry', 'salad'],
+            ['brown_rice', 'fish', 'curd', 'veg_curry', 'salad']
+          ];
+        } else if (diets === 'Eggetarian') {
+          altTemplates.lunch = [
+            ['chapati', 'eggs', 'curd', 'veg_curry', 'salad'],
+            ['brown_rice', 'eggs', 'curd', 'veg_curry', 'salad']
+          ];
+        } else {
+          altTemplates.lunch = [
+            ['chapati', 'paneer', 'curd', 'veg_curry', 'salad'],
+            ['brown_rice', 'dal', 'curd', 'veg_curry', 'salad']
+          ];
+        }
+        altTemplates.lunch = altTemplates.lunch.map(list => list.filter(k => FOOD_DB[k] && isFoodAllowed(k, avoidedList)));
+      }
+
+      if (altTemplates.dinner.length === 0) {
+        if (diets === 'Non-Vegetarian') {
+          altTemplates.dinner = [
+            ['rice', 'chicken', 'curd', 'veg_curry', 'salad'],
+            ['chapati', 'fish', 'curd', 'veg_curry', 'salad']
+          ];
+        } else if (diets === 'Eggetarian') {
+          altTemplates.dinner = [
+            ['rice', 'eggs', 'curd', 'veg_curry', 'salad'],
+            ['chapati', 'eggs', 'curd', 'veg_curry', 'salad']
+          ];
+        } else {
+          altTemplates.dinner = [
+            ['rice', 'dal', 'curd', 'veg_curry', 'salad'],
+            ['chapati', 'paneer', 'curd', 'veg_curry', 'salad']
+          ];
+        }
+        altTemplates.dinner = altTemplates.dinner.map(list => list.filter(k => FOOD_DB[k] && isFoodAllowed(k, avoidedList)));
+      }
+
+      return altTemplates;
+    }
+
+    function optimizeSingleMeal(foodKeys, mealTargets, mealName, targets) {
+      const validKeys = foodKeys.filter(key => {
+        const fd = FOOD_DB[key];
+        return fd && 
+               Number.isFinite(fd.cal) && 
+               Number.isFinite(fd.p) && 
+               Number.isFinite(fd.c) && 
+               Number.isFinite(fd.f) && 
+               Number.isFinite(fd.fib) &&
+               Number.isFinite(fd.min) &&
+               Number.isFinite(fd.max);
+      });
+
+      if (validKeys.length === 0) {
+        return { invalid: true, foods: [], totals: { cal: 0, p: 0, c: 0, f: 0, fib: 0 }, reason: "Alternative unavailable for current restrictions." };
+      }
+
+      let state = validKeys.map(key => {
+        const fd = FOOD_DB[key];
+        let newMin = fd.min;
+        if (mealName && targets) {
+          const nameLower = mealName.toLowerCase();
+          const tempTemplates = { [nameLower]: validKeys };
+          newMin = getPracticalMin(nameLower, key, tempTemplates, targets);
+        }
+        let initialQty = (newMin + fd.max) / 2;
+        if (!Number.isFinite(initialQty)) initialQty = fd.min;
+        return {
+          key,
+          qty: initialQty,
+          min: newMin,
+          max: fd.max,
+          cal: fd.cal,
+          p: fd.p,
+          c: fd.c,
+          f: fd.f,
+          fib: fd.fib
+        };
+      });
+
+      function getLoss(st) {
+        let p = 0, c = 0, f = 0, fib = 0;
+        st.forEach(s => {
+          p += s.qty * s.p;
+          c += s.qty * s.c;
+          f += s.qty * s.f;
+          fib += s.qty * s.fib;
+        });
+        let cal = p * 4 + c * 4 + f * 9;
+        
+        let dCal = cal - mealTargets.cal;
+        let dP = p - mealTargets.p;
+        let dC = c - mealTargets.c;
+        let dF = f - mealTargets.f;
+        let dFib = fib - mealTargets.fib;
+
+        return (dCal * dCal) + (dP * dP * 25) + (dC * dC * 25) + (dF * dF * 100) + (dFib * dFib * 25);
+      }
+
+      let bestState = state.map(s => ({...s}));
+      let bestLoss = getLoss(bestState);
+      let steps = [10, 5, 2, 1, 0.5, 0.1];
+
+      for (let step of steps) {
+        let improved = true;
+        let iter = 0;
+        while (improved && iter < 100) {
+          improved = false;
+          iter++;
+          for (let i = 0; i < state.length; i++) {
+            const originalQty = state[i].qty;
+            
+            // Try up
+            state[i].qty = Math.min(state[i].max, originalQty + step);
+            let lossUp = getLoss(state);
+            if (lossUp < bestLoss) {
+              bestLoss = lossUp;
+              bestState = state.map(s => ({...s}));
+              improved = true;
+              continue;
+            }
+
+            // Try down
+            state[i].qty = Math.max(state[i].min, originalQty - step);
+            let lossDown = getLoss(state);
+            if (lossDown < bestLoss) {
+              bestLoss = lossDown;
+              bestState = state.map(s => ({...s}));
+              improved = true;
+              continue;
+            }
+
+            // Restore
+            state[i].qty = originalQty;
+          }
+        }
+      }
+
+      // Format result
+      let finalFoods = [];
+      let totalCal = 0, totalP = 0, totalC = 0, totalF = 0, totalFib = 0;
+
+      bestState.forEach(s => {
+        let roundedQty = Math.round(s.qty);
+        if (!Number.isFinite(roundedQty)) roundedQty = 0;
+        const food = FOOD_DB[s.key];
+        
+        let fCal = Math.round(roundedQty * s.cal);
+        let fP = Math.round(roundedQty * s.p * 10) / 10;
+        let fC = Math.round(roundedQty * s.c * 10) / 10;
+        let fF = Math.round(roundedQty * s.f * 10) / 10;
+        let fFib = Math.round(roundedQty * s.fib * 10) / 10;
+
+        if (!Number.isFinite(fCal)) fCal = 0;
+        if (!Number.isFinite(fP)) fP = 0;
+        if (!Number.isFinite(fC)) fC = 0;
+        if (!Number.isFinite(fF)) fF = 0;
+        if (!Number.isFinite(fFib)) fFib = 0;
+
+        totalCal += fCal;
+        totalP += fP;
+        totalC += fC;
+        totalF += fF;
+        totalFib += fFib;
+
+        finalFoods.push({
+          key: s.key,
+          name: food.name,
+          qty: roundedQty,
+          unit: food.unit,
+          cal: fCal,
+          p: fP,
+          c: fC,
+          f: fF,
+          fib: fFib
+        });
+      });
+
+      if (!Number.isFinite(totalCal)) totalCal = 0;
+      if (!Number.isFinite(totalP)) totalP = 0;
+      if (!Number.isFinite(totalC)) totalC = 0;
+      if (!Number.isFinite(totalF)) totalF = 0;
+      if (!Number.isFinite(totalFib)) totalFib = 0;
+
+      return {
+        foods: finalFoods,
+        totals: {
+          cal: totalCal,
+          p: totalP,
+          c: totalC,
+          f: totalF,
+          fib: totalFib
+        }
+      };
+    }
+
+    // ==========================================
+    // REPLACEMENT TABLE GENERATION
+    // ==========================================
+    function calculateReplacements(generatedMeals) {
+      // Find what foods exist in the diet plan and calculate replacements
+      let replacements = [];
+
+      const replacementDefinitions = [
+        {
+          origKey: 'chicken',
+          replKey: 'paneer',
+          mode: 'protein',
+          suitable: 'Vegetarian / Dairy'
+        },
+        {
+          origKey: 'chicken',
+          replKey: 'soya',
+          mode: 'protein',
+          suitable: 'Vegetarian / Vegan'
+        },
+        {
+          origKey: 'rice',
+          replKey: 'chapati',
+          mode: 'carbs',
+          suitable: 'All'
+        },
+        {
+          origKey: 'rice',
+          replKey: 'bread',
+          mode: 'carbs',
+          suitable: 'All'
+        },
+        {
+          origKey: 'rice',
+          replKey: 'sweet_potato',
+          mode: 'carbs',
+          suitable: 'All'
+        },
+        {
+          origKey: 'paneer',
+          replKey: 'soya',
+          mode: 'protein',
+          suitable: 'Vegetarian / Vegan'
+        },
+        {
+          origKey: 'paneer',
+          replKey: 'dal',
+          mode: 'protein',
+          suitable: 'Vegetarian / Vegan'
+        },
+        {
+          origKey: 'milk',
+          replKey: 'curd',
+          mode: 'protein',
+          suitable: 'Dairy eaters'
+        },
+        {
+          origKey: 'banana',
+          replKey: 'apple',
+          mode: 'carbs',
+          suitable: 'All'
+        },
+        {
+          origKey: 'pb',
+          replKey: 'almonds',
+          mode: 'fat',
+          suitable: 'All'
+        },
+        {
+          origKey: 'pb',
+          replKey: 'peanuts',
+          mode: 'fat',
+          suitable: 'All'
+        }
+      ];
+
+      // Extract all foods with their quantities from the generated plan
+      let foodQuantities = {};
+      generatedMeals.forEach(meal => {
+        meal.foods.forEach(f => {
+          if (!foodQuantities[f.key]) {
+            foodQuantities[f.key] = 0;
+          }
+          foodQuantities[f.key] += f.qty;
+        });
+      });
+
+      replacementDefinitions.forEach(def => {
+        const origQty = foodQuantities[def.origKey];
+        if (origQty && origQty > 0) {
+          const origFood = FOOD_DB[def.origKey];
+          const replFood = FOOD_DB[def.replKey];
+
+          let replQty = 0;
+          if (def.mode === 'protein') {
+            replQty = origQty * (origFood.p / replFood.p);
+          } else if (def.mode === 'carbs') {
+            replQty = origQty * (origFood.c / replFood.c);
+          } else if (def.mode === 'fat') {
+            replQty = origQty * (origFood.f / replFood.f);
+          }
+
+          replQty = Math.round(replQty);
+
+          const cal = Math.round(replQty * replFood.cal);
+          const p = Math.round(replQty * replFood.p * 10) / 10;
+          const c = Math.round(replQty * replFood.c * 10) / 10;
+          const f = Math.round(replQty * replFood.f * 10) / 10;
+          const fib = Math.round(replQty * replFood.fib * 10) / 10;
+
+          replacements.push({
+            origName: origFood.name,
+            origQty: Math.round(origQty) + " " + origFood.unit,
+            replName: replFood.name,
+            replQty: replQty + " " + replFood.unit,
+            cal, p, c, f, fib,
+            suitable: def.suitable
+          });
+        }
+      });
+
+      return replacements;
+    }
+
+    // ==========================================
+    // CONTROLLER & UI RENDERING
+    // ==========================================
+    function triggerPlanGeneration() {
+      // 1. Show calibration loader screen
+      document.getElementById('loaderOverlay').style.display = 'flex';
+      const loaderText = document.getElementById('loaderText');
+      const loaderLog = document.getElementById('loaderLog');
+
+      setTimeout(() => {
+        loaderText.textContent = "Calibrating Metamodels...";
+        loaderLog.textContent = "Evaluating Mifflin-St Jeor daily energy expenditure...";
+      }, 500);
+
+      setTimeout(() => {
+        loaderText.textContent = "Optimizing Meal Plates...";
+        loaderLog.textContent = "Executing coordinate descent over food vectors...";
+      }, 1200);
+
+      setTimeout(() => {
+        loaderText.textContent = "Running Self-Validation Engine...";
+        loaderLog.textContent = "Asserting macronutrient target errors against constraints...";
+      }, 2000);
+
+      setTimeout(() => {
+        // Run generation logic
+        generateDietReport();
+        document.getElementById('loaderOverlay').style.display = 'none';
+        document.getElementById('wizardSection').style.display = 'none';
+        document.getElementById('resultsSection').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 2600);
+    }
+
+    function generateDietReport() {
+      const targets = calculateDailyTargets();
+      const preferred = getSelectedPreferredFoods();
+      
+      const avoidRaw = document.getElementById('inputAvoidFoods').value || "";
+      const avoidedList = avoidRaw.split(',').map(s => s.trim()).filter(s => s.length > 0);
+
+      // 1. Get food templates
+      const templates = getOriginalTemplates(preferred, avoidedList);
+
+      // 2. Global optimization of primary meals
+      const meals = runGlobalOptimization(templates, targets);
+
+      // Apply practical constraints and rebalance if necessary
+      const context = {
+        gender: activeGender,
+        goal: activeGoal,
+        frequency: activeFreq,
+        level: activeLevel,
+        foodPref: activeFoodPref,
+        cuisine: activeCuisine
+      };
+
+      const adjusted = applyPracticalConstraints(meals, targets, context);
+      if (adjusted) {
+        rebalanceAfterPracticalAdjustments(meals, targets);
+        applyPracticalConstraints(meals, targets, context); // finalize quantities and totals
+      }
+
+      // Compute final daily macro sums
+      let totalCal = 0, totalP = 0, totalC = 0, totalF = 0, totalFib = 0;
+      meals.forEach(m => {
+        totalCal += m.totals.cal;
+        totalP += m.totals.p;
+        totalC += m.totals.c;
+        totalF += m.totals.f;
+        totalFib += m.totals.fib;
+      });
+      
+      // Re-sum total cal for consistency (4-4-9)
+      totalCal = Math.round(totalP * 4 + totalC * 4 + totalF * 9);
+      totalP = Math.round(totalP * 10) / 10;
+      totalC = Math.round(totalC * 10) / 10;
+      totalF = Math.round(totalF * 10) / 10;
+      totalFib = Math.round(totalFib * 10) / 10;
+
+      // 4. Generate meal alternatives
+      const altTemplates = getAlternativeTemplates(meals, preferred, avoidedList);
+      const alternatives = {
+        Breakfast: [],
+        Lunch: [],
+        Snack: [],
+        Dinner: []
+      };
+
+      meals.forEach(meal => {
+        const key = meal.name; // Breakfast/Lunch/Snack/Dinner
+        const tList = altTemplates[key.toLowerCase()] || [];
+
+        tList.forEach((foodKeys, index) => {
+          const altMeal = optimizeSingleMeal(foodKeys, meal.totals, key, targets);
+
+          const altMealObj = {
+            name: key,
+            foods: altMeal.foods || [],
+            totals: altMeal.totals || { cal: 0, p: 0, c: 0, f: 0, fib: 0 },
+            invalid: !!altMeal.invalid,
+            reason: altMeal.reason || ""
+          };
+
+          const warnings = scorePracticality([altMealObj], activeGoal);
+          const hasHardViolations = warnings.some(
+            w => w.rule !== 'dist_fat_share' && w.rule !== 'dist_single_dominance'
+          );
+
+          const isFiniteTotal =
+            Number.isFinite(altMealObj.totals.cal) &&
+            Number.isFinite(altMealObj.totals.p) &&
+            Number.isFinite(altMealObj.totals.c) &&
+            Number.isFinite(altMealObj.totals.f) &&
+            Number.isFinite(altMealObj.totals.fib);
+
+          const isFiniteFoods = altMealObj.foods.every(f =>
+            Number.isFinite(f.qty) &&
+            Number.isFinite(f.cal) &&
+            Number.isFinite(f.p) &&
+            Number.isFinite(f.c) &&
+            Number.isFinite(f.f) &&
+            Number.isFinite(f.fib)
+          );
+
+          if (!altMealObj.invalid && isFiniteTotal && isFiniteFoods && !hasHardViolations) {
+            alternatives[key].push({
+              label: `Alternative ${index + 1}`,
+              foods: altMealObj.foods,
+              totals: altMealObj.totals
+            });
+          } else {
+            console.warn(`Alternative ${index + 1} for ${key} rejected`, warnings, altMealObj.reason);
+          }
+        });
+
+        // fallback placeholder if none valid
+        if (alternatives[key].length === 0) {
+          alternatives[key].push({
+            label: "Alternative unavailable",
+            foods: [],
+            totals: { cal: 0, p: 0, c: 0, f: 0, fib: 0 },
+            invalid: true,
+            reason: "Alternative unavailable for current restrictions."
+          });
+        }
+      });
+
+      // 5. Generate replacement table
+      const replacements = calculateReplacements(meals);
+
+      latestReport = {
+        targets,
+        meals,
+        alternatives,
+        replacements,
+        totals: { cal: totalCal, p: totalP, c: totalC, f: totalF, fib: totalFib }
+      };
+
+      renderResults();
+    }
+
+    function renderResults() {
+      const r = latestReport;
+      
+      // Update targets label
+      document.getElementById('lblTargetCal').textContent = Math.round(r.targets.targetCalories);
+      document.getElementById('lblTargetP').textContent = fmt.g1(r.targets.protein);
+      document.getElementById('lblTargetF').textContent = fmt.g1(r.targets.fat);
+      document.getElementById('lblTargetC').textContent = fmt.g1(r.targets.carbs);
+      document.getElementById('lblTargetFib').textContent = fmt.g1(r.targets.fiber);
+
+      // Render main meals
+      const grid = document.getElementById('mealsGridContainer');
+      grid.innerHTML = '';
+
+      const icons = {
+        Breakfast: 'fa-egg',
+        Lunch: 'fa-bowl-rice',
+        Snack: 'fa-bread-slice',
+        Dinner: 'fa-plate-wheat'
+      };
+
+      r.meals.forEach((meal) => {
+        let listHtml = '';
+        meal.foods.forEach(f => {
+          listHtml += `
+            <li class="meal-plate-item" style="flex-direction: column; align-items: flex-start; gap: 2px; padding: 10px 0;">
+              <div style="display: flex; justify-content: space-between; width: 100%;">
+                <span>• ${f.name}</span>
+                <span class="meal-plate-qty">${fmt.qty(f.qty, f.unit)}</span>
+              </div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); margin-left: 10px; font-weight: 500;">
+                P: ${fmt.g1(f.p)} · C: ${fmt.g1(f.c)} · F: ${fmt.g1(f.f)} · Fib: ${fmt.g1(f.fib)}
+              </div>
+            </li>
+          `;
+        });
+
+        let adjustedBadgeHtml = '';
+        if (meal.adjustedForUsability) {
+          adjustedBadgeHtml = `
+            <div style="background: rgba(217, 119, 6, 0.1); border: 1px solid rgba(217, 119, 6, 0.3); color: #b45309; font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; margin-bottom: 8px;">
+              <i class="fa-solid fa-triangle-exclamation"></i> Adjusted for Usability
+            </div>
+          `;
+        }
+
+        const cardHtml = `
+          <div class="meal-card">
+            <div class="meal-card-header">
+              <h3 class="meal-name-title"><i class="fa-solid ${icons[meal.name] || 'fa-utensils'}"></i> ${meal.name}</h3>
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                <span class="meal-calories-badge">${fmt.kcal(meal.totals.cal)}</span>
+                <span class="meal-calories-badge" style="background: rgba(244, 63, 94, 0.15); color: #f43f5e; border-color: rgba(244, 63, 94, 0.3);">Fat: ${fmt.g1(meal.totals.f)}</span>
+              </div>
+            </div>
+            <div class="meal-card-body">
+              <ul class="meal-plate-list">
+                ${listHtml}
+              </ul>
+              
+              ${adjustedBadgeHtml}
+              
+              <div class="meal-macros-summary-row" style="margin-top: auto;">
+                <div class="meal-macro-badge">
+                  <span class="meal-macro-val">${fmt.g1(meal.totals.p)}</span>
+                  <span class="meal-macro-lbl">Prot</span>
+                </div>
+                <div class="meal-macro-badge">
+                  <span class="meal-macro-val">${fmt.g1(meal.totals.c)}</span>
+                  <span class="meal-macro-lbl">Carb</span>
+                </div>
+                <div class="meal-macro-badge">
+                  <span class="meal-macro-val" style="color: #f43f5e;">${fmt.g1(meal.totals.f)}</span>
+                  <span class="meal-macro-lbl">Fat</span>
+                </div>
+                <div class="meal-macro-badge">
+                  <span class="meal-macro-val">${fmt.g1(meal.totals.fib)}</span>
+                  <span class="meal-macro-lbl">Fib</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        grid.innerHTML += cardHtml;
+      });
+
+      // Render Alternatives Accordion Cards
+      const altContainer = document.getElementById('alternativesContainer');
+      altContainer.innerHTML = '';
+
+      r.meals.forEach((meal) => {
+        const key = meal.name;
+        const alts = r.alternatives[key] || [];
+        
+        let altCardsHtml = '';
+        alts.forEach(alt => {
+          if (alt.invalid) {
+            altCardsHtml += `
+              <div class="alt-meal-option" style="opacity: 0.8; border-left: 3px solid #ef4444;">
+                <div class="alt-meal-foods" style="color:var(--text-muted); font-style:italic; font-size:13px; padding: 4px 0;">${alt.reason}</div>
+              </div>
+            `;
+          } else {
+            const foodString = alt.foods.map(f => `${f.name} (${fmt.qty(f.qty, f.unit)})`).join(', ');
+            altCardsHtml += `
+              <div class="alt-meal-option">
+                <div class="alt-meal-header">
+                  <span>${alt.label}</span>
+                  <span style="color:var(--primary); font-weight:700;">${fmt.kcal(alt.totals.cal)}</span>
+                </div>
+                <div class="alt-meal-foods">${foodString}</div>
+                <div class="alt-meal-macros">
+                  <span class="alt-p">P: ${fmt.g1(alt.totals.p)}</span>
+                  <span class="alt-c">C: ${fmt.g1(alt.totals.c)}</span>
+                  <span class="alt-f">F: ${fmt.g1(alt.totals.f)}</span>
+                  <span class="alt-fib" style="color:#7c3aed;">Fib: ${fmt.g1(alt.totals.fib)}</span>
+                </div>
+              </div>
+            `;
+          }
+        });
+
+        const sectionHtml = `
+          <div class="meal-card" style="border-color: var(--border-color);">
+            <div class="meal-card-header" style="background: #f8fafc; border-bottom-color: var(--border-color);">
+              <h3 class="meal-name-title" style="color:var(--text-main);"><i class="fa-solid fa-arrows-spin"></i> ${key} swaps</h3>
+              <span class="meal-calories-badge" style="background:var(--accent-glow); color:var(--accent); border-color:var(--border-color);">${fmt.kcal(meal.totals.cal)}</span>
+            </div>
+            <div class="meal-card-body" style="padding: 16px;">
+              ${altCardsHtml}
+            </div>
+          </div>
+        `;
+        altContainer.innerHTML += sectionHtml;
+      });
+
+      // Render Replacement Table
+      const replBody = document.getElementById('replacementTableBody');
+      replBody.innerHTML = '';
+      r.replacements.forEach(row => {
+        replBody.innerHTML += `
+          <tr>
+            <td><strong>${row.origName}</strong></td>
+            <td>${row.origQty}</td>
+            <td><strong style="color:var(--primary);">${row.replName}</strong></td>
+            <td style="color:var(--primary); font-weight:700;">${row.replQty}</td>
+            <td>${fmt.kcal(row.cal)}</td>
+            <td>${fmt.g1(row.p)}</td>
+            <td>${fmt.g1(row.c)}</td>
+            <td>${fmt.g1(row.f)}</td>
+            <td>${fmt.g1(row.fib)}</td>
+            <td><span class="tagline" style="font-size:0.7rem; padding:4px 8px; border-radius:4px;">${row.suitable}</span></td>
+          </tr>
+        `;
+      });
+
+      // Render Engine Self-Validation Log
+      const validationGrid = document.getElementById('validationGrid');
+      validationGrid.innerHTML = '';
+
+      const errCal = Math.abs(r.totals.cal - r.targets.targetCalories);
+      const errP = Math.abs(r.totals.p - r.targets.protein);
+      const errF = Math.abs(r.totals.f - r.targets.fat);
+      const errC = Math.abs(r.totals.c - r.targets.carbs);
+      const errFib = Math.abs(r.totals.fib - r.targets.fiber);
+
+      const preferredList = getSelectedPreferredFoods();
+      let preferredOk = true;
+      if (preferredList.length > 0) {
+        let foundPreferred = false;
+        r.meals.forEach(m => {
+          m.foods.forEach(f => {
+            if (preferredList.some(p => f.name.toLowerCase().includes(p.toLowerCase()))) {
+              foundPreferred = true;
+            }
+          });
+        });
+        preferredOk = foundPreferred;
+      }
+
+      const avoidRaw = document.getElementById('inputAvoidFoods').value || "";
+      const avoidedList = avoidRaw.split(',').map(s => s.trim()).filter(s => s.length > 0);
+      let avoidedOk = true;
+      r.meals.forEach(m => {
+        m.foods.forEach(f => {
+          if (avoidedList.some(a => f.name.toLowerCase().includes(a.toLowerCase()))) {
+            avoidedOk = false;
+          }
+        });
+      });
+
+      let altsOk = true;
+      r.meals.forEach(meal => {
+        const alts = r.alternatives[meal.name] || [];
+        alts.forEach(alt => {
+          const dCal = Math.abs(alt.totals.cal - meal.totals.cal);
+          const dP = Math.abs(alt.totals.p - meal.totals.p);
+          const dC = Math.abs(alt.totals.c - meal.totals.c);
+          const dF = Math.abs(alt.totals.f - meal.totals.f);
+          const dFib = Math.abs(alt.totals.fib - meal.totals.fib);
+          if (dCal > 30 || dP > 3 || dC > 5 || dF > 3 || dFib > 2) {
+            altsOk = false;
+          }
+        });
+      });
+
+      const usabilityWarnings = scorePracticality(r.meals, r.targets.goal);
+      const usabilityOk = usabilityWarnings.length === 0;
+
+      const logs = [
+        { label: `Calories: ${Math.round(r.totals.cal)} / ${Math.round(r.targets.targetCalories)} kcal (Error: ${fmt.num1(errCal)} kcal)`, pass: errCal <= PRACTICAL_RULES.tolerances.cal },
+        { label: `Protein: ${fmt.num1(r.totals.p)} / ${fmt.num1(r.targets.protein)}g (Error: ${fmt.num1(errP)}g)`, pass: errP <= PRACTICAL_RULES.tolerances.protein },
+        { label: `Fat: ${fmt.num1(r.totals.f)} / ${fmt.num1(r.targets.fat)}g (Error: ${fmt.num1(errF)}g)`, pass: errF <= PRACTICAL_RULES.tolerances.fat },
+        { label: `Carbs: ${fmt.num1(r.totals.c)} / ${fmt.num1(r.targets.carbs)}g (Error: ${fmt.num1(errC)}g)`, pass: errC <= PRACTICAL_RULES.tolerances.carbs },
+        { label: `Fiber: ${fmt.num1(r.totals.fib)} / ${fmt.num1(r.targets.fiber)}g (Error: ${fmt.num1(errFib)}g)`, pass: errFib <= PRACTICAL_RULES.tolerances.fiber },
+        { label: "Preferred foods prioritized", pass: preferredOk },
+        { label: "Avoided foods excluded", pass: avoidedOk },
+        { label: "Meal swaps match tolerances", pass: altsOk },
+        { label: `Usability: ${usabilityOk ? "Practicality checks passed" : `Requires minor adjustments (${usabilityWarnings.length} warnings)`}`, pass: usabilityOk }
+      ];
+
+      logs.forEach(log => {
+        validationGrid.innerHTML += `
+          <div class="validation-item">
+            <i class="fa-solid ${log.pass ? 'fa-circle-check' : 'fa-circle-xmark'}" style="color:${log.pass ? 'var(--primary)' : '#f43f5e'};"></i>
+            <span>${log.label}</span>
+          </div>
+        `;
+      });
+    }
+
+    // ==========================================
+    // PDF GENERATION & EXPORT
+    // ==========================================
+    function downloadDietPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('p', 'mm', 'a4');
+      const r = latestReport;
+
+      if (!r) return;
+
+      // Draw CLAWW Logo (base64)
+      const logoBase64 = "data:image/jpeg;base64,{{CLAWW_LOGO_BASE64}}";
+      
+      try {
+        doc.addImage(logoBase64, 'JPEG', 15, 12, 16, 16);
+      } catch(e) {
+        console.error("Failed to add image to PDF", e);
+      }
+
+      // Title & Branding
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(22);
+      doc.setTextColor(30, 41, 59);
+      doc.text("CLAWW ADAPTIVE DIET PLAN", 35, 20);
+      
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text("CLAWW Adaptive Nutrition Engine", 35, 25);
+
+      // Divider
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.5);
+      doc.line(15, 32, 195, 32);
+
+      // User details Block
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(30, 41, 59);
+      doc.text("User Details Profile", 15, 40);
+
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(71, 85, 105);
+      
+      const detailsCol1 = [
+        `Age: ${r.targets.age} yrs`,
+        `Gender: ${activeGender}`,
+        `Height: ${r.targets.height} cm`,
+        `Weight: ${r.targets.weight} kg`
+      ];
+      const detailsCol2 = [
+        `Body Fat: ${r.targets.bodyFat}%`,
+        `Goal: ${activeGoal}`,
+        `Level: ${activeLevel}`,
+        `Preference: ${activeFoodPref}`
+      ];
+
+      detailsCol1.forEach((text, i) => doc.text(text, 15, 46 + (i * 5)));
+      detailsCol2.forEach((text, i) => doc.text(text, 80, 46 + (i * 5)));
+
+      // Daily Calorie & Macro Target Table
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(30, 41, 59);
+      doc.text("Daily Target Summary", 15, 72);
+
+      const targetHeaders = [["Parameter", "Maintenance", "Target Goal", "Protein Target", "Fat Target", "Carbs Target", "Fiber Target"]];
+      const targetRows = [[
+        "Value", 
+        `${r.targets.maintenanceCal} kcal`, 
+        `${r.targets.targetCalories} kcal`,
+        `${r.targets.protein} g`,
+        `${r.targets.fat} g`,
+        `${r.targets.carbs} g`,
+        `${r.targets.fiber} g`
+      ]];
+
+      doc.autoTable({
+        startY: 76,
+        head: targetHeaders,
+        body: targetRows,
+        theme: 'grid',
+        headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5 },
+        bodyStyles: { textColor: [51, 65, 85], fontSize: 8.5, halign: 'center' },
+        columnStyles: { 0: { fontStyle: 'bold', halign: 'left' } },
+        margin: { left: 15, right: 15 }
+      });
+
+      // Daily Meal Plates
+      let nextY = doc.lastAutoTable.finalY + 12;
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(30, 41, 59);
+      doc.text("Daily Meal Plates", 15, nextY);
+
+      // Construct table for meals
+      const mealHeaders = [["Meal", "Plate Description / Quantity", "Calories", "Protein", "Carbs", "Fat", "Fiber"]];
+      const mealRows = [];
+
+      r.meals.forEach(meal => {
+        const foodStr = meal.foods.map(f => `- ${f.name} (${fmt.qty(f.qty, f.unit)}) (P:${fmt.num1(f.p)}g C:${fmt.num1(f.c)}g F:${fmt.num1(f.f)}g)`).join("\n");
+        mealRows.push([
+          meal.name,
+          foodStr,
+          fmt.kcal(meal.totals.cal),
+          fmt.g1(meal.totals.p),
+          fmt.g1(meal.totals.c),
+          fmt.g1(meal.totals.f),
+          fmt.g1(meal.totals.fib)
+        ]);
+      });
+
+      // Daily totals row
+      mealRows.push([
+        "Daily Totals",
+        "Calculated actual daily nutrition summation",
+        fmt.kcal(r.totals.cal),
+        fmt.g1(r.totals.p),
+        fmt.g1(r.totals.c),
+        fmt.g1(r.totals.f),
+        fmt.g1(r.totals.fib)
+      ]);
+
+      doc.autoTable({
+        startY: nextY + 4,
+        head: mealHeaders,
+        body: mealRows,
+        theme: 'grid',
+        headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontSize: 8.5 },
+        bodyStyles: { fontSize: 8.5, textColor: [51, 65, 85], valign: 'middle' },
+        columnStyles: {
+          0: { fontStyle: 'bold', width: 22 },
+          1: { width: 90 },
+          2: { halign: 'center' },
+          3: { halign: 'center' },
+          4: { halign: 'center' },
+          5: { halign: 'center' },
+          6: { halign: 'center' }
+        },
+        didParseCell: function(data) {
+          if (data.row.index === 4) {
+            data.cell.styles.fontStyle = 'bold';
+            data.cell.styles.fillColor = [241, 245, 249];
+          }
+        },
+        margin: { left: 15, right: 15 }
+      });
+
+      // Page Footer 1
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(8.5);
+      doc.setTextColor(148, 163, 184);
+      doc.text("Powered by CLAWW", 15, 287);
+      doc.text("Page 1 of 2", 180, 287);
+
+      // ==========================================
+      // PAGE 2: Alternatives and Replacement table
+      // ==========================================
+      doc.addPage();
+
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(13);
+      doc.setTextColor(30, 41, 59);
+      doc.text("Complete Meal Swaps & Alternatives", 15, 20);
+
+      // Divider
+      doc.line(15, 24, 195, 24);
+
+      // Render alternatives table
+      const altHeaders = [["Meal", "Alternative 1", "Alternative 2", "Alternative 3"]];
+      const altRows = [];
+
+      r.meals.forEach(meal => {
+        const key = meal.name;
+        const alts = r.alternatives[key] || [];
+        
+        const cols = [key];
+        for (let i = 0; i < 3; i++) {
+          const alt = alts[i];
+          if (alt) {
+            if (alt.invalid) {
+              cols.push(alt.reason);
+            } else {
+              const fStr = alt.foods.map(f => `- ${f.name} (${fmt.qty(f.qty, f.unit)})`).join("\n");
+              const macroStr = `\n${fmt.kcal(alt.totals.cal)} | P: ${fmt.num1(alt.totals.p)}g | C: ${fmt.num1(alt.totals.c)}g | F: ${fmt.num1(alt.totals.f)}g | Fib: ${fmt.num1(alt.totals.fib)}g`;
+              cols.push(fStr + macroStr);
+            }
+          } else {
+            cols.push("-");
+          }
+        }
+        altRows.push(cols);
+      });
+
+      doc.autoTable({
+        startY: 28,
+        head: altHeaders,
+        body: altRows,
+        theme: 'grid',
+        headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontSize: 8.5 },
+        bodyStyles: { fontSize: 7.5, textColor: [51, 65, 85], valign: 'middle' },
+        columnStyles: {
+          0: { fontStyle: 'bold', width: 22 },
+          1: { width: 56 },
+          2: { width: 56 },
+          3: { width: 56 }
+        },
+        margin: { left: 15, right: 15 }
+      });
+
+      // Master Replacement Table
+      nextY = doc.lastAutoTable.finalY + 12;
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(12);
+      doc.setTextColor(30, 41, 59);
+      doc.text("Master Food Replacement Table", 15, nextY);
+
+      const replHeaders = [["Original Food", "Original Qty", "Replacement Food", "Replacement Qty", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Suitable For"]];
+      const replRows = r.replacements.map(row => [
+        row.origName,
+        row.origQty,
+        row.replName,
+        row.replQty,
+        fmt.kcal(row.cal),
+        fmt.g1(row.p),
+        fmt.g1(row.c),
+        fmt.g1(row.f),
+        fmt.g1(row.fib),
+        row.suitable
+      ]);
+
+      doc.autoTable({
+        startY: nextY + 4,
+        head: replHeaders,
+        body: replRows,
+        theme: 'grid',
+        headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontSize: 8 },
+        bodyStyles: { fontSize: 7, textColor: [51, 65, 85] },
+        columnStyles: {
+          0: { fontStyle: 'bold' },
+          2: { fontStyle: 'bold', textColor: [30, 116, 39] }
+        },
+        margin: { left: 15, right: 15 }
+      });
+
+      // Page Footer 2
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(8.5);
+      doc.setTextColor(148, 163, 184);
+      doc.text("Powered by CLAWW", 15, 287);
+      doc.text("Page 2 of 2", 180, 287);
+
+      // Save and download PDF
+      doc.save(`CLAWW_Adaptive_Diet_Plan.pdf`);
+    }
+
+    // Toggle Alternative View Details
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.classList.contains('alt-trigger') || e.target.parentElement && e.target.parentElement.classList.contains('alt-trigger')) {
+        const trigger = e.target.classList.contains('alt-trigger') ? e.target : e.target.parentElement;
+        const content = trigger.nextElementSibling;
+        const icon = trigger.querySelector('i');
+        
+        if (content.style.display === 'block') {
+          content.style.display = 'none';
+          icon.style.transform = 'rotate(0deg)';
+        } else {
+          content.style.display = 'block';
+          icon.style.transform = 'rotate(180deg)';
+        }
+      }
+    });
+
+    window.triggerPlanGeneration = triggerPlanGeneration;
+    window.downloadDietPDF = downloadDietPDF;
+    window.resetWizard = resetWizard;
+  </script>
+</body>
+</html>
