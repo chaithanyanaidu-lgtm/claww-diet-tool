@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f3f5f2;
+  --ink: #18201c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141816;
+    --ink: #e6ebe7;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-ink: var(--ink);
+  --font-sans: var(--font-schibsted), system-ui, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
