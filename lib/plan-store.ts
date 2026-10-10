@@ -115,3 +115,33 @@ export function saveDraft(draft: Draft) {
     // ignore
   }
 }
+
+// ---- save after sign-in ----
+
+// Answers waiting to be saved once the user signs in. localStorage (not sessionStorage) so it
+// survives the confirmation email opening a new tab. Only answers are kept; the server
+// recomputes the plan from them.
+const PENDING_KEY = "claww:pending-save";
+
+export function setPendingSave(input: PlanInput) {
+  try {
+    window.localStorage.setItem(PENDING_KEY, JSON.stringify({ input, at: Date.now() }));
+  } catch {
+    // ignore
+  }
+}
+
+/** Returns and clears the pending answers, if any were stored in the last day. */
+export function takePendingSave(): PlanInput | null {
+  try {
+    const raw = window.localStorage.getItem(PENDING_KEY);
+    window.localStorage.removeItem(PENDING_KEY);
+    if (!raw) return null;
+    const { input, at } = JSON.parse(raw) as { input?: unknown; at?: number };
+    if (!at || Date.now() - at > 24 * 60 * 60 * 1000) return null;
+    const parsed = PlanInputSchema.safeParse(input);
+    return parsed.success ? parsed.data : null;
+  } catch {
+    return null;
+  }
+}

@@ -10,15 +10,21 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "fixtures:legacy": "node scripts/legacy-fixtures.mjs"
+    "fixtures:legacy": "node scripts/legacy-fixtures.mjs",
+    "db:migrate": "node --env-file=.env.local scripts/db-migrate.mjs",
+    "db:rls-check": "node --env-file=.env.local scripts/db-rls-check.mjs",
+    "e2e:auth": "node --env-file=.env.local scripts/e2e-auth.mjs"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.3",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
     "next": "16.4.0",
     "radix-ui": "^1.7.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -28,6 +34,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.0",
+    "playwright": "^1.56.1",
     "supabase": "^2.120.0",
     "tailwindcss": "^4",
     "typescript": "^5",
