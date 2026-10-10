@@ -33,7 +33,7 @@ These read `.env.local` (see `.env.example`). In cloud sandboxes Node needs `NOD
 
 - Engine numbers are the source of truth. The AI explains plans; it never calculates or changes quantities. Anything the model might need to compute (e.g. plan vs targets) is computed in `planFacts` and handed to it.
 - `/api/chat` rebuilds the plan from validated answers on every request. Groq's free tier allows ~8k tokens/minute per account (about 3 questions a minute); the route turns rate limits into a friendly message.
-- Deploys: `vercel deploy --prod` (project `claww-diet`; not connected to GitHub, so pushes don't deploy).
+- Deploys: the Vercel project `claww-diet` is connected to this repo. Pushing to `main` deploys production (https://claww-diet.vercel.app); other branches get preview deployments. `vercel deploy --prod` still works for a manual deploy.
 - The server never trusts a client-sent report: re-run the engine from validated inputs.
 - Auth: use `getUser()` (verifies with Supabase), never `getSession()` on the server. With Cache Components on, anything reading the session must sit inside `<Suspense>`.
 - Schema changes go in a new migration file; never edit one that has been applied.
