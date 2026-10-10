@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { PlanChat } from "@/components/chat/plan-chat";
 import { Button } from "@/components/ui/button";
 import type { PlanInput, PlanReport } from "@/lib/engine";
 import { fmt } from "@/lib/labels";
@@ -39,7 +40,18 @@ function MacroBar({ report }: { report: PlanReport }) {
   );
 }
 
-export function PlanView({ input, report, actions }: { input: PlanInput; report: PlanReport; actions?: ReactNode }) {
+export function PlanView({
+  input,
+  report,
+  actions,
+  children,
+}: {
+  input: PlanInput;
+  report: PlanReport;
+  actions?: ReactNode;
+  /** Extra panels shown above the assistant, such as sharing controls. */
+  children?: ReactNode;
+}) {
   const [pdfState, setPdfState] = useState<"idle" | "busy" | "error">("idle");
 
   // Print shows the collapsed sections too.
@@ -95,7 +107,12 @@ export function PlanView({ input, report, actions }: { input: PlanInput; report:
         <MealSection key={meal.key} meal={meal} alternatives={report.alternatives[meal.key]} index={i} />
       ))}
 
-      <div className="mt-4">
+      <div className="mt-8 space-y-4">
+        {children}
+        <PlanChat input={input} />
+      </div>
+
+      <div className="mt-8">
         <Disclosure title="Swaps you can make">
           <SwapTable report={report} />
         </Disclosure>

@@ -66,7 +66,15 @@ export default function PlansPage() {
       </SiteHeader>
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 pt-4 pb-16 sm:px-6">
         <h1 className="text-xl font-medium tracking-tight">My plans</h1>
-        <Suspense fallback={<div className="mt-8 h-40 rounded-[20px] border border-line bg-surface" aria-busy="true" />}>
+        <Suspense
+          fallback={
+            <div className="mt-8 h-40 animate-pulse rounded-[20px] border border-line bg-surface motion-reduce:animate-none" aria-busy="true">
+              <p role="status" className="sr-only">
+                Loading your plans…
+              </p>
+            </div>
+          }
+        >
           <PlanList />
         </Suspense>
       </main>

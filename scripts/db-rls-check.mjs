@@ -20,6 +20,7 @@ do $$
 declare
   n int;
   plan_a uuid;
+  token text;
 begin
   insert into auth.users (id, aud, role, email) values
     ('${A}', 'authenticated', 'authenticated', 'rls-a@example.test'),
@@ -66,6 +67,55 @@ begin
   exception when insufficient_privilege then null;
   end;
 
+  -- sharing: nobody but the owner can share, anon can't call the setter
+  begin
+    perform public.set_plan_sharing(plan_a, true);
+    raise exception 'FAIL: anon could call set_plan_sharing';
+  exception when insufficient_privilege then null;
+  end;
+  select count(*) into n from public.get_shared_plan('00000000000000000000000000000000');
+  if n <> 0 then raise exception 'FAIL: a made-up share token returned a plan'; end if;
+
+  reset role;
+  perform set_config('request.jwt.claims', '{"sub":"${B}","role":"authenticated"}', true);
+  set local role authenticated;
+  begin
+    perform public.set_plan_sharing(plan_a, true);
+    raise exception 'FAIL: B shared A''s plan';
+  exception when no_data_found then null;
+  end;
+
+  -- A shares; the link is stable and readable by anyone, and only through the function
+  reset role;
+  perform set_config('request.jwt.claims', '{"sub":"${A}","role":"authenticated"}', true);
+  set local role authenticated;
+  token := public.set_plan_sharing(plan_a, true);
+  if token is null or length(token) <> 32 then raise exception 'FAIL: bad share token %', token; end if;
+  if public.set_plan_sharing(plan_a, true) <> token then raise exception 'FAIL: share token changed on re-share'; end if;
+
+  reset role;
+  perform set_config('request.jwt.claims', '{"role":"anon"}', true);
+  set local role anon;
+  select count(*) into n from public.get_shared_plan(token);
+  if n <> 1 then raise exception 'FAIL: anon could not open a shared plan'; end if;
+
+  reset role;
+  perform set_config('request.jwt.claims', '{"sub":"${B}","role":"authenticated"}', true);
+  set local role authenticated;
+  select count(*) into n from public.plans;
+  if n <> 0 then raise exception 'FAIL: sharing exposed the plans table to B'; end if;
+
+  -- A stops sharing; the old link no longer works
+  reset role;
+  perform set_config('request.jwt.claims', '{"sub":"${A}","role":"authenticated"}', true);
+  set local role authenticated;
+  if public.set_plan_sharing(plan_a, false) is not null then raise exception 'FAIL: unshare kept a token'; end if;
+  reset role;
+  perform set_config('request.jwt.claims', '{"role":"anon"}', true);
+  set local role anon;
+  select count(*) into n from public.get_shared_plan(token);
+  if n <> 0 then raise exception 'FAIL: link still worked after unsharing'; end if;
+
   -- A can still delete its own plan
   reset role;
   perform set_config('request.jwt.claims', '{"sub":"${A}","role":"authenticated"}', true);
@@ -85,7 +135,7 @@ const res = await fetch(`https://api.supabase.com/v1/projects/${ref}/database/qu
 });
 const text = await res.text();
 if (text.includes("RLS_CHECK_PASSED")) {
-  console.log("RLS check passed: users see and delete only their own plans; anon sees none.");
+  console.log("RLS check passed: users see and delete only their own plans; anon sees none; only owners share, and unsharing revokes the link.");
 } else {
   console.error("RLS check failed:", text);
   process.exit(1);

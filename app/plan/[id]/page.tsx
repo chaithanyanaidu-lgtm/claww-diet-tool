@@ -3,6 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { DeletePlanButton } from "@/components/results/delete-plan-button";
 import { PlanView } from "@/components/results/plan-view";
+import { SharePlan } from "@/components/results/share-plan";
+import { PageLoading } from "@/components/ui/page-loading";
 import { SiteHeader } from "@/components/ui/site-header";
 import { getCurrentUser } from "@/lib/auth";
 import { formatDate } from "@/lib/dates";
@@ -24,7 +26,9 @@ async function SavedPlan({ params }: { params: Promise<{ id: string }> }) {
       <p className="mx-auto w-full max-w-3xl px-4 pt-2 text-sm text-muted sm:px-6">
         {plan.title} · saved {formatDate(plan.createdAt)}
       </p>
-      <PlanView input={plan.input} report={plan.report} actions={<DeletePlanButton id={plan.id} />} />
+      <PlanView input={plan.input} report={plan.report} actions={<DeletePlanButton id={plan.id} />}>
+        <SharePlan id={plan.id} initialToken={plan.shareToken} />
+      </PlanView>
     </>
   );
 }
@@ -34,7 +38,7 @@ export default function SavedPlanPage({ params }: PageProps<"/plan/[id]">) {
     <>
       <SiteHeader />
       <main className="flex flex-1 flex-col">
-        <Suspense fallback={<div className="flex-1" aria-busy="true" />}>
+        <Suspense fallback={<PageLoading label="Loading your plan…" />}>
           <SavedPlan params={params} />
         </Suspense>
       </main>

@@ -20,6 +20,14 @@ export interface SavedPlan {
   createdAt: string;
   input: PlanInput;
   report: PlanReport;
+  shareToken: string | null;
+}
+
+export interface SharedPlan {
+  title: string;
+  createdAt: string;
+  input: PlanInput;
+  report: PlanReport;
 }
 
 export type SaveResult =
@@ -78,7 +86,7 @@ export async function getPlan(id: string): Promise<SavedPlan | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("plans")
-    .select("id, title, created_at, input, report, engine_version")
+    .select("id, title, created_at, input, report, engine_version, share_token")
     .eq("id", id)
     .maybeSingle();
   if (error || !data) return null;
@@ -87,7 +95,37 @@ export async function getPlan(id: string): Promise<SavedPlan | null> {
   if (!input.success) return null;
   // Plans saved by an older engine are shown as the current engine would make them.
   const report = data.engine_version === ENGINE_VERSION ? (data.report as PlanReport) : generatePlan(input.data);
-  return { id: data.id as string, title: data.title as string, createdAt: data.created_at as string, input: input.data, report };
+  return {
+    id: data.id as string,
+    title: data.title as string,
+    createdAt: data.created_at as string,
+    input: input.data,
+    report,
+    shareToken: (data.share_token as string | null) ?? null,
+  };
+}
+
+/** Turns a plan's share link on (returns the token) or off (returns null). Owner only, enforced in SQL. */
+export async function setSharing(id: string, enabled: boolean): Promise<{ ok: boolean; token: string | null }> {
+  if (!IdSchema.safeParse(id).success) return { ok: false, token: null };
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("set_plan_sharing", { plan_id: id, enabled });
+  if (error) return { ok: false, token: null };
+  return { ok: true, token: (data as string | null) ?? null };
+}
+
+const TokenSchema = z.string().regex(/^[0-9a-f]{32}$/);
+
+/** A plan someone shared, by its link token. Numbers are rebuilt from the stored answers. */
+export async function getSharedPlan(token: string): Promise<SharedPlan | null> {
+  if (!TokenSchema.safeParse(token).success) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("get_shared_plan", { token });
+  const row = Array.isArray(data) ? data[0] : null;
+  if (error || !row) return null;
+  const input = PlanInputSchema.safeParse(row.input);
+  if (!input.success) return null;
+  return { title: row.title as string, createdAt: row.created_at as string, input: input.data, report: generatePlan(input.data) };
 }
 
 export async function deletePlan(id: string): Promise<boolean> {

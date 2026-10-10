@@ -132,6 +132,22 @@ try {
   // ---- A deletes the plan ----
   await a.goto(planUrl);
   check("A's plan still exists after B's attempts", await seen(a.locator("#plan-total:visible")));
+  // ---- sharing: link works signed out, and stops working when turned off ----
+  await a.getByRole("button", { name: "Create share link" }).click();
+  await a.waitForFunction(() => document.querySelector("input[aria-label='Share link']")?.value.startsWith("http"));
+  const shareUrl = await a.getByLabel("Share link").inputValue();
+  const visitor = await (await browser.newContext()).newPage();
+  await visitor.goto(shareUrl);
+  const sharedKcal = (await seen(visitor.locator("#plan-total:visible")))
+    ? (await visitor.locator("#plan-total:visible").innerText()).split("\n")[0]
+    : "";
+  check("share link opens the plan signed out", sharedKcal === kcal, `${shareUrl.replace(BASE, "")} ${sharedKcal}`);
+  check("shared view has no owner controls", (await visitor.getByRole("button", { name: /Delete|Create share link|Stop sharing/ }).count()) === 0);
+  await a.getByRole("button", { name: "Stop sharing" }).click();
+  await a.getByRole("button", { name: "Create share link" }).waitFor();
+  await visitor.goto(shareUrl);
+  check("stopped link shows not found", await seen(visitor.getByRole("heading", { name: "We couldn't find that page" })));
+
   await a.getByRole("button", { name: "Delete" }).click();
   await a.getByRole("button", { name: "Yes, delete it" }).click();
   await a.waitForURL(`${BASE}/plans`);

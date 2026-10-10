@@ -11,8 +11,8 @@ export default function NotFound() {
       <main className="mx-auto w-full max-w-[560px] flex-1 px-4 pt-16">
         <h1 className="text-lg font-medium">We couldn&apos;t find that page</h1>
         <p className="mt-2 text-muted">
-          The link may be mistyped, or the plan may have been deleted. Saved plans are only visible to the account that
-          saved them.
+          The link may be mistyped, or the plan was deleted or is no longer shared. Saved plans are private to the account
+          that saved them unless it shares a link.
         </p>
         <div className="mt-6 flex flex-wrap gap-2">
           <ButtonLink href="/plans">My plans</ButtonLink>
