@@ -148,6 +148,17 @@ try {
   await c.locator("form [role=alert]").waitFor();
   check("sign-up rejects short password on the server", (await c.locator("form [role=alert]").innerText()).includes("8 characters"));
   if (shots) await c.screenshot({ path: `${shots}/login.png` });
+
+  // ---- sign-up signs straight in (email confirmation is off) ----
+  const newEmail = `claww-e2e-${run}-new@example.com`;
+  await c.getByLabel("Email").fill(newEmail);
+  await c.getByLabel("Password").fill(PASSWORD);
+  await c.locator("form").getByRole("button", { name: "Create account" }).click();
+  await c.waitForURL(`${BASE}/plans`, { timeout: 15000 }).catch(() => {});
+  check("new account is signed in straight away", await seen(c.getByRole("heading", { name: "My plans" })), c.url());
+  const found = await (await admin(`users?per_page=200`)).json();
+  const created = found.users?.find((u) => u.email === newEmail);
+  if (created) userIds.push(created.id);
 } catch (e) {
   console.error(e);
   results.push(false);
