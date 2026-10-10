@@ -1,25 +1,165 @@
 @import "tailwindcss";
 
+/* "The measured plate": calm, exact, few elements. Tokens from the build spec, section 6. */
 :root {
   --bg: #f3f5f2;
+  --surface: #ffffff;
   --ink: #18201c;
+  --muted: #66706a;
+  --line: #dde2de;
+  --accent: #2f6b4f;
+  --on-accent: #ffffff;
+  --protein: #2f6b4f;
+  --carbs: #c9971a;
+  --fat: #4e6e9c;
+  --fiber: #8c9a7e;
+  --danger: #a3312a;
+  color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #141816;
+    --surface: #1b201d;
     --ink: #e6ebe7;
+    --muted: #98a29c;
+    --line: #2a312d;
+    --accent: #6fb08e;
+    --on-accent: #141816;
+    --protein: #6fb08e;
+    --carbs: #e0b54a;
+    --fat: #86a3cc;
+    --fiber: #a9b69b;
+    --danger: #f08a80;
+    color-scheme: dark;
   }
+}
+
+:root[data-theme="dark"] {
+  --bg: #141816;
+  --surface: #1b201d;
+  --ink: #e6ebe7;
+  --muted: #98a29c;
+  --line: #2a312d;
+  --accent: #6fb08e;
+  --on-accent: #141816;
+  --protein: #6fb08e;
+  --carbs: #e0b54a;
+  --fat: #86a3cc;
+  --fiber: #a9b69b;
+  --danger: #f08a80;
+  color-scheme: dark;
 }
 
 @theme inline {
   --color-bg: var(--bg);
+  --color-surface: var(--surface);
   --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-protein: var(--protein);
+  --color-carbs: var(--carbs);
+  --color-fat: var(--fat);
+  --color-fiber: var(--fiber);
+  --color-danger: var(--danger);
+
   --font-sans: var(--font-schibsted), system-ui, sans-serif;
+
+  /* Type scale (rem): 0.8125 / 0.9375 / 1.0625 body / 1.375 / 2 / 3.5 (daily calories only) */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.4;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.45;
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.55;
+  --text-lg: 1.375rem;
+  --text-lg--line-height: 1.3;
+  --text-xl: 2rem;
+  --text-xl--line-height: 1.15;
+  --text-display: 3.5rem;
+  --text-display--line-height: 1;
+
+  --radius-sheet: 14px;
 }
 
-body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font-sans);
+@layer base {
+  html {
+    background: var(--bg);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: 1.55;
+  }
+
+  /* Grams line up in columns. */
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--accent) 25%, transparent);
+  }
+}
+
+/* Plate arcs draw once on first load (one 600 ms sequence across the four plates). */
+@media (prefers-reduced-motion: no-preference) {
+  .plate-draw .plate-arc {
+    animation: plate-draw 300ms ease-out both;
+    animation-delay: calc(var(--plate-index, 0) * 100ms);
+  }
+}
+
+@keyframes plate-draw {
+  from {
+    stroke-dashoffset: var(--arc-length);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@layer base {
+  summary {
+    cursor: pointer;
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  details[open] > summary .disclosure-mark {
+    transform: rotate(90deg);
+  }
+}
+
+@media print {
+  :root,
+  :root[data-theme="dark"] {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --ink: #000000;
+    --muted: #333333;
+    --line: #bbbbbb;
+    color-scheme: light;
+  }
+  .no-print,
+  .plate {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  section {
+    break-inside: avoid;
+  }
 }
