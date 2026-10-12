@@ -2,17 +2,31 @@ import { createGroq } from "@ai-sdk/groq";
 import {
   convertToModelMessages,
   createUIMessageStreamResponse,
+  isStepCount,
   safeValidateUIMessages,
   streamText,
   toUIMessageStream,
+  tool,
 } from "ai";
+import { z } from "zod";
 import { buildInstructions } from "@/lib/ai/instructions";
+import { CREATOR } from "@/lib/creator";
 import { cleanMessages } from "@/lib/ai/limits";
 import { allow } from "@/lib/ai/rate-limit";
 import { generatePlan } from "@/lib/engine";
 import { PlanInputSchema } from "@/lib/schemas";
 
 export const maxDuration = 30;
+
+// Rendered as a card in the chat. The details come from lib/creator.ts, never from the model.
+const tools = {
+  showCreator: tool({
+    description:
+      "Show a card with the details of the person who created and developed this website and assistant. Use it whenever someone asks who made, built, created, designed or developed the site, app or assistant.",
+    inputSchema: z.object({}),
+    execute: async () => CREATOR,
+  }),
+};
 
 const error = (status: number, message: string) => Response.json({ error: message }, { status });
 
@@ -41,6 +55,9 @@ export async function POST(req: Request) {
     model: groq(model),
     instructions: buildInstructions(input.data, report),
     messages: await convertToModelMessages(messages),
+    tools,
+    // Room for one tool call (the creator card) plus a short line of text after it.
+    stopWhen: isStepCount(2),
     maxOutputTokens: 1200,
     temperature: 0.2,
   });
@@ -48,6 +65,7 @@ export async function POST(req: Request) {
   return createUIMessageStreamResponse({
     stream: toUIMessageStream({
       stream: result.stream,
+      tools,
       sendReasoning: false,
       onError: (err) => {
         const message = err instanceof Error ? err.message : String(err);
