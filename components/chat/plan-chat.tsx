@@ -4,11 +4,34 @@ import { useChat } from "@ai-sdk/react";
 import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { Button, buttonClass } from "@/components/ui/button";
 import type { PlanInput } from "@/lib/engine";
+import { OFF_TOPIC_NOTE } from "@/lib/ai/off-topic";
+import { CREATOR } from "@/lib/creator";
+import { CreatorCard } from "./creator-card";
 import { RichText } from "./rich-text";
 
-const SUGGESTIONS = ["Why this many calories?", "What can I swap at lunch?", "How do I prep these meals?"];
+const SUGGESTIONS = ["Why this many calories?", "What can I swap at lunch?", "How do I prep these meals?", "Who built this site?"];
 const MAX_CHARS = 1000;
 const MAX_MESSAGES = 20;
+
+/** Answers to questions outside the site start with OFF_TOPIC_NOTE; show that line as a note. */
+function AssistantText({ text }: { text: string }) {
+  const trimmed = text.trimStart();
+  const marker = OFF_TOPIC_NOTE.slice(0, 40);
+  if (!trimmed.startsWith(marker)) return <RichText text={text} />;
+  const rest = trimmed.slice(trimmed.indexOf("\n") === -1 ? trimmed.length : trimmed.indexOf("\n")).trim();
+  return (
+    <>
+      <p className="mb-2 flex items-start gap-2 rounded-[12px] border border-line bg-surface px-3 py-2 text-xs text-muted">
+        <svg viewBox="0 0 16 16" className="mt-0.5 size-3.5 shrink-0" aria-hidden="true">
+          <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+          <path d="M8 7v4M8 4.8v.2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+        <span>This isn&apos;t about your diet plan or this website, but here&apos;s an answer.</span>
+      </p>
+      {rest && <RichText text={rest} />}
+    </>
+  );
+}
 
 function errorText(error: Error): string {
   try {
@@ -62,7 +85,8 @@ export function PlanChat({ input }: { input: PlanInput }) {
         Ask about this plan
       </h2>
       <p className="mt-1 text-sm text-muted">
-        Answers use this plan&apos;s numbers. The assistant explains; it doesn&apos;t change quantities.
+        Ask about your plan, or anything else. Plan answers use this plan&apos;s numbers; the assistant explains and
+        doesn&apos;t change quantities.
       </p>
 
       {messages.length === 0 ? (
@@ -90,10 +114,30 @@ export function PlanChat({ input }: { input: PlanInput }) {
                 </div>
               );
             }
+            const hasCard = m.parts.some((p) => p.type === "tool-showCreator");
             return (
-              <div key={m.id} className="max-w-[92%] rounded-[16px] border border-line bg-bg px-4 py-2.5 text-sm">
+              <div key={m.id} className="max-w-[92%] space-y-3">
                 <span className="sr-only">Assistant: </span>
-                {content ? <RichText text={content} /> : <span className="text-muted">Thinking…</span>}
+                {m.parts.map((p, i) => {
+                  if (p.type === "tool-showCreator") {
+                    return p.state === "output-available" ? (
+                      <CreatorCard key={i} creator={CREATOR} />
+                    ) : p.state === "output-error" ? null : (
+                      <div key={i} className="h-36 w-full max-w-sm animate-pulse rounded-[16px] border border-line bg-surface motion-reduce:animate-none" />
+                    );
+                  }
+                  if (p.type === "text" && p.text.trim()) {
+                    return (
+                      <div key={i} className="rounded-[16px] border border-line bg-bg px-4 py-2.5 text-sm">
+                        <AssistantText text={p.text} />
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
+                {!content && !hasCard && (
+                  <div className="w-fit rounded-[16px] border border-line bg-bg px-4 py-2.5 text-sm text-muted">Thinking…</div>
+                )}
               </div>
             );
           })}

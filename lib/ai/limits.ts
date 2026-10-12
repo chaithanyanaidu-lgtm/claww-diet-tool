@@ -17,6 +17,8 @@ export function cleanMessages(messages: UIMessage[]): UIMessage[] | null {
     const parts = m.parts.filter((p) => p.type === "text");
     const length = parts.reduce((n, p) => n + (p.type === "text" ? p.text.length : 0), 0);
     if (m.role === "user" && length > MAX_CHARS) return null;
+    // An assistant turn that was only a tool card (e.g. the creator card) carries no text to resend.
+    if (m.role === "assistant" && parts.length === 0) continue;
     cleaned.push({ id: m.id, role: m.role, parts });
   }
   const last = cleaned[cleaned.length - 1];

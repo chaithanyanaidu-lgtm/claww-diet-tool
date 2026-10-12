@@ -1,6 +1,7 @@
 import type { UIMessage } from "ai";
 import { describe, expect, it } from "vitest";
 import { buildInstructions, planFacts } from "@/lib/ai/instructions";
+import { OFF_TOPIC_NOTE } from "@/lib/ai/off-topic";
 import { CONTEXT_MESSAGES, MAX_CHARS, MAX_MESSAGES, cleanMessages } from "@/lib/ai/limits";
 import { allow } from "@/lib/ai/rate-limit";
 import { generatePlan, type PlanInput } from "@/lib/engine";
@@ -41,6 +42,13 @@ describe("planFacts", () => {
     expect(planFacts(input, on)).toMatch(/calories \d+ of \d+ kcal \(on target\)/);
   });
 
+  it("answers off-topic questions behind the note, and leaves creator details to the tool", () => {
+    const text = buildInstructions(input, report);
+    expect(text).toContain(OFF_TOPIC_NOTE);
+    expect(text).toMatch(/call the showCreator tool/);
+    expect(text).not.toContain("2473A05185");
+  });
+
   it("keeps the no-calculating rule in the instructions", () => {
     const text = buildInstructions(input, report);
     expect(text).toMatch(/Do no arithmetic at all/);
@@ -70,6 +78,16 @@ describe("cleanMessages", () => {
     expect(kept.length).toBeLessThanOrEqual(CONTEXT_MESSAGES);
     expect(kept[0].role).toBe("user");
     expect(kept.at(-1)?.parts[0]).toEqual({ type: "text", text: "m14" });
+  });
+
+  it("drops assistant turns that were only a tool card", () => {
+    const card: UIMessage = {
+      id: "c",
+      role: "assistant",
+      parts: [{ type: "tool-showCreator", toolCallId: "t1", state: "output-available", input: {}, output: {} }],
+    } as UIMessage;
+    const kept = cleanMessages([msg("user", "who made this?"), card, msg("user", "thanks, and why rice?")]);
+    expect(kept?.map((m) => m.role)).toEqual(["user", "user"]);
   });
 
   it("drops non-text parts", () => {

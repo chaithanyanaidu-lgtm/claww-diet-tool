@@ -31,7 +31,7 @@ These read `.env.local` (see `.env.example`). In cloud sandboxes Node needs `NOD
 
 ## Rules
 
-- Engine numbers are the source of truth. The AI explains plans; it never calculates or changes quantities. Anything the model might need to compute (e.g. plan vs targets) is computed in `planFacts` and handed to it.
+- Engine numbers are the source of truth. The AI explains plans; it never calculates or changes quantities. Questions outside the site get an answer that starts with `OFF_TOPIC_NOTE` (`lib/ai/off-topic.ts`), which the chat shows as a note. "Who made this?" calls the `showCreator` tool, which renders a card from `lib/creator.ts`; the model never writes those details itself. Anything the model might need to compute (e.g. plan vs targets) is computed in `planFacts` and handed to it.
 - `/api/chat` rebuilds the plan from validated answers on every request. Groq's free tier allows ~8k tokens/minute per account (about 3 questions a minute); the route turns rate limits into a friendly message.
 - Deploys: the Vercel project `claww-diet` is connected to this repo. Pushing to `main` deploys production (https://claww-diet.vercel.app); other branches get preview deployments. `vercel deploy --prod` still works for a manual deploy.
 - The server never trusts a client-sent report: re-run the engine from validated inputs.
