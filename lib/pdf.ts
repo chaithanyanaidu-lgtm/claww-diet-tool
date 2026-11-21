@@ -57,6 +57,36 @@ export async function downloadPlanPdf(input: PlanInput, report: PlanReport) {
   );
   y += 6;
 
+  const dCal = s.cal - t.targetCalories;
+  const dP = Math.round((s.p - t.protein) * 10) / 10;
+  const dC = Math.round((s.c - t.carbs) * 10) / 10;
+  const dF = Math.round((s.f - t.fat) * 10) / 10;
+  const dFib = Math.round((s.fib - t.fiber) * 10) / 10;
+
+  const fmtDelta = (d: number, unit: string) =>
+    `${d > 0 ? "+" : d < 0 ? "−" : ""}${fmt.one(Math.abs(d))} ${unit}`;
+
+  autoTable(doc, {
+    startY: y,
+    margin: { left, right: left },
+    head: [["Daily Targets vs Plan", "Target", "In the plan", "Difference"]],
+    body: [
+      ["Calories", `${fmt.int(t.targetCalories)} kcal`, `${fmt.int(s.cal)} kcal`, fmtDelta(dCal, "kcal")],
+      ["Protein", `${fmt.one(t.protein)} g`, `${fmt.one(s.p)} g`, fmtDelta(dP, "g")],
+      ["Carbs", `${fmt.one(t.carbs)} g`, `${fmt.one(s.c)} g`, fmtDelta(dC, "g")],
+      ["Fat", `${fmt.one(t.fat)} g`, `${fmt.one(s.f)} g`, fmtDelta(dF, "g")],
+      ["Fiber", `${fmt.one(t.fiber)} g`, `${fmt.one(s.fib)} g`, fmtDelta(dFib, "g")],
+    ],
+    theme: "plain",
+    styles: { font: "helvetica", fontSize: 9, textColor: ink, cellPadding: { top: 1.2, bottom: 1.2, left: 1.5, right: 1.5 } },
+    headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: [221, 226, 222] },
+    columnStyles: { 0: { cellWidth: "auto" }, 1: { cellWidth: 28 }, 2: { cellWidth: 28 }, 3: { cellWidth: 28 } },
+    didParseCell: (d) => {
+      if (d.column.index > 0) d.cell.styles.halign = "right";
+    },
+  });
+  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 6;
+
   for (const meal of report.meals) {
     autoTable(doc, {
       startY: y,

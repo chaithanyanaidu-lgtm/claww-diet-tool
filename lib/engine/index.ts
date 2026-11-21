@@ -1,6 +1,6 @@
 import { buildAlternatives } from "./alternatives";
 import { runGlobalOptimization, round1 } from "./optimize";
-import { applyPracticalConstraints, rebalanceAfterPracticalAdjustments, scorePracticality } from "./practical";
+import { applyPracticalConstraints, checkMacroToleranceWarnings, rebalanceAfterPracticalAdjustments, scorePracticality } from "./practical";
 import { calculateReplacements } from "./replacements";
 import { calculateDailyTargets } from "./targets";
 import { getOriginalTemplates, makeFoodFilter } from "./templates";
@@ -55,7 +55,9 @@ export function generatePlan(input: PlanInput, options: { debug?: boolean } = {}
     : undefined;
   const alternatives = buildAlternatives(meals, targets, filter, debug?.rejectedAlternatives);
   const replacements = calculateReplacements(meals);
-  const warnings = scorePracticality(meals, targets.goal);
+  const portionWarnings = scorePracticality(meals, targets.goal);
+  const macroWarnings = checkMacroToleranceWarnings(totals, targets);
+  const warnings = [...portionWarnings, ...macroWarnings];
 
   const report: PlanReport = { engineVersion: ENGINE_VERSION, targets, meals, alternatives, replacements, totals, warnings };
   if (debug) report.debug = debug;

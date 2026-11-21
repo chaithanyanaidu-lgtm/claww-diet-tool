@@ -89,6 +89,11 @@ const WARNING_TEXT: Record<PracticalRule, string> = {
   main_completeness: "Missing a carb, a protein or a vegetable.",
   dist_fat_share: "Lower in fat than usual for this goal.",
   dist_single_dominance: "One food makes up most of the calories.",
+  target_miss_cal: "Daily calories are outside tolerance (±20 kcal).",
+  target_miss_protein: "Daily protein is outside tolerance (target to +10%).",
+  target_miss_carbs: "Daily carbohydrates are outside tolerance (±5 g).",
+  target_miss_fat: "Daily fat is outside tolerance (±2 g).",
+  target_miss_fiber: "Daily fiber is below target (±5 g).",
 };
 
 function Row({ label, children }: { label: string; children: ReactNode }) {

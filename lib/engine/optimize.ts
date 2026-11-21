@@ -34,6 +34,7 @@ interface Weights {
   c: number;
   f: number;
   fib: number;
+  split: number;
 }
 
 const OTHER_MAIN_PROTEINS: FoodKey[] = ["chicken", "fish", "paneer", "paneer_bhurji", "soya", "eggs"];
@@ -60,7 +61,7 @@ export function getPracticalMin(
       const targetPBMin = targetCalVal > 2000 ? r.pbPreferred : r.pbMin;
       const pbMinFromBread = Math.max(targetPBMin, r.pbBreadRatioMin * estimatedBread);
       const neededPBFromFat = Math.ceil(r.minFatPerSnack / 0.5);
-      newMin = Math.max(pbMinFromBread, neededPBFromFat);
+      newMin = Math.min(25, Math.max(pbMinFromBread, neededPBFromFat));
     }
     if (foodKey === "almonds") newMin = Math.ceil(r.minFatPerSnack / 0.49);
     if (foodKey === "peanuts") newMin = Math.ceil(r.minFatPerSnack / 0.49);
@@ -75,11 +76,12 @@ export function getPracticalMin(
       if (foodKey === "eggs") newMin = r.minEggsWithHighOats;
       if (foodKey === "paneer") newMin = r.minPaneerWithHighOats;
     }
-    if (foodKey === "pb") newMin = r.pbMinIfPresent;
+    if (foodKey === "pb") newMin = Math.min(25, r.pbMinIfPresent);
   }
 
   if (meal === "lunch" || meal === "dinner") {
     const r = PRACTICAL_RULES.lunchDinner;
+    if (foodKey === "ghee") newMin = r.minGhee;
     if (foodKey === "chicken") newMin = r.minChicken;
     if (foodKey === "fish") newMin = r.minFish;
     if (foodKey === "paneer") newMin = r.minPaneer;
@@ -89,6 +91,18 @@ export function getPracticalMin(
       if (!hasOtherProtein) newMin = r.minDalMajor;
     }
     if (foodKey === "curd") newMin = r.minCurdIfIncluded;
+  }
+
+  if (meal === "dinner") {
+    const r = PRACTICAL_RULES.lunchDinner;
+    const dinnerCal = targets.targetCalories * MEAL_CALORIE_SPLIT[3];
+    if (foodKey === "chapati") {
+      const minFromCal = Math.round((0.25 * dinnerCal) / FOOD_DB.chapati.cal);
+      newMin = Math.max(r.minDinnerChapati, minFromCal);
+    } else if (foodKey === "rice" || foodKey === "brown_rice") {
+      const minFromCal = Math.round((0.25 * dinnerCal) / FOOD_DB[foodKey].cal);
+      newMin = Math.max(100, minFromCal);
+    }
   }
 
   return newMin;
@@ -118,7 +132,18 @@ function dayLoss(st: OptItem[], weights: Weights, targets: Targets): number {
   const totalCal = totalP * 4 + totalC * 4 + totalF * 9;
 
   const dCal = totalCal - targets.targetCalories;
-  const dP = totalP - targets.protein;
+
+  // Protein treated as a floor with 10% headroom (target to target + 10%)
+  const pHeadroom = targets.protein * 0.10;
+  let dP = 0;
+  if (totalP < targets.protein) {
+    dP = totalP - targets.protein;
+  } else if (totalP > targets.protein + pHeadroom) {
+    dP = totalP - (targets.protein + pHeadroom);
+  } else {
+    dP = 0;
+  }
+
   const dC = totalC - targets.carbs;
   const dF = totalF - targets.fat;
   const dFib = totalFib - targets.fiber;
@@ -134,7 +159,14 @@ function dayLoss(st: OptItem[], weights: Weights, targets: Targets): number {
   for (let i = 0; i < 4; i++) {
     const targetMealCal = targets.targetCalories * MEAL_CALORIE_SPLIT[i];
     const dMealCal = mealCal[i] - targetMealCal;
-    ratioLoss += dMealCal * dMealCal * 0.25;
+    ratioLoss += dMealCal * dMealCal * weights.split;
+
+    // Per-meal band penalty (within ±15% of intended meal calories)
+    const band = 0.15 * targetMealCal;
+    const bandExcess = Math.abs(dMealCal) - band;
+    if (bandExcess > 0) {
+      ratioLoss += bandExcess * bandExcess * weights.split * 4.0;
+    }
   }
 
   let penaltyLoss = 0;
@@ -274,12 +306,12 @@ const copyState = (st: OptItem[]) => st.map((s) => ({ ...s }));
  */
 export function descendDay(initial: OptItem[], targets: Targets): { best: OptItem[]; attempts: number } {
   let state = copyState(initial);
-  const weights: Weights = { cal: 1, p: 25, c: 25, f: 100, fib: 25 };
+  const weights: Weights = { cal: 1, p: 25, c: 25, f: 100, fib: 25, split: 1.0 };
   let bestState = copyState(state);
   let attempts = 0;
   let targetsSatisfied = false;
 
-  while (!targetsSatisfied && attempts < 8) {
+  while (!targetsSatisfied && attempts < 3) {
     let currentBestLoss = dayLoss(bestState, weights, targets);
     const steps = [15, 8, 4, 2, 1, 0.5, 0.1];
 
@@ -353,22 +385,38 @@ export function descendDay(initial: OptItem[], targets: Targets): { best: OptIte
     }
 
     let totalP = 0, totalC = 0, totalF = 0, totalFib = 0;
+    const mealCal = [0, 0, 0, 0];
     bestState.forEach((s) => {
       totalP += s.qty * s.p;
       totalC += s.qty * s.c;
       totalF += s.qty * s.f;
       totalFib += s.qty * s.fib;
+      mealCal[s.mealIndex] += s.qty * s.cal;
     });
     const totalCal = totalP * 4 + totalC * 4 + totalF * 9;
 
     const errCal = Math.abs(totalCal - targets.targetCalories);
-    const errP = Math.abs(totalP - targets.protein);
+    const pHeadroom = targets.protein * 0.10;
+    const errP = totalP < targets.protein
+      ? targets.protein - totalP
+      : totalP > targets.protein + pHeadroom
+        ? totalP - (targets.protein + pHeadroom)
+        : 0;
     const errC = Math.abs(totalC - targets.carbs);
     const errF = Math.abs(totalF - targets.fat);
     const errFib = Math.abs(totalFib - targets.fiber);
 
+    let splitSatisfied = true;
+    for (let i = 0; i < 4; i++) {
+      const targetMealCal = targets.targetCalories * MEAL_CALORIE_SPLIT[i];
+      if (Math.abs(mealCal[i] - targetMealCal) > 0.15 * targetMealCal) {
+        splitSatisfied = false;
+        break;
+      }
+    }
+
     const t = PRACTICAL_RULES.tolerances;
-    if (errCal <= t.cal && errP <= t.protein && errF <= t.fat && errC <= t.carbs && errFib <= t.fiber) {
+    if (errCal <= t.cal && errP <= t.protein && errF <= t.fat && errC <= t.carbs && errFib <= t.fiber && splitSatisfied) {
       targetsSatisfied = true;
     } else {
       if (errCal > t.cal) weights.cal *= 8;
@@ -376,6 +424,7 @@ export function descendDay(initial: OptItem[], targets: Targets): { best: OptIte
       if (errC > t.carbs) weights.c *= 8;
       if (errF > t.fat) weights.f *= 8;
       if (errFib > t.fiber) weights.fib *= 8;
+      if (!splitSatisfied) weights.split *= 4;
 
       state = copyState(bestState);
       attempts++;

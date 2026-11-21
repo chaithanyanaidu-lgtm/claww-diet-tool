@@ -128,10 +128,15 @@ export type PracticalRule =
   | "main_curd_min"
   | "main_completeness"
   | "dist_fat_share"
-  | "dist_single_dominance";
+  | "dist_single_dominance"
+  | "target_miss_cal"
+  | "target_miss_protein"
+  | "target_miss_carbs"
+  | "target_miss_fat"
+  | "target_miss_fiber";
 
 export interface PracticalWarning {
-  mealName: MealName;
+  mealName: MealName | "Daily";
   message: string;
   rule: PracticalRule;
 }

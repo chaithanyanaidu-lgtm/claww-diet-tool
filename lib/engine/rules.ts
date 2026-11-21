@@ -22,6 +22,8 @@ export const PRACTICAL_RULES = {
     minPaneer: 70,
     minDalMajor: 120,
     minCurdIfIncluded: 80,
+    minGhee: 5,
+    minDinnerChapati: 80,
   },
   distribution: {
     minFatCalorieSharePerMeal: 0.15,
@@ -33,6 +35,7 @@ export const PRACTICAL_RULES = {
       "Weight Gain": 0.15,
     } satisfies Record<Goal, number>,
     maxSingleItemCalorieShare: 0.7,
+    mealCalorieBand: 0.15,
   },
   tolerances: {
     cal: 20,

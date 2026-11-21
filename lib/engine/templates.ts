@@ -81,6 +81,7 @@ export function getOriginalTemplates(input: PlanInput, filter: FoodFilter): Temp
   // Lunch
   const lunchCarb = pick("carb", cuisine === "North Indian" ? ["chapati"] : ["rice", "brown_rice", "chapati"], ["rice", "chapati"]);
   const lunchProtein = pick("protein", foodPref === "Non-Vegetarian" ? ["chicken", "fish"] : ["paneer", "soya", "dal"], ["paneer", "dal"]);
+  const lunchFat = pick("fat", ["ghee", "almonds", "peanuts"], ["ghee"]);
 
   // Snack
   const snackCarb = pick("carb", ["bread", "sweet_potato", "oats"], ["bread", "sweet_potato"]);
@@ -94,12 +95,13 @@ export function getOriginalTemplates(input: PlanInput, filter: FoodFilter): Temp
     foodPref === "Non-Vegetarian" ? ["chicken", "paneer_bhurji", "eggs"] : ["paneer_bhurji", "paneer", "dal", "soya"],
     ["paneer_bhurji", "dal"],
   );
+  const dinnerFat = pick("fat", ["ghee", "almonds", "peanuts"], ["ghee"]);
 
   return {
     breakfast: present([bfCarb, bfProtein, bfFat, bfFruit]),
-    lunch: present([lunchCarb, lunchProtein, ifAllowed("curd"), ifAllowed("veg_curry"), ifAllowed("salad")]),
+    lunch: present([lunchCarb, lunchProtein, lunchFat, ifAllowed("curd"), ifAllowed("veg_curry"), ifAllowed("salad")]),
     snack: present([snackCarb, snackFat, snackFruit]),
-    dinner: present([dinnerCarb, dinnerProtein, ifAllowed("curd"), ifAllowed("veg_curry"), ifAllowed("salad")]),
+    dinner: present([dinnerCarb, dinnerProtein, dinnerFat, ifAllowed("curd"), ifAllowed("veg_curry"), ifAllowed("salad")]),
   };
 }
 
@@ -118,9 +120,9 @@ export function getAlternativeTemplates(filter: FoodFilter): Record<MealKey, Foo
       ["idli", veg ? "paneer" : "eggs", "peanuts", "apple"],
     ]),
     lunch: allowed([
-      ["chapati", nonVeg ? "fish" : "soya", "curd", "veg_curry", "salad"],
-      ["brown_rice", nonVeg ? "chicken" : "dal", "curd", "veg_curry", "salad"],
-      ["chapati", nonVeg ? "eggs" : "paneer", "curd", "veg_curry", "salad"],
+      ["chapati", nonVeg ? "fish" : "soya", "ghee", "curd", "veg_curry", "salad"],
+      ["brown_rice", nonVeg ? "chicken" : "dal", "ghee", "curd", "veg_curry", "salad"],
+      ["chapati", nonVeg ? "eggs" : "paneer", "ghee", "curd", "veg_curry", "salad"],
     ]),
     snack: allowed([
       ["sweet_potato", "almonds", "apple"],
@@ -128,9 +130,9 @@ export function getAlternativeTemplates(filter: FoodFilter): Record<MealKey, Foo
       ["bread", "peanuts", "apple"],
     ]),
     dinner: allowed([
-      ["rice", nonVeg ? "chicken" : "dal", "curd", "veg_curry", "salad"],
-      ["chapati", nonVeg ? "fish" : "soya", "curd", "veg_curry", "salad"],
-      ["chapati", nonVeg ? "eggs" : "paneer", "curd", "veg_curry", "salad"],
+      ["rice", nonVeg ? "chicken" : "dal", "ghee", "curd", "veg_curry", "salad"],
+      ["chapati", nonVeg ? "fish" : "soya", "ghee", "curd", "veg_curry", "salad"],
+      ["chapati", nonVeg ? "eggs" : "paneer", "ghee", "curd", "veg_curry", "salad"],
     ]),
   };
 }

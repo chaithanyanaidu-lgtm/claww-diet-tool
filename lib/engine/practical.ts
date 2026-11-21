@@ -196,7 +196,7 @@ export function applyPracticalConstraints(meals: Meal[], targets: Targets): bool
       if (currentFat < r.minFatPerSnack) {
         if (has("pb")) {
           const pb = getFood("pb");
-          const neededPB = Math.ceil(r.minFatPerSnack / 0.5);
+          const neededPB = Math.min(25, Math.ceil(r.minFatPerSnack / 0.5));
           if (pb.qty < neededPB) {
             pb.qty = neededPB;
             adjusted = true;
@@ -209,6 +209,10 @@ export function applyPracticalConstraints(meals: Meal[], targets: Targets): bool
             adjusted = true;
           }
         }
+      }
+      if (has("pb") && getFood("pb").qty > 25) {
+        getFood("pb").qty = 25;
+        adjusted = true;
       }
     }
 
@@ -234,6 +238,10 @@ export function applyPracticalConstraints(meals: Meal[], targets: Targets): bool
 
     if (name === "lunch" || name === "dinner") {
       const r = PRACTICAL_RULES.lunchDinner;
+      if (has("ghee") && getFood("ghee").qty < r.minGhee) {
+        getFood("ghee").qty = r.minGhee;
+        adjusted = true;
+      }
       if (has("chicken") && getFood("chicken").qty < r.minChicken) {
         getFood("chicken").qty = r.minChicken;
         adjusted = true;
@@ -260,6 +268,35 @@ export function applyPracticalConstraints(meals: Meal[], targets: Targets): bool
       if (has("curd") && getFood("curd").qty < r.minCurdIfIncluded) {
         getFood("curd").qty = r.minCurdIfIncluded;
         adjusted = true;
+      }
+    }
+
+    if (name === "dinner") {
+      const r = PRACTICAL_RULES.lunchDinner;
+      const dinnerCal = targets.targetCalories * 0.25;
+      if (has("chapati")) {
+        const minFromCal = Math.round((0.25 * dinnerCal) / FOOD_DB.chapati.cal);
+        const reqMin = Math.max(r.minDinnerChapati, minFromCal);
+        if (getFood("chapati").qty < reqMin) {
+          getFood("chapati").qty = reqMin;
+          adjusted = true;
+        }
+      }
+      if (has("rice")) {
+        const minFromCal = Math.round((0.25 * dinnerCal) / FOOD_DB.rice.cal);
+        const reqMin = Math.max(100, minFromCal);
+        if (getFood("rice").qty < reqMin) {
+          getFood("rice").qty = reqMin;
+          adjusted = true;
+        }
+      }
+      if (has("brown_rice")) {
+        const minFromCal = Math.round((0.25 * dinnerCal) / FOOD_DB.brown_rice.cal);
+        const reqMin = Math.max(100, minFromCal);
+        if (getFood("brown_rice").qty < reqMin) {
+          getFood("brown_rice").qty = reqMin;
+          adjusted = true;
+        }
       }
     }
   });
@@ -345,4 +382,58 @@ export function rebalanceAfterPracticalAdjustments(meals: Meal[], targets: Targe
   });
 
   return attempts;
+}
+
+/** Emits warnings when daily macro totals exceed the engine's tolerances. */
+export function checkMacroToleranceWarnings(totals: Macros, targets: Targets): PracticalWarning[] {
+  const warnings: PracticalWarning[] = [];
+  const t = PRACTICAL_RULES.tolerances;
+  const pHeadroom = targets.protein * 0.10;
+
+  if (Math.abs(totals.cal - targets.targetCalories) > t.cal) {
+    const diff = totals.cal - targets.targetCalories;
+    warnings.push({
+      mealName: "Daily",
+      message: `Daily calories (${totals.cal} kcal) missed target (${targets.targetCalories} kcal) by ${diff > 0 ? "+" : ""}${diff} kcal.`,
+      rule: "target_miss_cal",
+    });
+  }
+
+  const pMin = targets.protein - t.protein;
+  const pMax = targets.protein + pHeadroom + t.protein;
+  if (totals.p < pMin || totals.p > pMax) {
+    warnings.push({
+      mealName: "Daily",
+      message: `Daily protein (${totals.p}g) is outside target range (${targets.protein}g – ${round1(targets.protein + pHeadroom)}g).`,
+      rule: "target_miss_protein",
+    });
+  }
+
+  if (Math.abs(totals.c - targets.carbs) > t.carbs) {
+    const diff = round1(totals.c - targets.carbs);
+    warnings.push({
+      mealName: "Daily",
+      message: `Daily carbohydrates (${totals.c}g) missed target (${targets.carbs}g) by ${diff > 0 ? "+" : ""}${diff}g.`,
+      rule: "target_miss_carbs",
+    });
+  }
+
+  if (Math.abs(totals.f - targets.fat) > t.fat) {
+    const diff = round1(totals.f - targets.fat);
+    warnings.push({
+      mealName: "Daily",
+      message: `Daily fat (${totals.f}g) missed target (${targets.fat}g) by ${diff > 0 ? "+" : ""}${diff}g.`,
+      rule: "target_miss_fat",
+    });
+  }
+
+  if (totals.fib < targets.fiber - t.fiber) {
+    warnings.push({
+      mealName: "Daily",
+      message: `Daily fiber (${totals.fib}g) is below target (${targets.fiber}g).`,
+      rule: "target_miss_fiber",
+    });
+  }
+
+  return warnings;
 }

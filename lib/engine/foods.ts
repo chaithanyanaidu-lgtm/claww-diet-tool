@@ -4,8 +4,8 @@ import type { Food } from "./types";
 // last-resort fallback takes the first allowed food of a type in this order.
 export const FOOD_DB = {
   // Carbs
-  rice: { name: "Cooked White Rice", type: "carb", cal: 1.3, p: 0.027, c: 0.28, f: 0.003, fib: 0.004, unit: "g", min: 80, max: 400 },
-  brown_rice: { name: "Cooked Brown Rice", type: "carb", cal: 1.11, p: 0.026, c: 0.23, f: 0.009, fib: 0.018, unit: "g", min: 80, max: 400 },
+  rice: { name: "Cooked White Rice", type: "carb", cal: 1.3, p: 0.027, c: 0.28, f: 0.003, fib: 0.004, unit: "g", min: 80, max: 250 },
+  brown_rice: { name: "Cooked Brown Rice", type: "carb", cal: 1.11, p: 0.026, c: 0.23, f: 0.009, fib: 0.018, unit: "g", min: 80, max: 250 },
   chapati: { name: "Whole Wheat Chapati", type: "carb", cal: 2.67, p: 0.08, c: 0.53, f: 0.011, fib: 0.08, unit: "g", min: 40, max: 240 },
   bread: { name: "Brown Bread", type: "carb", cal: 2.65, p: 0.09, c: 0.43, f: 0.042, fib: 0.06, unit: "g", min: 28, max: 140 },
   oats: { name: "Oats (Dry)", type: "carb", cal: 3.89, p: 0.169, c: 0.66, f: 0.069, fib: 0.106, unit: "g", min: 30, max: 150 },
@@ -29,7 +29,7 @@ export const FOOD_DB = {
   curd: { name: "Low Fat Curd", type: "protein", cal: 0.43, p: 0.037, c: 0.047, f: 0.01, fib: 0.0, unit: "g", min: 50, max: 300 },
 
   // Fats
-  pb: { name: "Peanut Butter", type: "fat", cal: 5.88, p: 0.25, c: 0.2, f: 0.5, fib: 0.06, unit: "g", min: 5, max: 40 },
+  pb: { name: "Peanut Butter", type: "fat", cal: 5.88, p: 0.25, c: 0.2, f: 0.5, fib: 0.06, unit: "g", min: 5, max: 25 },
   almonds: { name: "Almonds", type: "fat", cal: 5.79, p: 0.21, c: 0.22, f: 0.49, fib: 0.12, unit: "g", min: 5, max: 45 },
   peanuts: { name: "Peanuts", type: "fat", cal: 5.67, p: 0.26, c: 0.16, f: 0.49, fib: 0.09, unit: "g", min: 5, max: 45 },
   ghee: { name: "Pure Ghee", type: "fat", cal: 9.0, p: 0.0, c: 0.0, f: 1.0, fib: 0.0, unit: "g", min: 2, max: 15 },

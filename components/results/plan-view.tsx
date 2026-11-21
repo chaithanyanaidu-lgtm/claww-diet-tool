@@ -3,7 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { PlanChat } from "@/components/chat/plan-chat";
 import { Button } from "@/components/ui/button";
-import type { PlanInput, PlanReport } from "@/lib/engine";
+import { PRACTICAL_RULES, type PlanInput, type PlanReport } from "@/lib/engine";
 import { fmt } from "@/lib/labels";
 import { HowCalculated, Disclosure, SwapTable } from "./details-sections";
 import { MealSection } from "./meal-section";
@@ -37,6 +37,54 @@ function MacroBar({ report }: { report: PlanReport }) {
         Fiber <span className="font-medium text-ink">{fmt.int(report.totals.fib)} g</span>
       </p>
     </>
+  );
+}
+
+function PlanTargetDeltas({ report }: { report: PlanReport }) {
+  const t = report.targets;
+  const s = report.totals;
+  const tol = PRACTICAL_RULES.tolerances;
+  const pHeadroom = t.protein * 0.10;
+
+  const dCal = s.cal - t.targetCalories;
+  const dP = Math.round((s.p - t.protein) * 10) / 10;
+  const dC = Math.round((s.c - t.carbs) * 10) / 10;
+  const dF = Math.round((s.f - t.fat) * 10) / 10;
+  const dFib = Math.round((s.fib - t.fiber) * 10) / 10;
+
+  const items = [
+    { label: "Calories", target: t.targetCalories, plan: s.cal, delta: dCal, unit: "kcal", ok: Math.abs(dCal) <= tol.cal },
+    { label: "Protein", target: t.protein, plan: s.p, delta: dP, unit: "g", ok: s.p >= t.protein - tol.protein && s.p <= t.protein + pHeadroom + tol.protein },
+    { label: "Carbs", target: t.carbs, plan: s.c, delta: dC, unit: "g", ok: Math.abs(dC) <= tol.carbs },
+    { label: "Fat", target: t.fat, plan: s.f, delta: dF, unit: "g", ok: Math.abs(dF) <= tol.fat },
+    { label: "Fiber", target: t.fiber, plan: s.fib, delta: dFib, unit: "g", ok: s.fib >= t.fiber - tol.fiber },
+  ];
+
+  return (
+    <div className="mt-4 rounded-xl border border-line bg-surface/50 p-3 sm:p-4">
+      <div className="mb-2 flex items-center justify-between text-xs text-muted">
+        <span className="font-medium text-ink">Plan vs Daily Target</span>
+        <span>tolerances: ±20 kcal, target–10% P, ±5g C, ±2g F</span>
+      </div>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+        {items.map((it) => (
+          <div key={it.label} className="rounded-lg border border-line/60 bg-surface px-2.5 py-2 text-center">
+            <span className="block text-xs text-muted">{it.label}</span>
+            <span className="num text-sm font-semibold text-ink">
+              {fmt.int(it.plan)} <span className="text-xs font-normal text-muted">{it.unit}</span>
+            </span>
+            <span
+              className={`block text-[11px] font-medium ${
+                it.ok ? "text-emerald-700 dark:text-emerald-400" : "text-amber-700 dark:text-amber-400"
+              }`}
+            >
+              {it.delta > 0 ? `+${it.delta}` : it.delta < 0 ? `−${Math.abs(it.delta)}` : "0"} {it.unit}
+              <span className="text-muted font-normal"> (tgt {fmt.int(it.target)})</span>
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -79,6 +127,7 @@ export function PlanView({
           {fmt.int(report.totals.cal)} <span className="text-lg font-normal text-muted">kcal a day</span>
         </h1>
         <MacroBar report={report} />
+        <PlanTargetDeltas report={report} />
 
         <div className="no-print mt-6 flex flex-wrap gap-2">
           {actions}
