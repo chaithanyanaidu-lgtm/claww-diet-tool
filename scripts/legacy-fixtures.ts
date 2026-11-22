@@ -181,7 +181,20 @@ const cases = inputs.map(({ id, ...input }) => {
 
 const testMathCases = TEST_MATH_CASES.map((c) => {
   const input = inputs.find((i) => i.id === c.id)!;
-  const { id: _id, ...wizardInput } = input;
+  const wizardInput: PlanInput = {
+    age: input.age,
+    heightCm: input.heightCm,
+    weightKg: input.weightKg,
+    bodyFatPct: input.bodyFatPct,
+    gender: input.gender,
+    goal: input.goal,
+    frequency: input.frequency,
+    level: input.level,
+    foodPref: input.foodPref,
+    cuisine: input.cuisine,
+    preferredFoods: input.preferredFoods,
+    avoidFoods: input.avoidFoods,
+  };
   const targets = calculateDailyTargets(wizardInput);
   const { meals } = runGlobalOptimization(c.templates, targets);
   if (applyPracticalConstraints(meals, targets)) {
