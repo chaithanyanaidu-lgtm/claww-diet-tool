@@ -38,7 +38,7 @@ export function SwapTable({ report }: { report: PlanReport }) {
               {foodLabel(r.toName)} <span className="font-medium">{fmt.int(r.toQty)} {r.toUnit}</span>
             </p>
             <p className="text-xs text-muted">
-              Matched on {BASIS_LABEL[r.basis].toLowerCase()} · {fmt.int(r.cal)} kcal
+              Matched on {BASIS_LABEL[r.basis].toLowerCase()} · {fmt.int(r.cal)} kcal ({r.calDelta > 0 ? `+${fmt.int(r.calDelta)}` : fmt.int(r.calDelta)} kcal)
             </p>
           </li>
         ))}
@@ -50,7 +50,8 @@ export function SwapTable({ report }: { report: PlanReport }) {
               <th scope="col" className="py-2 pr-4 font-normal">Instead of</th>
               <th scope="col" className="py-2 pr-4 font-normal">Have</th>
               <th scope="col" className="py-2 pr-4 font-normal">Matched on</th>
-              <th scope="col" className="py-2 text-right font-normal">kcal</th>
+              <th scope="col" className="py-2 pr-4 text-right font-normal">kcal</th>
+              <th scope="col" className="py-2 text-right font-normal">Calorie diff</th>
             </tr>
           </thead>
           <tbody>
@@ -63,7 +64,10 @@ export function SwapTable({ report }: { report: PlanReport }) {
                   {foodLabel(r.toName)} <span className="font-medium">{fmt.int(r.toQty)} {r.toUnit}</span>
                 </td>
                 <td className="py-2.5 pr-4">{BASIS_LABEL[r.basis]}</td>
-                <td className="py-2.5 text-right">{fmt.int(r.cal)}</td>
+                <td className="py-2.5 pr-4 text-right">{fmt.int(r.cal)}</td>
+                <td className="py-2.5 text-right text-muted">
+                  {r.calDelta > 0 ? `+${fmt.int(r.calDelta)}` : fmt.int(r.calDelta)} kcal
+                </td>
               </tr>
             ))}
           </tbody>

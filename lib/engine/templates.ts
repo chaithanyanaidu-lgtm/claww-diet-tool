@@ -19,19 +19,33 @@ export function makeFoodFilter(input: Pick<PlanInput, "foodPref" | "avoidFoods">
   return { foodPref: input.foodPref, avoid: normaliseFoodWords(input.avoidFoods) };
 }
 
+const DAIRY_KEYS: FoodKey[] = ["milk", "curd", "paneer", "paneer_bhurji", "ghee"];
+const MEAT_KEYS: FoodKey[] = ["chicken", "fish"];
+const EGG_KEYS: FoodKey[] = ["eggs", "egg_whites"];
+
 export function isFoodAllowed(key: FoodKey, filter: FoodFilter): boolean {
   const food = FOOD_DB[key];
   if (!food) return false;
 
-  if (filter.foodPref === "Vegetarian") {
-    if (key === "chicken" || key === "fish" || key === "eggs" || key === "egg_whites") return false;
-  } else if (filter.foodPref === "Eggetarian") {
-    if (key === "chicken" || key === "fish") return false;
+  const pref = filter.foodPref as string;
+  if (pref === "Vegan") {
+    if (MEAT_KEYS.includes(key) || EGG_KEYS.includes(key) || DAIRY_KEYS.includes(key)) return false;
+  } else if (pref === "Vegetarian") {
+    if (MEAT_KEYS.includes(key) || EGG_KEYS.includes(key)) return false;
+  } else if (pref === "Eggetarian") {
+    if (MEAT_KEYS.includes(key)) return false;
   }
 
-  // Substring match on the food name: "egg" removes whole eggs and egg whites.
+  // Substring match on the food name, plus keyword checks for dairy/ghee/vegan
   const name = food.name.toLowerCase();
-  if (filter.avoid.some((word) => name.includes(word))) return false;
+  for (const word of filter.avoid) {
+    if (name.includes(word)) return false;
+    if (word === "dairy" && DAIRY_KEYS.includes(key)) return false;
+    if (word === "vegan" && (DAIRY_KEYS.includes(key) || MEAT_KEYS.includes(key) || EGG_KEYS.includes(key))) return false;
+    if (word === "meat" && MEAT_KEYS.includes(key)) return false;
+    if (word === "egg" && EGG_KEYS.includes(key)) return false;
+    if (word === "ghee" && key === "ghee") return false;
+  }
 
   return true;
 }
@@ -81,7 +95,7 @@ export function getOriginalTemplates(input: PlanInput, filter: FoodFilter): Temp
   // Lunch
   const lunchCarb = pick("carb", cuisine === "North Indian" ? ["chapati"] : ["rice", "brown_rice", "chapati"], ["rice", "chapati"]);
   const lunchProtein = pick("protein", foodPref === "Non-Vegetarian" ? ["chicken", "fish"] : ["paneer", "soya", "dal"], ["paneer", "dal"]);
-  const lunchFat = pick("fat", ["ghee", "almonds", "peanuts"], ["ghee"]);
+  const lunchFat = pick("fat", ["ghee", "almonds", "peanuts"], ["almonds", "peanuts"]);
 
   // Snack
   const snackCarb = pick("carb", ["bread", "sweet_potato", "oats"], ["bread", "sweet_potato"]);
@@ -95,7 +109,7 @@ export function getOriginalTemplates(input: PlanInput, filter: FoodFilter): Temp
     foodPref === "Non-Vegetarian" ? ["chicken", "paneer_bhurji", "eggs"] : ["paneer_bhurji", "paneer", "dal", "soya"],
     ["paneer_bhurji", "dal"],
   );
-  const dinnerFat = pick("fat", ["ghee", "almonds", "peanuts"], ["ghee"]);
+  const dinnerFat = pick("fat", ["ghee", "almonds", "peanuts"], ["almonds", "peanuts"]);
 
   return {
     breakfast: present([bfCarb, bfProtein, bfFat, bfFruit]),
@@ -105,34 +119,108 @@ export function getOriginalTemplates(input: PlanInput, filter: FoodFilter): Temp
   };
 }
 
-export function getAlternativeTemplates(filter: FoodFilter): Record<MealKey, FoodKey[][]> {
-  const diet = filter.foodPref;
-  const veg = diet === "Vegetarian";
-  const nonVeg = diet === "Non-Vegetarian";
-  const allowed = (lists: FoodKey[][]) => lists.map((list) => list.filter((k) => FOOD_DB[k] && isFoodAllowed(k, filter)));
+export type CarbFamily = "rice" | "chapati" | "bread" | "oats" | "poha" | "idli_dosa" | "sweet_potato" | "other";
 
-  // Unlike the legacy code, there is no "fallback if empty" branch: each list below always has
-  // three entries (possibly emptied by the filter), so the legacy fallback could never run.
+export function getCarbFamily(key: FoodKey): CarbFamily {
+  if (key === "rice" || key === "brown_rice") return "rice";
+  if (key === "chapati") return "chapati";
+  if (key === "bread") return "bread";
+  if (key === "oats") return "oats";
+  if (key === "poha") return "poha";
+  if (key === "idli" || key === "dosa") return "idli_dosa";
+  if (key === "sweet_potato") return "sweet_potato";
+  return "other";
+}
+
+export function getAlternativeTemplates(
+  filter: FoodFilter,
+  mainCarbs?: Partial<Record<MealKey, FoodKey>>,
+): Record<MealKey, FoodKey[][]> {
+  const diet = filter.foodPref;
+  const nonVeg = diet === "Non-Vegetarian";
+  const eggetarian = diet === "Eggetarian";
+
+  const allowed = (lists: FoodKey[][]) =>
+    lists
+      .map((list) => list.filter((k) => FOOD_DB[k] && isFoodAllowed(k, filter)))
+      .filter((list) => list.length > 0);
+
+  // Common side foods for main meals
+  const altFat = isFoodAllowed("ghee", filter) ? "ghee" : isFoodAllowed("almonds", filter) ? "almonds" : "peanuts";
+  const curd = isFoodAllowed("curd", filter) ? "curd" : null;
+  const vegCurry = isFoodAllowed("veg_curry", filter) ? "veg_curry" : null;
+  const salad = isFoodAllowed("salad", filter) ? "salad" : null;
+  const sides = [altFat, curd, vegCurry, salad].filter(Boolean) as FoodKey[];
+
+  // Protein pools
+  const mainProteins: FoodKey[] = nonVeg
+    ? ["fish", "chicken", "egg_whites", "eggs", "paneer_bhurji", "paneer", "soya", "dal"]
+    : eggetarian
+      ? ["eggs", "egg_whites", "paneer_bhurji", "paneer", "soya", "dal"]
+      : ["paneer_bhurji", "paneer", "soya", "dal"];
+
+  // Breakfast candidate generators
+  const bfCarb = mainCarbs?.breakfast;
+  const bfFamily = bfCarb ? getCarbFamily(bfCarb) : null;
+  const allBfCarbs: FoodKey[] = ["bread", "oats", "poha", "idli", "dosa"];
+  const sortedBfCarbs = bfFamily
+    ? [...allBfCarbs.filter((c) => getCarbFamily(c) === bfFamily), ...allBfCarbs.filter((c) => getCarbFamily(c) !== bfFamily)]
+    : allBfCarbs;
+
+  const bfCandidates: FoodKey[][] = [];
+  sortedBfCarbs.forEach((c) => {
+    if (nonVeg || eggetarian) {
+      bfCandidates.push([c, "eggs", "pb", "apple"]);
+      bfCandidates.push([c, "egg_whites", "almonds", "banana"]);
+      bfCandidates.push([c, "paneer", "peanuts", "apple"]);
+      bfCandidates.push([c, "milk", "pb", "banana"]);
+      bfCandidates.push([c, "eggs", "almonds", "banana"]);
+    } else {
+      bfCandidates.push([c, "paneer", "pb", "apple"]);
+      bfCandidates.push([c, "milk", "almonds", "banana"]);
+      bfCandidates.push([c, "paneer", "peanuts", "apple"]);
+      bfCandidates.push([c, "milk", "pb", "apple"]);
+    }
+  });
+
+  // Helper for lunch and dinner candidates
+  const buildMainCandidates = (mainCarb?: FoodKey) => {
+    const family = mainCarb ? getCarbFamily(mainCarb) : null;
+    const allCarbs: FoodKey[] = family === "rice"
+      ? ["rice", "brown_rice", "chapati"]
+      : ["chapati", "rice", "brown_rice"];
+
+    const candidates: FoodKey[][] = [];
+    allCarbs.forEach((c) => {
+      mainProteins.forEach((p) => {
+        candidates.push([c, p, ...sides]);
+      });
+    });
+    return candidates;
+  };
+
+  // Snack candidate generator
+  const snackCarb = mainCarbs?.snack;
+  const snackFamily = snackCarb ? getCarbFamily(snackCarb) : null;
+  const allSnackCarbs: FoodKey[] = ["bread", "oats", "sweet_potato"];
+  const sortedSnackCarbs = snackFamily
+    ? [...allSnackCarbs.filter((c) => getCarbFamily(c) === snackFamily), ...allSnackCarbs.filter((c) => getCarbFamily(c) !== snackFamily)]
+    : allSnackCarbs;
+
+  const snackCandidates: FoodKey[][] = [];
+  sortedSnackCarbs.forEach((c) => {
+    snackCandidates.push([c, "pb", "apple"]);
+    snackCandidates.push([c, "almonds", "banana"]);
+    snackCandidates.push([c, "peanuts", "apple"]);
+    snackCandidates.push([c, "pb", "banana"]);
+    snackCandidates.push([c, "almonds", "apple"]);
+    snackCandidates.push([c, "peanuts", "banana"]);
+  });
+
   return {
-    breakfast: allowed([
-      ["bread", veg ? "paneer" : "eggs", "pb", "apple"],
-      ["poha", veg ? "milk" : "egg_whites", "almonds", "banana"],
-      ["idli", veg ? "paneer" : "eggs", "peanuts", "apple"],
-    ]),
-    lunch: allowed([
-      ["chapati", nonVeg ? "fish" : "soya", "ghee", "curd", "veg_curry", "salad"],
-      ["brown_rice", nonVeg ? "chicken" : "dal", "ghee", "curd", "veg_curry", "salad"],
-      ["chapati", nonVeg ? "eggs" : "paneer", "ghee", "curd", "veg_curry", "salad"],
-    ]),
-    snack: allowed([
-      ["sweet_potato", "almonds", "apple"],
-      ["oats", "pb", "banana"],
-      ["bread", "peanuts", "apple"],
-    ]),
-    dinner: allowed([
-      ["rice", nonVeg ? "chicken" : "dal", "ghee", "curd", "veg_curry", "salad"],
-      ["chapati", nonVeg ? "fish" : "soya", "ghee", "curd", "veg_curry", "salad"],
-      ["chapati", nonVeg ? "eggs" : "paneer", "ghee", "curd", "veg_curry", "salad"],
-    ]),
+    breakfast: allowed(bfCandidates),
+    lunch: allowed(buildMainCandidates(mainCarbs?.lunch)),
+    snack: allowed(snackCandidates),
+    dinner: allowed(buildMainCandidates(mainCarbs?.dinner)),
   };
 }

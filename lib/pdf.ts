@@ -118,18 +118,19 @@ export async function downloadPlanPdf(input: PlanInput, report: PlanReport) {
     autoTable(doc, {
       startY: y,
       margin: { left, right: left },
-      head: [["Instead of", "Have", "Matched on", "kcal"]],
+      head: [["Instead of", "Have", "Matched on", "kcal", "Calorie diff"]],
       body: report.replacements.map((r) => [
         `${foodLabel(r.fromName)} ${fmt.int(r.fromQty)} ${r.fromUnit}`,
         `${foodLabel(r.toName)} ${fmt.int(r.toQty)} ${r.toUnit}`,
         r.basis === "carbs" ? "Carbs" : r.basis === "fat" ? "Fat" : "Protein",
         fmt.int(r.cal),
+        `${r.calDelta > 0 ? "+" : ""}${fmt.int(r.calDelta)} kcal`,
       ]),
       theme: "plain",
       styles: { font: "helvetica", fontSize: 9, textColor: ink, cellPadding: 1.4 },
       headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: [221, 226, 222] },
       didParseCell: (d) => {
-        if (d.column.index === 3) d.cell.styles.halign = "right";
+        if (d.column.index === 3 || d.column.index === 4) d.cell.styles.halign = "right";
       },
     });
     y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 6;

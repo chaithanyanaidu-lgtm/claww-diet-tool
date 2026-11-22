@@ -39,11 +39,13 @@ export function generate240Profiles(): PlanInput[] {
 }
 
 export function runSweep(profiles = generate240Profiles()) {
-  let riceCapCount = 0;
+  let riceCap400Count = 0;
+  let riceCap250Count = 0;
   let riceEligible = 0;
   let dinnerUnder80 = 0;
   let calOff = 0;
-  let pOff = 0;
+  let pOffRaw = 0;
+  let pOffHeadroom = 0;
   let cOff = 0;
   let fOff = 0;
   let fibOff = 0;
@@ -51,9 +53,13 @@ export function runSweep(profiles = generate240Profiles()) {
   let ratioSum = 0;
   let maxRatio = 0;
   let minRatio = Infinity;
+  const times: number[] = [];
 
   for (const p of profiles) {
+    const t0 = performance.now();
     const report = generatePlan(p);
+    times.push(performance.now() - t0);
+
     const lunch = report.meals.find((m) => m.key === "lunch")!;
     const dinner = report.meals.find((m) => m.key === "dinner")!;
     const targetDinnerCal = report.targets.targetCalories * 0.25;
@@ -61,9 +67,11 @@ export function runSweep(profiles = generate240Profiles()) {
     const lunchRice = lunch.foods.find((f) => f.key === "rice" || f.key === "brown_rice");
     if (p.cuisine !== "North Indian") {
       riceEligible++;
-      // Rice cap check: 400 or >= 250
       if (lunchRice && lunchRice.qty >= 400) {
-        riceCapCount++;
+        riceCap400Count++;
+      }
+      if (lunchRice && lunchRice.qty >= 250) {
+        riceCap250Count++;
       }
     }
 
@@ -72,9 +80,16 @@ export function runSweep(profiles = generate240Profiles()) {
     }
 
     if (Math.abs(report.totals.cal - report.targets.targetCalories) > 20) calOff++;
-    // Protein tolerance check
+
+    // Raw protein error (+/- 2g)
     const rawPErr = Math.abs(report.totals.p - report.targets.protein);
-    if (rawPErr > 2) pOff++;
+    if (rawPErr > 2) pOffRaw++;
+
+    // Headroom protein error (target to target + 10%, +/- 2g)
+    const pHeadroom = report.targets.protein * 0.10;
+    if (report.totals.p < report.targets.protein - 2 || report.totals.p > report.targets.protein + pHeadroom + 2) {
+      pOffHeadroom++;
+    }
 
     if (Math.abs(report.totals.c - report.targets.carbs) > 5) cOff++;
     if (Math.abs(report.totals.f - report.targets.fat) > 2) fOff++;
@@ -87,13 +102,19 @@ export function runSweep(profiles = generate240Profiles()) {
     if (ratio < minRatio) minRatio = ratio;
   }
 
+  times.sort((a, b) => a - b);
+  const avgTime = times.reduce((a, b) => a + b, 0) / times.length;
+  const p95Time = times[Math.floor(times.length * 0.95)];
+
   const result = {
     total: profiles.length,
-    riceCapCount,
+    riceCap400Count,
+    riceCap250Count,
     riceEligible,
     dinnerUnder80,
     calOff,
-    pOff,
+    pOffRaw,
+    pOffHeadroom,
     cOff,
     fOff,
     fibOff,
@@ -101,6 +122,8 @@ export function runSweep(profiles = generate240Profiles()) {
     avgRatio: Math.round((ratioSum / profiles.length) * 100) / 100,
     minRatio: Math.round(minRatio * 100) / 100,
     maxRatio: Math.round(maxRatio * 100) / 100,
+    avgTimeMs: Math.round(avgTime * 10) / 10,
+    p95TimeMs: Math.round(p95Time * 10) / 10,
   };
   return result;
 }

@@ -35,7 +35,7 @@ export const PRACTICAL_RULES = {
       "Weight Gain": 0.15,
     } satisfies Record<Goal, number>,
     maxSingleItemCalorieShare: 0.7,
-    mealCalorieBand: 0.15,
+    mealCalorieBand: 0.10,
   },
   tolerances: {
     cal: 20,

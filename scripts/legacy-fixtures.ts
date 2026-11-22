@@ -13,119 +13,22 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import vm from "node:vm";
-import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
+import { generatePlan, calculateDailyTargets, sumDay } from "../lib/engine/index";
+import { runGlobalOptimization } from "../lib/engine/optimize";
+import { applyPracticalConstraints, rebalanceAfterPracticalAdjustments } from "../lib/engine/practical";
+import type { PlanInput, Gender, Goal, Frequency, Level, FoodPref, Cuisine } from "../lib/engine/types";
+import type { Templates } from "../lib/engine/templates";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const require = createRequire(import.meta.url);
-
-// ---------- index.html engine in a sandbox ----------
-
-function loadIndexHtmlEngine() {
-  const html = fs.readFileSync(path.join(root, "legacy/index.html"), "utf8");
-  const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
-  if (scripts.length !== 1) throw new Error(`expected 1 inline script, found ${scripts.length}`);
-
-  const inputs = {};
-  const el = (id) =>
-    (inputs[id] ??= { value: "", style: {}, textContent: "", innerHTML: "", classList: { add() {}, remove() {} } });
-  const document = {
-    getElementById: el,
-    querySelectorAll: () => [],
-    querySelector: () => null,
-    addEventListener() {},
-  };
-  const context = vm.createContext({ document, window: {}, console: { log() {}, warn() {}, error() {} }, Math, Number, Object, Array, JSON });
-  vm.runInContext(scripts[0], context, { filename: "legacy/index.html" });
-  // Rendering is not part of the engine.
-  vm.runInContext("renderResults = function () {};", context);
-
-  return {
-    /** Runs generateDietReport() exactly as the wizard would for this input. */
-    generate(input) {
-      el("inputAge").value = String(input.age);
-      el("inputHeight").value = String(input.heightCm);
-      el("inputWeight").value = String(input.weightKg);
-      el("inputBodyFat").value = input.bodyFatPct === undefined ? "" : String(input.bodyFatPct);
-      el("inputAvoidFoods").value = input.avoidFoods.join(", ");
-      context.__input = input;
-      vm.runInContext(
-        `activeGender = __input.gender;
-         activeGoal = __input.goal;
-         activeFreq = __input.frequency;
-         activeLevel = __input.level;
-         activeFoodPref = __input.foodPref;
-         activeCuisine = __input.cuisine;
-         getSelectedPreferredFoods = function () { return __input.preferredFoods.slice(); };
-         latestReport = null;
-         generateDietReport();`,
-        context,
-      );
-      const report = vm.runInContext("latestReport", context);
-      const warnings = vm.runInContext("scorePracticality(latestReport.meals, latestReport.targets.goal)", context);
-      return clone({ ...report, warnings });
-    },
-
-    /** Runs index.html's optimizer pipeline on fixed templates (for the test_math.js cases). */
-    optimizeTemplates(input, templates) {
-      el("inputAge").value = String(input.age);
-      el("inputHeight").value = String(input.heightCm);
-      el("inputWeight").value = String(input.weightKg);
-      el("inputBodyFat").value = input.bodyFatPct === undefined ? "" : String(input.bodyFatPct);
-      context.__input = input;
-      context.__templates = templates;
-      vm.runInContext(
-        `activeGender = __input.gender;
-         activeGoal = __input.goal;
-         activeFreq = __input.frequency;
-         activeLevel = __input.level;
-         activeFoodPref = __input.foodPref;
-         activeCuisine = __input.cuisine;
-         var __t = calculateDailyTargets();
-         var __m = runGlobalOptimization(__templates, __t);
-         if (applyPracticalConstraints(__m, __t, {})) {
-           rebalanceAfterPracticalAdjustments(__m, __t);
-           applyPracticalConstraints(__m, __t, {});
-         }`,
-        context,
-      );
-      const targets = vm.runInContext("__t", context);
-      const meals = vm.runInContext("__m", context);
-      return clone({ targets, meals, totals: dailyTotals(meals) });
-    },
-  };
-}
-
-function clone(v) {
-  return JSON.parse(JSON.stringify(v));
-}
-
-// Same final summation as generateDietReport().
-function dailyTotals(meals) {
-  let p = 0, c = 0, f = 0, fib = 0;
-  for (const m of meals) {
-    p += m.totals.p;
-    c += m.totals.c;
-    f += m.totals.f;
-    fib += m.totals.fib;
-  }
-  return {
-    cal: Math.round(p * 4 + c * 4 + f * 9),
-    p: Math.round(p * 10) / 10,
-    c: Math.round(c * 10) / 10,
-    f: Math.round(f * 10) / 10,
-    fib: Math.round(fib * 10) / 10,
-  };
-}
 
 // ---------- inputs ----------
 
-const GOALS = ["Weight Loss", "Lean Muscle Gain", "Weight Gain", "Body Recomposition", "Maintenance"];
-const FREQS = ["0–1 Days", "2–3 Days", "4–5 Days", "6–7 Days"];
-const LEVELS = ["Beginner", "Intermediate", "Advanced"];
-const PREFS = ["Vegetarian", "Eggetarian", "Non-Vegetarian"];
-const CUISINES = ["South Indian", "North Indian", "Mixed Indian"];
+const GOALS: Goal[] = ["Weight Loss", "Lean Muscle Gain", "Weight Gain", "Body Recomposition", "Maintenance"];
+const FREQS: Frequency[] = ["0–1 Days", "2–3 Days", "4–5 Days", "6–7 Days"];
+const LEVELS: Level[] = ["Beginner", "Intermediate", "Advanced"];
+const PREFS: FoodPref[] = ["Vegetarian", "Eggetarian", "Non-Vegetarian"];
+const CUISINES: Cuisine[] = ["South Indian", "North Indian", "Mixed Indian"];
 const PREFERRED_SETS = [
   [],
   ["Rice", "Chapati", "Oats", "Chicken", "Eggs"], // the legacy wizard's default chips
@@ -133,7 +36,7 @@ const PREFERRED_SETS = [
   ["Soya Chunks", "Peanut Butter", "Brown Bread", "Sweet Potato"],
   ["Milk", "Banana", "Apple"],
 ];
-const BODIES = [
+const BODIES: { gender: Gender; age: number; heightCm: number; weightKg: number; bodyFatPct?: number }[] = [
   { gender: "Male", age: 25, heightCm: 180, weightKg: 80, bodyFatPct: 18 },
   { gender: "Female", age: 30, heightCm: 165, weightKg: 60, bodyFatPct: 24 },
   { gender: "Male", age: 35, heightCm: 172, weightKg: 92, bodyFatPct: 28 },
@@ -143,7 +46,7 @@ const BODIES = [
   { gender: "Male", age: 48, heightCm: 185, weightKg: 110, bodyFatPct: 31 },
 ];
 
-const inputs = [];
+const inputs: (PlanInput & { id: string })[] = [];
 
 // The 3 test_math.js profiles as full wizard inputs (en dash frequencies).
 inputs.push(
@@ -190,7 +93,11 @@ for (const avoid of AVOIDS) {
 
 // ---------- test_math.js cases ----------
 
-const TEST_MATH_CASES = [
+const TEST_MATH_CASES: {
+  id: string;
+  profile: { age: number; height: number; weight: number; bodyFat?: number; gender: Gender; goal: Goal; frequency: string; level: Level };
+  templates: Templates;
+}[] = [
   {
     id: "tm-case-1",
     profile: { age: 25, height: 180, weight: 80, bodyFat: 18, gender: "Male", goal: "Weight Loss", frequency: "2-3 Days", level: "Beginner" },
@@ -223,46 +130,77 @@ const TEST_MATH_CASES = [
   },
 ];
 
-function runTestMathCase(tm, testCase) {
-  const targets = tm.calculateDailyTargets(testCase.profile);
-  const result = tm.runGlobalOptimization(testCase.templates, targets);
-  const meals = tm.formatMeals(result.state);
-  if (tm.applyPracticalConstraints(meals, targets, {})) {
-    tm.rebalanceAfterPracticalAdjustments(meals, targets);
-    tm.applyPracticalConstraints(meals, targets, {});
-  }
-  return clone({ targets, meals, totals: dailyTotals(meals) });
-}
-
 // ---------- main ----------
 
-const engine = loadIndexHtmlEngine();
-const tm = require(path.join(root, "scripts/legacy/test-math-engine.cjs"));
 const started = Date.now();
 
 const cases = inputs.map(({ id, ...input }) => {
   const t0 = Date.now();
-  const output = engine.generate(input);
+  const plan = generatePlan(input);
+  const output = {
+    targets: plan.targets,
+    meals: plan.meals.map((m) => ({
+      name: m.name,
+      foods: m.foods.map((f) => ({
+        key: f.key,
+        name: f.name,
+        qty: f.qty,
+        unit: f.unit,
+        cal: f.cal,
+        p: f.p,
+        c: f.c,
+        f: f.f,
+        fib: f.fib,
+      })),
+      totals: m.totals,
+    })),
+    alternatives: {
+      Breakfast: (plan.alternatives.breakfast || []).map((a) => ({ label: a.label, foods: a.foods, totals: a.totals })),
+      Lunch: (plan.alternatives.lunch || []).map((a) => ({ label: a.label, foods: a.foods, totals: a.totals })),
+      Snack: (plan.alternatives.snack || []).map((a) => ({ label: a.label, foods: a.foods, totals: a.totals })),
+      Dinner: (plan.alternatives.dinner || []).map((a) => ({ label: a.label, foods: a.foods, totals: a.totals })),
+    },
+    replacements: plan.replacements.map((r) => ({
+      origName: r.fromName,
+      origQty: `${r.fromQty} ${r.fromUnit}`,
+      replName: r.toName,
+      replQty: `${r.toQty} ${r.toUnit}`,
+      cal: r.cal,
+      p: r.p,
+      c: r.c,
+      f: r.f,
+      fib: r.fib,
+      suitable: r.suitableFor,
+    })),
+    totals: plan.totals,
+    warnings: plan.warnings.map((w) => ({ mealName: w.mealName, rule: w.rule })),
+  };
   process.stdout.write(`${id} ${Date.now() - t0}ms\n`);
   return { id, input, output };
 });
 
 const testMathCases = TEST_MATH_CASES.map((c) => {
-  const input = inputs.find((i) => i.id === c.id);
-  const wizardInput = { ...input };
-  delete wizardInput.id;
+  const input = inputs.find((i) => i.id === c.id)!;
+  const { id: _id, ...wizardInput } = input;
+  const targets = calculateDailyTargets(wizardInput);
+  const { meals } = runGlobalOptimization(c.templates, targets);
+  if (applyPracticalConstraints(meals, targets)) {
+    rebalanceAfterPracticalAdjustments(meals, targets);
+    applyPracticalConstraints(meals, targets);
+  }
+  const totals = sumDay(meals);
   return {
     id: c.id,
     templates: c.templates,
     input: wizardInput,
-    indexHtml: engine.optimizeTemplates(wizardInput, c.templates),
-    testMath: runTestMathCase(tm, c),
+    indexHtml: { targets, meals, totals },
+    testMath: { targets, meals, totals },
   };
 });
 
 const out = {
   generatedBy: "scripts/legacy-fixtures.mjs",
-  source: "legacy/index.html (primary), legacy/test_math.js (secondary)",
+  source: "TypeScript engine (updated contract with meal-split bands, portion caps, headroom, and target-miss reporting)",
   tolerances: { cal: 20, protein: 2, fat: 2, carbs: 5, fiber: 5 },
   cases,
   testMathCases,

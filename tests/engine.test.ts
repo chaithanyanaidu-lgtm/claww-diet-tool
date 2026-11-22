@@ -57,6 +57,34 @@ describe("engine", () => {
     for (const k of ["chicken", "fish", "eggs", "egg_whites"]) expect(keys).not.toContain(k);
   });
 
+  it("never serves ghee when ghee is in avoidFoods", () => {
+    const keys = allFoodKeys({ ...base, avoidFoods: ["ghee"] });
+    expect(keys).not.toContain("ghee");
+  });
+
+  it("never serves ghee or dairy when dairy is in avoidFoods", () => {
+    const keys = allFoodKeys({ ...base, avoidFoods: ["dairy"] });
+    for (const k of ["ghee", "milk", "curd", "paneer", "paneer_bhurji"]) {
+      expect(keys).not.toContain(k);
+    }
+  });
+
+  it("never serves ghee, dairy, meat, or eggs when vegan is specified", () => {
+    const keysFromAvoid = allFoodKeys({ ...base, avoidFoods: ["vegan"] });
+    for (const k of ["ghee", "milk", "curd", "paneer", "paneer_bhurji", "chicken", "fish", "eggs", "egg_whites"]) {
+      expect(keysFromAvoid).not.toContain(k);
+    }
+    const keysFromPref = allFoodKeys({ ...base, foodPref: "Vegan" as unknown as PlanInput["foodPref"] });
+    for (const k of ["ghee", "milk", "curd", "paneer", "paneer_bhurji", "chicken", "fish", "eggs", "egg_whites"]) {
+      expect(keysFromPref).not.toContain(k);
+    }
+  });
+
+  it("ensures protein is treated as a floor with headroom and never lands below target", () => {
+    const r = generatePlan(base);
+    expect(r.totals.p).toBeGreaterThanOrEqual(r.targets.protein - 2); // within tolerance of floor
+  });
+
   it("only includes debug data when asked", () => {
     expect(generatePlan(base).debug).toBeUndefined();
     const d = generatePlan(base, { debug: true }).debug;

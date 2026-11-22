@@ -82,6 +82,7 @@ export function getPracticalMin(
   if (meal === "lunch" || meal === "dinner") {
     const r = PRACTICAL_RULES.lunchDinner;
     if (foodKey === "ghee") newMin = r.minGhee;
+    if (foodKey === "almonds" || foodKey === "peanuts") newMin = 10;
     if (foodKey === "chicken") newMin = r.minChicken;
     if (foodKey === "fish") newMin = r.minFish;
     if (foodKey === "paneer") newMin = r.minPaneer;
@@ -161,8 +162,8 @@ function dayLoss(st: OptItem[], weights: Weights, targets: Targets): number {
     const dMealCal = mealCal[i] - targetMealCal;
     ratioLoss += dMealCal * dMealCal * weights.split;
 
-    // Per-meal band penalty (within ±15% of intended meal calories)
-    const band = 0.15 * targetMealCal;
+    // Per-meal band penalty (within mealCalorieBand of intended meal calories)
+    const band = PRACTICAL_RULES.distribution.mealCalorieBand * targetMealCal;
     const bandExcess = Math.abs(dMealCal) - band;
     if (bandExcess > 0) {
       ratioLoss += bandExcess * bandExcess * weights.split * 4.0;
@@ -409,7 +410,7 @@ export function descendDay(initial: OptItem[], targets: Targets): { best: OptIte
     let splitSatisfied = true;
     for (let i = 0; i < 4; i++) {
       const targetMealCal = targets.targetCalories * MEAL_CALORIE_SPLIT[i];
-      if (Math.abs(mealCal[i] - targetMealCal) > 0.15 * targetMealCal) {
+      if (Math.abs(mealCal[i] - targetMealCal) > PRACTICAL_RULES.distribution.mealCalorieBand * targetMealCal) {
         splitSatisfied = false;
         break;
       }
@@ -510,6 +511,10 @@ export function optimizeSingleMeal(
   mealTargets: Macros,
   mealName: string,
   targets: Targets,
+  options?: {
+    curdMax?: number;
+    chapatiMax?: number;
+  },
 ): SingleMealResult {
   const validKeys = foodKeys.filter((key) => {
     const fd = FOOD_DB[key];
@@ -538,9 +543,16 @@ export function optimizeSingleMeal(
   const state = validKeys.map((key) => {
     const fd = FOOD_DB[key];
     const newMin = getPracticalMin(nameLower, key, { [nameLower]: validKeys }, targets);
-    let initialQty = (newMin + fd.max) / 2;
-    if (!Number.isFinite(initialQty)) initialQty = fd.min;
-    return { key, qty: initialQty, min: newMin, max: fd.max as number, cal: fd.cal as number, p: fd.p as number, c: fd.c as number, f: fd.f as number, fib: fd.fib as number };
+    let max = fd.max as number;
+    if (key === "curd" && options?.curdMax !== undefined) {
+      max = Math.min(max, options.curdMax);
+    }
+    if (key === "chapati" && options?.chapatiMax !== undefined) {
+      max = Math.min(max, options.chapatiMax);
+    }
+    let initialQty = (newMin + max) / 2;
+    if (!Number.isFinite(initialQty) || initialQty < newMin) initialQty = newMin;
+    return { key, qty: initialQty, min: newMin, max, cal: fd.cal as number, p: fd.p as number, c: fd.c as number, f: fd.f as number, fib: fd.fib as number };
   });
 
   const getLoss = (st: typeof state) => {
@@ -559,7 +571,7 @@ export function optimizeSingleMeal(
     const dF = f - mealTargets.f;
     const dFib = fib - mealTargets.fib;
 
-    return dCal * dCal + dP * dP * 25 + dC * dC * 25 + dF * dF * 100 + dFib * dFib * 25;
+    return dCal * dCal * 2 + dP * dP * 100 + dC * dC * 25 + dF * dF * 100 + dFib * dFib * 25;
   };
 
   let bestState = state.map((s) => ({ ...s }));

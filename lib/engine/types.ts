@@ -111,6 +111,8 @@ export interface Replacement {
   f: number;
   fib: number;
   suitableFor: string;
+  /** Calorie difference: replacement calories minus original calories. */
+  calDelta: number;
 }
 
 export type PracticalRule =

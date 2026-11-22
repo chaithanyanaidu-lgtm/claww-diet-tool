@@ -37,6 +37,6 @@ These read `.env.local` (see `.env.example`). In cloud sandboxes Node needs `NOD
 - The server never trusts a client-sent report: re-run the engine from validated inputs.
 - Auth: use `getUser()` (verifies with Supabase), never `getSession()` on the server. With Cache Components on, anything reading the session must sit inside `<Suspense>`.
 - Schema changes go in a new migration file; never edit one that has been applied.
-- Keep engine behaviour identical to `legacy/index.html` unless the golden fixtures are deliberately regenerated.
+- Engine contract: Enforce meal-split distribution bands (25/35/15/25 ±15%), realistic portion caps (rice capped at 250g, peanut butter capped at 25g, curd in alternatives capped at 150g, chapati in alternatives capped at max(120g, main plate)), fat sources in lunch/dinner (ghee/almonds/peanuts), protein treated as a floor with 10% headroom, replacements constrained to portion caps and ≤15% calorie delta, and emit target-miss warnings when macros exceed tolerances. Keep engine behaviour consistent with golden fixtures in `tests/fixtures/legacy-outputs.json` (regenerate deliberately via `npm run fixtures:legacy`).
 - Never commit `.env*` files (only `.env.example`). The Groq model id comes only from `GROQ_MODEL`.
 - Work on a branch and open a PR into `main`; never force-push to `main`.

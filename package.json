@@ -10,7 +10,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "fixtures:legacy": "node scripts/legacy-fixtures.mjs",
+    "fixtures:legacy": "tsx scripts/legacy-fixtures.ts",
     "db:migrate": "node --env-file=.env.local scripts/db-migrate.mjs",
     "db:rls-check": "node --env-file=.env.local scripts/db-rls-check.mjs",
     "e2e:auth": "node --env-file=.env.local scripts/e2e-auth.mjs"

@@ -37,6 +37,16 @@ export function calculateReplacements(meals: Meal[]): Replacement[] {
     const n = NUTRIENT[def.basis];
     const replQty = Math.round(origQty * (origFood[n] / replFood[n]));
 
+    // Never suggest a replacement quantity above that food's max portion
+    if (replQty > replFood.max) return;
+
+    const origCal = Math.round(origQty * origFood.cal);
+    const replCal = Math.round(replQty * replFood.cal);
+    const calDelta = replCal - origCal;
+
+    // Hide swaps that change calories by more than 15%
+    if (origCal > 0 && Math.abs(calDelta) / origCal > 0.15) return;
+
     replacements.push({
       fromKey: def.from,
       fromName: origFood.name,
@@ -47,12 +57,13 @@ export function calculateReplacements(meals: Meal[]): Replacement[] {
       toQty: replQty,
       toUnit: replFood.unit,
       basis: def.basis,
-      cal: Math.round(replQty * replFood.cal),
+      cal: replCal,
       p: round1(replQty * replFood.p),
       c: round1(replQty * replFood.c),
       f: round1(replQty * replFood.f),
       fib: round1(replQty * replFood.fib),
       suitableFor: def.suitableFor,
+      calDelta,
     });
   });
 
